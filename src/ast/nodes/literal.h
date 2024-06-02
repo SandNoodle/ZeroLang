@@ -11,17 +11,19 @@ namespace soul
 {
 	struct boolean_literal_t { bool value; };
 	struct float_literal_t { double value; };
-	struct function_literal_t { std::string identifier; };
+	struct function_literal_t { std::string value; };
 	struct integer_literal_t { int64_t value; };
-	struct variable_literal_t { std::string identifier; };
+	struct string_literal_t { std::string value; };
+	struct variable_literal_t { std::string value; };
 
 	template <typename T>
-	concept is_literal_t = std::same_as<T, boolean_literal_t>  //
-		              || std::same_as<T, float_literal_t>  //
+	concept is_literal_t = std::same_as<T, boolean_literal_t> //
+		              || std::same_as<T, float_literal_t>     //
 		              || std::same_as<T, function_literal_t>  //
-		              || std::same_as<T, integer_literal_t>  //
+		              || std::same_as<T, integer_literal_t>   //
 		              || std::same_as<T, variable_literal_t>  //
-		              || std::same_as<T, std::monostate>  //
+		              || std::same_as<T, string_literal_t>    //
+		              || std::same_as<T, std::monostate>      //
 	;
 
 	/**
@@ -32,7 +34,15 @@ namespace soul
 	{
 		public:
 			using null_t = std::monostate;
-			using value_t = std::variant<null_t, variable_literal_t, function_literal_t, integer_literal_t, float_literal_t>;
+			using value_t = std::variant<
+				null_t,
+				boolean_t,
+				float_literal_t,
+				function_literal_t,
+				integer_literal_t,
+				variable_literal_t,
+				string_literal_t
+			>;
 
 		private:
 			value_t _value = null_t{};
