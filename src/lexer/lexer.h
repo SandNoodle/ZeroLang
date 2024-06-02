@@ -7,6 +7,9 @@
 
 namespace soul
 {
+	/**
+	 * @brief Class used performing a lexical analysis on the given input text.
+	 */
 	class lexer_t
 	{
 		public:

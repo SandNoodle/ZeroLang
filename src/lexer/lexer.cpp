@@ -99,20 +99,20 @@ namespace soul
 		// Keywords
 		static const std::unordered_map<std::string_view, token_type_t> k_keywords = {
 			// Keywords
-			{ "native",   token_type_t::token_native },
+			{ "break",    token_type_t::token_break },
+			{ "continue", token_type_t::token_continue },
+			{ "else",     token_type_t::token_else },
+			{ "false",    token_type_t::token_false },
+			{ "fn",       token_type_t::token_fn },
+			{ "for",      token_type_t::token_for },
+			{ "if",       token_type_t::token_if },
 			{ "let",      token_type_t::token_let },
 			{ "mut",      token_type_t::token_mut },
-			{ "if",       token_type_t::token_if },
-			{ "else",     token_type_t::token_else },
-			{ "for",      token_type_t::token_for },
-			{ "while",    token_type_t::token_while },
-			{ "continue", token_type_t::token_continue },
-			{ "break",    token_type_t::token_break },
+			{ "native",   token_type_t::token_native },
 			{ "return",   token_type_t::token_return },
-			{ "fn",       token_type_t::token_fn },
 			{ "struct",   token_type_t::token_struct },
 			{ "true",     token_type_t::token_true },
-			{ "false",    token_type_t::token_false },
+			{ "while",    token_type_t::token_while },
 		};
 
 		const auto current_token = this->current_token();
@@ -262,4 +262,4 @@ namespace soul
 	{
 		return c == '"' || c == '\'';
 	}
-}
+}  // namespace soul

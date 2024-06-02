@@ -56,10 +56,10 @@ namespace soul
 			explicit operator std::string() const;
 
 			/** @brief Returns the underlying type. */
-			const type_t& type() const noexcept;
+			[[nodiscard]] const type_t& type() const noexcept;
 
 			/** @brief Returns the underlying type. */
-			type_t& type() noexcept;
+			[[nodiscard]] type_t& type() noexcept;
 	};
 
 	/**
@@ -84,10 +84,10 @@ namespace soul
 			explicit operator std::string() const;
 
 			/** @brief Returns the underlying types. */
-			const std::vector<type_t>& types() const noexcept;
+			[[nodiscard]] const std::vector<type_t>& types() const noexcept;
 
 			/** @brief Returns the underlying types. */
-			std::vector<type_t>& types() noexcept;
+			[[nodiscard]] std::vector<type_t>& types() noexcept;
 	};
 
 	/**
@@ -119,7 +119,7 @@ namespace soul
 			 * @return Returns true if this is a given type, false otherwise.
 			 */
 			template <is_type_t T>
-			[[nodiscard]] bool is() const
+			[[nodiscard]] constexpr bool is() const
 			{
 				return std::holds_alternative<T>(_type);
 			}
@@ -130,7 +130,7 @@ namespace soul
 			 * @tparam Type to return.
 			 */
 			template <is_type_t T>
-			[[nodiscard]] T& get()
+			[[nodiscard]] constexpr T& get()
 			{
 				return std::get<T>(_type);
 			}
@@ -141,7 +141,7 @@ namespace soul
 			 * @tparam Type to return.
 			 */
 			template <is_type_t T>
-			[[nodiscard]] const T& get() const
+			[[nodiscard]] constexpr const T& get() const
 			{
 				return std::get<T>(_type);
 			}

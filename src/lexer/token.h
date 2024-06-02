@@ -40,29 +40,27 @@ namespace soul
 		token_literal_identifier, // my_variable, ...
 
 		// Keywords
-		token_native,
+		token_break,
+		token_continue,
+		token_else,
+		token_false,
+		token_fn,
+		token_for,
+		token_if,
 		token_let,
 		token_mut,
-		token_if,
-		token_else,
-		token_for,
-		token_while,
-		token_continue,
-		token_break,
+		token_native,
 		token_return,
-		token_fn,
 		token_struct,
 		token_true,
-		token_false,
+		token_while,
 
 		// Special tokens
 		token_error, // Token containing error message.
 		token_eof,   // End of File.
 	};
 
-	/**
-	 * @brief
-	 */
+	/** @brief Stringifies the token type. */
 	std::string_view token_type_to_string(token_type_t type);
 
 	template <typename T>
@@ -101,7 +99,7 @@ namespace soul
 			explicit operator std::string() const;
 
 			/** @brief Returns the token's type. */
-			constexpr token_type_t type() const
+			[[nodiscard]] constexpr token_type_t type() const
 			{
 				return _type;
 			}
@@ -112,9 +110,18 @@ namespace soul
 			 * @return true if it is, false otherwise.
 			 */
 			template <is_value_t T>
-			constexpr bool has() const
+			[[nodiscard]] constexpr bool has() const
 			{
 				return std::holds_alternative<T>(_value);
+			}
+
+			/**
+			 * @brief Verifies that token holds no value.
+			 * @return true if token does not contain a value, false otherwise.
+			 */
+			[[nodiscard]] constexpr bool no_value() const
+			{
+				return std::holds_alternative<empty_t>(_value);
 			}
 
 			/**
@@ -123,11 +130,10 @@ namespace soul
 			 * @return Value held in a token of type T.
 			 */
 			template <is_value_t T>
-			constexpr const T& get() const
+			[[nodiscard]] constexpr const T& get() const
 			{
 				return std::get<T>(_value);
 			}
-
 	};
 
 	template <typename T>

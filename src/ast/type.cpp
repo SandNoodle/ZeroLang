@@ -54,12 +54,12 @@ namespace soul
 		return ss.str();
 	}
 
-	const type_t& array_type_t::type() const noexcept
+	[[nodiscard]] const type_t& array_type_t::type() const noexcept
 	{
 		return *this->_contained_type;
 	}
 
-	type_t& array_type_t::type() noexcept
+	[[nodiscard]] type_t& array_type_t::type() noexcept
 	{
 		return *this->_contained_type;
 	}
@@ -96,13 +96,12 @@ namespace soul
 		return ss.str();
 	}
 
-	const std::vector<type_t>& struct_type_t::types() const noexcept
+    [[nodiscard]] const std::vector<type_t>& struct_type_t::types() const noexcept
 	{
 		return this->_types;
-
 	}
 
-	std::vector<type_t>& struct_type_t::types() noexcept
+	[[nodiscard]] std::vector<type_t>& struct_type_t::types() noexcept
 	{
 		return this->_types;
 	}
