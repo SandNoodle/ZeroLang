@@ -26,7 +26,7 @@ namespace soul::ut
 		const auto result_tokens = _lexer.tokenize(empty_string);
 		ASSERT_EQ(result_tokens.size(), 1);
 		ASSERT_EQ(result_tokens[0].type(), token_type_t::token_eof);
-		ASSERT_TRUE(result_tokens[0].has<token_t::empty_t>());
+		ASSERT_TRUE(result_tokens[0].no_value());
 	}
 
 	TEST_F(LexerTest, Literals_Identifiers)
@@ -78,7 +78,7 @@ namespace soul::ut
 			const auto& expected_token = expected_tokens[index];
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
-			EXPECT_TRUE(result_token.has<token_t::empty_t>()) << "Expected no value, but got: " << std::string(result_token);
+			EXPECT_TRUE(result_token.no_value()) << "Expected no value, but got: " << std::string(result_token);
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
@@ -117,7 +117,7 @@ namespace soul::ut
 			const auto& expected_token = token_t(expected_types[index]);
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
-			EXPECT_TRUE(result_tokens[index].has<token_t::empty_t>()) << "Expected no value, but got: " << std::string(result_tokens[index]);
+			EXPECT_TRUE(result_tokens[index].no_value()) << "Expected no value, but got: " << std::string(result_tokens[index]);
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));

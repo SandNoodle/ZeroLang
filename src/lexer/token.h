@@ -134,6 +134,17 @@ namespace soul
 			{
 				return std::get<T>(_value);
 			}
+
+            /**
+             * @brief Returns the value that token holds.
+             * @tparam T Type of value to return.
+             * @return Value held in a token of type T.
+             */
+            template <is_value_t T>
+            [[nodiscard]] constexpr T& get()
+            {
+                return std::get<T>(_value);
+            }
 	};
 
 	template <typename T>

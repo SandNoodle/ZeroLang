@@ -17,7 +17,7 @@ namespace soul
 		std::vector<token_t> result;
 		if (script.empty())
 		{
-			result.emplace_back(token_t(token_type_t::token_eof));
+			result.emplace_back(token_type_t::token_eof);
 			return result;
 		}
 
@@ -28,9 +28,7 @@ namespace soul
 		{
 			result.emplace_back(scan_token());
 			if (result.back().type() == token_type_t::token_eof)
-			{
 				break;
-			}
 		}
 		return result;
 	}
@@ -81,7 +79,7 @@ namespace soul
 		c = advance();
 
 		// At maximum special tokens are a combination of two characters.
-		if (!is_eof(c && !is_whitespace(c)))
+		if (!is_eof(c) && !is_whitespace(c))
 			_current_offset++;
 		
 		const auto current_token = this->current_token();
@@ -140,7 +138,7 @@ namespace soul
 
 		const auto create_token = [this] <is_value_t T> (std::string_view token, token_type_t type) -> token_t {
 			T value = 0;
-			const auto [_, error_code]= std::from_chars(token.data(), token.data() + token.size(), value);
+			const auto [_, error_code] = std::from_chars(token.data(), token.data() + token.size(), value);
 
 			if (error_code == std::errc{}) [[likely]]
 				return token_t(type, value); // No error.
@@ -152,14 +150,9 @@ namespace soul
 			return create_error_token("unrecognized");
 		};
 
-		if (current_token.find('.') != std::string_view::npos)
-		{
-			return create_token.operator()<double>(current_token, token_type_t::token_literal_float);
-		}
-		else
-		{
-			return create_token.operator()<int64_t>(current_token, token_type_t::token_literal_integer);
-		}
+		return current_token.find('.') != std::string_view::npos ?
+			create_token.operator()<double>(current_token, token_type_t::token_literal_float) :
+			create_token.operator()<int64_t>(current_token, token_type_t::token_literal_integer);
 	}
 
 	token_t lexer_t::create_string_token()
