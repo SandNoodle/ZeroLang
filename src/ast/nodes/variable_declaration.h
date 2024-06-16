@@ -18,13 +18,13 @@ namespace soul
 			identifier_t _identifier;
 			identifier_t _type_identifier;
 			dependency_t _expression;
-			bool         _is_mutable = false;
+			bool         _is_mutable;
 
 		public:
-			explicit variable_declaration_t(const identifier_t& identifier,
-				                            const identifier_t& type_identifier,
-				                            dependency_t expression,
-				                            bool is_mutable = false);
+			explicit variable_declaration_t(identifier_t&& identifier,
+				                            identifier_t&& type_identifier,
+				                            dependency_t&& expression,
+				                            bool is_mutable);
 			~variable_declaration_t() override = default;
 
 			/**
@@ -32,9 +32,9 @@ namespace soul
 			 * @param identifier Name of the Variable to be identified by.
 			 * @param type_identifier String Type of the variable. Used for Type checking.
 			 * @param expression Expression this variable evaluates to.
-			 * @param is_mutable Can the value of the expression be reasigned, i.e. is const?
+			 * @param is_mutable Can the value of the expression be reassigned, i.e. is const?
 			 * @return New 'Variable Declaration' statement node.
 			 */
-			static dependency_t create(const identifier_t& identifier, const identifier_t& type_identifier, dependency_t expression, bool is_mutable);
+			static dependency_t create(identifier_t&& identifier, identifier_t&& type_identifier, dependency_t&& expression, bool is_mutable);
 	};
 }

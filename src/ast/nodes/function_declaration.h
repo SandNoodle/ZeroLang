@@ -14,7 +14,7 @@ namespace soul
 	{
 		public:
 			using dependency_t = ast_node_t::dependency_t;
-			using dependencies_t = std::vector<dependency_t>;
+			using dependencies_t = ast_node_t::dependencies_t;
 			using identifier_t = ast_node_t::identifier_t;
 
 		private:
@@ -24,8 +24,8 @@ namespace soul
 			dependencies_t _statements;
 
 		public:
-			explicit function_declaration_t(const identifier_t& identifier,
-				                            const identifier_t& return_type_identifier,
+			explicit function_declaration_t(identifier_t&& identifier,
+				                            identifier_t&& return_type_identifier,
 				                            dependencies_t&& parameters,
 				                            dependencies_t&& statements);
 			~function_declaration_t() override = default;
@@ -38,8 +38,8 @@ namespace soul
 			 * @param statements
 			 * @return New 'Function Declaration' statement node.
 			 */
-			static dependency_t create(const identifier_t& identifier,
-				                       const identifier_t& return_type_identifier,
+			static dependency_t create(identifier_t&& identifier,
+				                       identifier_t&& return_type_identifier,
 				                       dependencies_t&& parameters,
 				                       dependencies_t&& statements);
 	};

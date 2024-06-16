@@ -122,14 +122,14 @@ namespace soul
 	{
 		return std::visit([](const auto& arg) -> std::string {
 			using T = std::decay_t<decltype(arg)>;
-			if constexpr (std::is_same_v<T, builtin_type_t>) {
-				static const std::unordered_map<builtin_type_t, std::string> k_types = {
-					{ builtin_type_t::type_boolean,   "bool" },
-					{ builtin_type_t::type_character, "char" },
-					{ builtin_type_t::type_float,     "float" },
-					{ builtin_type_t::type_integer,   "integer" },
-					{ builtin_type_t::type_string,    "str" },
-					{ builtin_type_t::type_void,      "void" },
+			if constexpr (std::is_same_v<T, scalar_type_t>) {
+				static const std::unordered_map<scalar_type_t, std::string> k_types = {
+					{ scalar_type_t::type_boolean,   "bool" },
+					{ scalar_type_t::type_character, "char" },
+					{ scalar_type_t::type_float,     "float" },
+					{ scalar_type_t::type_integer,   "integer" },
+					{ scalar_type_t::type_string,    "str" },
+					{ scalar_type_t::type_void,      "void" },
 				};
 				return k_types.at(arg);
 			} else if constexpr (std::is_constructible_v<T, std::string>) {

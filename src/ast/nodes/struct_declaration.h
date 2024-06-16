@@ -22,7 +22,7 @@ namespace soul
 			dependencies_t _parameters;
 
 		public:
-			explicit struct_declaration_t(const identifier_t& identifier,
+			explicit struct_declaration_t(identifier_t&& identifier,
 				                          dependencies_t&& parameters);
 			~struct_declaration_t() override = default;
 
@@ -32,7 +32,7 @@ namespace soul
 			 * @param statements Variable declarations making this struct.
 			 * @return New 'Struct Declaration' statement node.
 			 */
-			static dependency_t create(const identifier_t& identifier,
+			static dependency_t create(identifier_t&& identifier,
 				                       dependencies_t&& statements);
 	};
 }  // namespace soul

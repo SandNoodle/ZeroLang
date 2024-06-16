@@ -10,9 +10,9 @@
 namespace soul
 {
 	/**
-	 * @brief Represents 'Primitive' type in the language.
+	 * @brief Represents a 'Primitive' type in the language.
 	 */
-	enum class builtin_type_t : uint8_t
+	enum class scalar_type_t : uint8_t
 	{
 		type_boolean,
 		type_character,
@@ -28,14 +28,14 @@ namespace soul
 	std::strong_ordering operator<=>(const type_t& lhs, const type_t& rhs) noexcept;
 
 	template <typename T>
-	concept is_type_t = std::same_as<T, builtin_type_t> //
+	concept is_type_t = std::same_as<T, scalar_type_t> //
 	                 || std::same_as<T, array_type_t>   //
 	                 || std::same_as<T, struct_type_t>  //
 	                 || std::same_as<T, std::monostate> //
 	;
 
 	/**
-	 * @brief Represents 'Array' type in the language.
+	 * @brief Represents an 'Array' type in the language.
 	 * Holds an underlying type making up the Array.
 	 */
 	class array_type_t
@@ -63,7 +63,7 @@ namespace soul
 	};
 
 	/**
-	 * @brief Represents 'Struct' type in the language.
+	 * @brief Represents a 'Struct' type in the language.
 	 * Holds multiple of underlying types making up the Struct.
 	 */
 	class struct_type_t
@@ -97,7 +97,7 @@ namespace soul
 	{
 		public:
 			using unknown_t = std::monostate;
-			using variant_t = std::variant<unknown_t, builtin_type_t, array_type_t, struct_type_t>;
+			using variant_t = std::variant<unknown_t, scalar_type_t, array_type_t, struct_type_t>;
 
 		private:
 			variant_t _type = unknown_t{};
