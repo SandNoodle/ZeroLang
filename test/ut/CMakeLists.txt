@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -16,15 +16,16 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(
-  ${PROJECT_NAME}
-  lexer/lexer_test.cpp
+        ${PROJECT_NAME}
+        ast/type_test.cpp
+        lexer/lexer_test.cpp
+        parser/parser_test.cpp
 )
 target_link_libraries(
-	${PROJECT_NAME}
-	PRIVATE
-	ScriptingLanguage
-
-  GTest::gtest_main
+        ${PROJECT_NAME}
+        PRIVATE
+        ScriptingLanguage
+        GTest::gtest_main
 )
 
 include(GoogleTest)

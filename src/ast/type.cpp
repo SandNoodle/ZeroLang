@@ -56,12 +56,12 @@ namespace soul
 
 	[[nodiscard]] const type_t& array_type_t::type() const noexcept
 	{
-		return *this->_contained_type;
+		return *_contained_type;
 	}
 
 	[[nodiscard]] type_t& array_type_t::type() noexcept
 	{
-		return *this->_contained_type;
+		return *_contained_type;
 	}
 
 	//
@@ -75,7 +75,7 @@ namespace soul
 	{
 		return std::lexicographical_compare_three_way(this->_types.begin(),
 			                                          this->_types.end(),
-			                                          other._types.end(),
+			                                          other._types.begin(),
 			                                          other._types.end(),
 			                                          [](const auto& lhs, const auto& rhs) {
 			                                          	return lhs <=> rhs;
@@ -110,14 +110,6 @@ namespace soul
 	// Type
 	//
 
-	type_t::type_t(is_type_t auto type)
-		: _type(std::move(type)) {}
-
-	std::strong_ordering operator<=>(const type_t& lhs, const type_t& rhs) noexcept
-	{
-		return std::tie(lhs._type) <=> std::tie(rhs._type);
-	}
-
 	type_t::operator std::string() const
 	{
 		return std::visit([](const auto& arg) -> std::string {
@@ -140,4 +132,8 @@ namespace soul
 		}, _type);
 	}
 
+	std::strong_ordering operator<=>(const type_t& lhs, const type_t& rhs) noexcept
+	{
+		return std::tie(lhs._type) <=> std::tie(rhs._type);
+	}
 }  // namespace soul

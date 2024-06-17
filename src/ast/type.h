@@ -106,7 +106,8 @@ namespace soul
 			type_t() noexcept = default;
 			type_t(const type_t&) noexcept = default;
 			type_t(type_t&&) noexcept = default;
-			explicit type_t(is_type_t auto type);
+			explicit type_t(is_type_t auto type)
+			 : _type(std::move(type)) {}
 
 			type_t& operator=(const type_t&) noexcept = default;
 			type_t& operator=(type_t&&) noexcept = default;
