@@ -93,7 +93,7 @@ namespace soul
 			value_t      _value = empty_t{};
 
 		public:
-			explicit token_t(token_type_t type, const value_t& value = empty_t{});
+			explicit token_t(token_type_t type, value_t value = empty_t{});
 
 			bool operator==(const token_t&) const noexcept = default;
 			auto operator<=>(const token_t&) const noexcept = default;

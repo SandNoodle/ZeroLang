@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <format>
+#include <utility>
 
 namespace soul
 {
@@ -71,8 +72,8 @@ namespace soul
 		return types.at(type);
 	}
 
-	token_t::token_t(token_type_t type, const value_t& value)
-		: _type(type), _value(value) {}
+	token_t::token_t(token_type_t type, value_t value)
+		: _type(type), _value(std::move(value)) {}
 
 	token_t::operator std::string() const
 	{
