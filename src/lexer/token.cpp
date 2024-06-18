@@ -63,7 +63,6 @@ namespace soul
 			{ token_type_t::token_struct,             "token_struct" },
 			{ token_type_t::token_true,               "token_true" },
 			{ token_type_t::token_false,              "token_false" },
-			{ token_type_t::token_error,              "[ERROR]" },
 			{ token_type_t::token_eof,                "[EOF]" },
 		};
 		if (!types.contains(type)) [[unlikely]] {

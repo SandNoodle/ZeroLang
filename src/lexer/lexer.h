@@ -1,7 +1,9 @@
 #pragma once
 
 #include "lexer/token.h"
+#include "common/diagnostic.h"
 
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -19,6 +21,7 @@ namespace soul
 			std::string_view _script;
 			size_t _start_index    = 0;
 			size_t _current_offset = 0;
+			mutable std::vector<diagnostic_t> _diagnostics;
 
 		public:
 			/**
@@ -29,12 +32,31 @@ namespace soul
 			 */
 			[[nodiscard]] std::vector<token_t> tokenize(std::string_view script);
 
+			/**
+			 * @brief Returns all diagnostic messages collected during lexing.
+			 * @detail If not diagnostic messages were collected, the vector is empty.
+			 */
+			[[nodiscard]] const std::vector<diagnostic_t>& diagnostics() const noexcept
+			{
+				return _diagnostics;
+			}
+
 		private:
-			token_t scan_token();
+			std::optional<token_t> scan_token();
 			token_t create_identifier_token();
-			token_t create_numeric_token();
-			token_t create_string_token();
-			token_t create_error_token(std::string_view message);
+			std::optional<token_t> create_numeric_token();
+			std::optional<token_t> create_string_token();
+
+			/**
+			 * @brief Creates diagnostic message.
+			 * @param code Diagnostic code - determines the message.
+			 * @param args Arguments to format the diagnostic string with.
+			 */
+			template <typename... Args>
+			void diagnostic(diagnostic_code_t code, Args&&... args) const
+			{
+				_diagnostics.emplace_back(code, std::forward<Args>(args)...);
+			}
 
 			void skip_whitespace();
 			char_t peek(size_t count = 0) const;

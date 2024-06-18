@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <format>
-#include <unordered_map>
 
 namespace soul
 {
@@ -16,13 +16,15 @@ namespace soul
 	 */
 	enum class diagnostic_code_t : uint8_t
 	{
-		error_lexer_out_of_range,
 		error_lexer_unrecognized_token,
 		error_lexer_value_is_not_a_number,
 		error_lexer_value_out_of_range,
 		error_lexer_unterminated_string,
 		error_parser_out_of_range,
 	};
+
+	/** * @brief Returns the base, un-formatted diagnostic message. */
+	std::string_view get_base_diagnostic_message(diagnostic_code_t);
 
 	class diagnostic_t
 	{
@@ -43,6 +45,13 @@ namespace soul
 			diagnostic_t& operator=(const diagnostic_t&) noexcept = default;
 			diagnostic_t& operator=(diagnostic_t&&) noexcept = default;
 
+			[[nodiscard]] diagnostic_code_t code() const;
+
+			/**
+			 * @brief Constructs human readable diagnostic message.
+			 */
+			std::string message() const;
+
 			explicit operator std::string() const;
 	};
 
@@ -50,14 +59,7 @@ namespace soul
 	diagnostic_t::diagnostic_t(diagnostic_code_t code, Args&&... args)
 		: _code(code)
 	{
-		static const std::unordered_map<diagnostic_code_t, std::string_view> k_messages = {
-				{ diagnostic_code_t::error_lexer_out_of_range, "cannot get the next character: out of range" },
-				{ diagnostic_code_t::error_lexer_unrecognized_token, "unrecognized token" },
-				{ diagnostic_code_t::error_lexer_value_is_not_a_number, "value is not a number" },
-				{ diagnostic_code_t::error_lexer_value_out_of_range, "value is out of range" },
-				{ diagnostic_code_t::error_lexer_unterminated_string, "unterminated string" },
-				{ diagnostic_code_t::error_parser_out_of_range, "cannot peek the next token: out of range" },
-		};
-		this->_message = std::vformat(k_messages.at(code), std::make_format_args(std::forward<Args>(args)...));
+		std::string_view message = get_base_diagnostic_message(code);
+		this->_message = std::vformat(message, std::make_format_args(std::forward<Args>(args)...));
 	}
 }  // namespace soul

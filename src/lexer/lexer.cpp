@@ -14,26 +14,29 @@ namespace soul
 
 	[[nodiscard]] std::vector<token_t> lexer_t::tokenize(std::string_view script)
 	{
-		std::vector<token_t> result;
-		if (script.empty())
-		{
-			result.emplace_back(token_type_t::token_eof);
-			return result;
-		}
-
 		_current_offset = 0;
 		_start_index = 0;
 		_script = script;
+		_diagnostics.clear();
+
+		if (script.empty())
+		{
+			return { token_t(token_type_t::token_eof) };
+		}
+
+		std::vector<token_t> result;
 		for(;;)
 		{
-			result.emplace_back(scan_token());
-			if (result.back().type() == token_type_t::token_eof)
+			auto result_token = scan_token();
+			if (!result_token.has_value() || result_token->type() == token_type_t::token_eof)
 				break;
+			result.push_back(std::move(*result_token));
 		}
+		result.emplace_back(token_type_t::token_eof);
 		return result;
 	}
 
-	token_t lexer_t::scan_token()
+	std::optional<token_t> lexer_t::scan_token()
 	{
 		skip_whitespace();
 
@@ -81,12 +84,13 @@ namespace soul
 		// At maximum special tokens are a combination of two characters.
 		if (!is_eof(c) && !is_whitespace(c))
 			_current_offset++;
-		
+
 		const auto current_token = this->current_token();
 		if (k_tokens.contains(current_token))
 			return token_t(k_tokens.at(current_token));
 
-		return create_error_token("unrecognized token");
+		diagnostic(diagnostic_code_t::error_lexer_unrecognized_token);
+		return std::nullopt;
 	}
 
 	token_t lexer_t::create_identifier_token()
@@ -126,36 +130,41 @@ namespace soul
 	//   Add support for scanning:
 	//   - binary (ex. 0x0111b)
 	//   - hex (ex. 0xFF)
-	token_t lexer_t::create_numeric_token()
+	std::optional<token_t> lexer_t::create_numeric_token()
 	{
+		char c = peek();
 		if (peek() == '-')
-			advance();
+			c = advance();
 
-		while(is_hex_digit(peek()) || peek() == '.' || peek() == 'x')
-			advance();
+		while(!is_eof(c) && (is_hex_digit(c) || c == '.' || c == 'x')) {
+			c = advance();
+		}
 
-		const auto current_token = this->current_token();
-
-		const auto create_token = [this] <is_value_t T> (std::string_view token, token_type_t type) -> token_t {
+		const auto create_token = [this] <is_value_t T> (std::string_view token, token_type_t type) -> std::optional<token_t> {
 			T value = 0;
 			const auto [_, error_code] = std::from_chars(token.data(), token.data() + token.size(), value);
 
-			if (error_code == std::errc{}) [[likely]]
+			if (error_code == std::errc{}) [[likely]] {
 				return token_t(type, value); // No error.
-			else if (error_code == std::errc::invalid_argument)
-				return create_error_token("value is not a number");
-			else if (error_code == std::errc::result_out_of_range)
-				return create_error_token("value out of range");
+			} else if (error_code == std::errc::invalid_argument) {
+				diagnostic(diagnostic_code_t::error_lexer_value_is_not_a_number);
+				return std::nullopt;
+			} else if (error_code == std::errc::result_out_of_range) {
+				diagnostic(diagnostic_code_t::error_lexer_value_out_of_range);
+				return std::nullopt;
+			}
 
-			return create_error_token("unrecognized");
+			diagnostic(diagnostic_code_t::error_lexer_unrecognized_token);
+			return std::nullopt;
 		};
 
+		const auto current_token = this->current_token();
 		return current_token.find('.') != std::string_view::npos ?
 			create_token.operator()<double>(current_token, token_type_t::token_literal_float) :
 			create_token.operator()<int64_t>(current_token, token_type_t::token_literal_integer);
 	}
 
-	token_t lexer_t::create_string_token()
+	std::optional<token_t> lexer_t::create_string_token()
 	{
 		char_t c = advance(); // Skip "
 		while(!is_quote(c) && !is_eof(c))
@@ -163,17 +172,14 @@ namespace soul
 			c = advance();
 		}
 
-		if (is_eof(c))
-			return create_error_token("unterminated string");
+		if (is_eof(c)) {
+			diagnostic(diagnostic_code_t::error_lexer_unterminated_string);
+			return std::nullopt;
+		}
 
 		const auto current_token = _script.substr(_start_index + 1, _current_offset - _start_index - 1);
 		advance();
 		return token_t(token_type_t::token_literal_string, std::string(current_token));
-	}
-
-	token_t lexer_t::create_error_token(std::string_view message)
-	{
-		return token_t(token_type_t::token_error, std::string(message));
 	}
 
 	void lexer_t::skip_whitespace()
@@ -206,8 +212,9 @@ namespace soul
 
 	lexer_t::char_t lexer_t::peek(size_t count) const
 	{
-		if (_current_offset + count >= _script.size())
-			return '\0'; // TODO: Error?
+		if (_current_offset + count >= _script.size()) {
+			return '\0';
+		}
 		return _script[_current_offset + count];
 	}
 
