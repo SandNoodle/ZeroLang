@@ -10,6 +10,7 @@ namespace soul
 {
 	enum class token_type_t : uint8_t
 	{
+		// clang-format off
 		token_unknown,
 
 		// Single character tokens
@@ -56,8 +57,8 @@ namespace soul
 		token_while,
 
 		// Special tokens
-		token_error, // Token containing error message.
 		token_eof,   // End of File.
+		// clang-format on
 	};
 
 	/** @brief Stringifies the token type. */

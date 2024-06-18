@@ -9,7 +9,7 @@ namespace soul::ut
 		protected:
 			soul::lexer_t _lexer;
 
-			bool has_eof_token(const std::vector<token_t> tokens) const
+			static bool has_eof_token(const std::vector<token_t>& tokens)
 			{
 				if (tokens.empty())
 					return false;
@@ -27,6 +27,7 @@ namespace soul::ut
 		ASSERT_EQ(result_tokens.size(), 1);
 		ASSERT_EQ(result_tokens[0].type(), token_type_t::token_eof);
 		ASSERT_TRUE(result_tokens[0].no_value());
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, Literals_Identifiers)
@@ -49,6 +50,7 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, Literals_Keywords)
@@ -82,6 +84,7 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, SpecialCharacters)
@@ -121,6 +124,7 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_Integers)
@@ -142,6 +146,7 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_Integers_OutOfRange)
@@ -149,9 +154,12 @@ namespace soul::ut
 		const std::string_view string = "100000000000000000000"; // Number sufficient to be Out of Range.
 		const auto result_tokens = _lexer.tokenize(string);
 
-		ASSERT_EQ(result_tokens.size(), 2);
-		ASSERT_EQ(result_tokens[0], token_t(token_type_t::token_error, "value out of range"));
+		ASSERT_EQ(result_tokens.size(), 1);
 		ASSERT_TRUE(has_eof_token(result_tokens));
+
+		const auto& diagnostics = _lexer.diagnostics();
+		ASSERT_EQ(diagnostics.size(), 1);
+		ASSERT_EQ(diagnostics[0].code(), diagnostic_code_t::error_lexer_value_out_of_range);
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_FloatingPoint)
@@ -173,6 +181,7 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_Mixed)
@@ -210,11 +219,12 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, Literals_Strings)
 	{
-		const std::string_view string = "\"my_value\"\"no space after previous\" \"520\"";
+		const std::string_view string = R"("my_value""no space after previous" "520")";
 		const std::vector<std::string> expected_values = {
 			"my_value", "no space after previous", "520"
 		};
@@ -231,6 +241,7 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 
 	TEST_F(LexerTest, Literals_Strings_UnterminatedString)
@@ -238,10 +249,12 @@ namespace soul::ut
 		const std::string_view string = "\"this is an unterminated string, how sad :c";
 		const auto result_tokens = _lexer.tokenize(string);
 
-		ASSERT_EQ(result_tokens.size(), 2);
-		ASSERT_EQ(result_tokens[0].type(), token_type_t::token_error);
-
+		ASSERT_EQ(result_tokens.size(), 1);
 		ASSERT_TRUE(has_eof_token(result_tokens));
+
+		const auto& diagnostics = _lexer.diagnostics();
+		ASSERT_EQ(diagnostics.size(), 1);
+		ASSERT_EQ(diagnostics[0].code(), diagnostic_code_t::error_lexer_unterminated_string);
 	}
 
 	TEST_F(LexerTest, All)
@@ -282,5 +295,6 @@ namespace soul::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
 }  // soul::ut
