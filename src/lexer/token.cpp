@@ -6,78 +6,77 @@
 
 namespace soul
 {
-	std::string_view token_type_to_string(token_type_t type)
+	std::string_view token_type_to_string_view(TokenType type)
 	{
-		static const std::unordered_map<token_type_t, std::string_view> types = {
-			{ token_type_t::token_unknown,            "token_unknown" },
-			{ token_type_t::token_semicolon,          "token_semicolon" },
-			{ token_type_t::token_question_mark,      "token_question_mark" },
-			{ token_type_t::token_percent,            "token_percent" },
-			{ token_type_t::token_caret,              "token_caret" },
-			{ token_type_t::token_dot,                "token_dot" },
-			{ token_type_t::token_comma,              "token_comma" },
-			{ token_type_t::token_paren_left,         "token_paren_left" },
-			{ token_type_t::token_paren_right,        "token_paren_right" },
-			{ token_type_t::token_brace_left,         "token_brace_left" },
-			{ token_type_t::token_brace_right,        "token_brace_right" },
-			{ token_type_t::token_bracket_left,       "token_bracket_left" },
-			{ token_type_t::token_bracket_right,      "token_bracket_right" },
-			{ token_type_t::token_colon,              "token_colon" },
-			{ token_type_t::token_double_colon,       "token_double_colon" },
-			{ token_type_t::token_equal,              "token_equal" },
-			{ token_type_t::token_double_equal,       "token_double_equal" },
-			{ token_type_t::token_bang,               "token_bang" },
-			{ token_type_t::token_bang_equal,         "token_bang_equal" },
-			{ token_type_t::token_greater,            "token_greater" },
-			{ token_type_t::token_greater_equal,      "token_greater_equal"},
-			{ token_type_t::token_less,               "token_less" },
-			{ token_type_t::token_less_equal,         "token_less_equal" },
-			{ token_type_t::token_plus,               "token_plus" },
-			{ token_type_t::token_plus_equal,         "token_plus_equal" },
-			{ token_type_t::token_double_plus,        "token_double_plus" },
-			{ token_type_t::token_minus,              "token_minus" },
-			{ token_type_t::token_minus_equal,        "token_minus_equal" },
-			{ token_type_t::token_double_minus,       "token_double_minus" },
-			{ token_type_t::token_star,               "token_star" },
-			{ token_type_t::token_star_equal,         "token_star_equal" },
-			{ token_type_t::token_slash,              "token_slash" },
-			{ token_type_t::token_slash_equal,        "token_slash_equal" },
-			{ token_type_t::token_ampersand,          "token_ampersand" },
-			{ token_type_t::token_double_ampersand,   "token_double_ampersand" },
-			{ token_type_t::token_pipe,               "token_pipe" },
-			{ token_type_t::token_double_pipe,        "token_double_pipe" },
-			{ token_type_t::token_literal_integer,    "token_literal_integer" },
-			{ token_type_t::token_literal_float,      "token_literal_float" },
-			{ token_type_t::token_literal_string,     "token_literal_string" },
-			{ token_type_t::token_literal_identifier, "token_literal_identifier" },
-			{ token_type_t::token_native,             "token_native" },
-			{ token_type_t::token_let,                "token_let" },
-			{ token_type_t::token_mut,                "token_mut" },
-			{ token_type_t::token_if,                 "token_if" },
-			{ token_type_t::token_else,               "token_else" },
-			{ token_type_t::token_for,                "token_for" },
-			{ token_type_t::token_while,              "token_while" },
-			{ token_type_t::token_continue,           "token_continue" },
-			{ token_type_t::token_break,              "token_break" },
-			{ token_type_t::token_return,             "token_return" },
-			{ token_type_t::token_fn,                 "token_function" },
-			{ token_type_t::token_struct,             "token_struct" },
-			{ token_type_t::token_true,               "token_true" },
-			{ token_type_t::token_false,              "token_false" },
-			{ token_type_t::token_eof,                "[EOF]" },
+		static const std::unordered_map<TokenType, std::string_view> k_types = {
+			{TokenType::TOKEN_UNKNOWN,            "token_unknown" },
+			{TokenType::TOKEN_SEMICOLON,          "token_semicolon" },
+			{TokenType::TOKEN_QUESTION_MARK,      "token_question_mark" },
+			{TokenType::TOKEN_PERCENT,            "token_percent" },
+			{TokenType::TOKEN_CARET,              "token_caret" },
+			{TokenType::TOKEN_DOT,                "token_dot" },
+			{TokenType::TOKEN_COMMA,              "token_comma" },
+			{TokenType::TOKEN_PAREN_LEFT,         "token_paren_left" },
+			{TokenType::TOKEN_PAREN_RIGHT,        "token_paren_right" },
+			{TokenType::TOKEN_BRACE_LEFT,         "token_brace_left" },
+			{TokenType::TOKEN_BRACE_RIGHT,        "token_brace_right" },
+			{TokenType::TOKEN_BRACKET_LEFT,       "token_bracket_left" },
+			{TokenType::TOKEN_BRACKET_RIGHT,      "token_bracket_right" },
+			{TokenType::TOKEN_COLON,              "token_colon" },
+			{TokenType::TOKEN_DOUBLE_COLON,       "token_double_colon" },
+			{TokenType::TOKEN_EQUAL,              "token_equal" },
+			{TokenType::TOKEN_DOUBLE_EQUAL,       "token_double_equal" },
+			{TokenType::TOKEN_BANG,               "token_bang" },
+			{TokenType::TOKEN_BANG_EQUAL,         "token_bang_equal" },
+			{TokenType::TOKEN_GREATER,            "token_greater" },
+			{TokenType::TOKEN_GREATER_EQUAL,      "token_greater_equal"},
+			{TokenType::TOKEN_LESS,               "token_less" },
+			{TokenType::TOKEN_LESS_EQUAL,         "token_less_equal" },
+			{TokenType::TOKEN_PLUS,               "token_plus" },
+			{TokenType::TOKEN_PLUS_EQUAL,         "token_plus_equal" },
+			{TokenType::TOKEN_DOUBLE_PLUS,        "token_double_plus" },
+			{TokenType::TOKEN_MINUS,              "token_minus" },
+			{TokenType::TOKEN_MINUS_EQUAL,        "token_minus_equal" },
+			{TokenType::TOKEN_DOUBLE_MINUS,       "token_double_minus" },
+			{TokenType::TOKEN_STAR,               "token_star" },
+			{TokenType::TOKEN_STAR_EQUAL,         "token_star_equal" },
+			{TokenType::TOKEN_SLASH,              "token_slash" },
+			{TokenType::TOKEN_SLASH_EQUAL,        "token_slash_equal" },
+			{TokenType::TOKEN_AMPERSAND,          "token_ampersand" },
+			{TokenType::TOKEN_DOUBLE_AMPERSAND,   "token_double_ampersand" },
+			{TokenType::TOKEN_PIPE,               "token_pipe" },
+			{TokenType::TOKEN_DOUBLE_PIPE,        "token_double_pipe" },
+			{TokenType::TOKEN_LITERAL_INTEGER,    "token_literal_integer" },
+			{TokenType::TOKEN_LITERAL_FLOAT,      "token_literal_float" },
+			{TokenType::TOKEN_LITERAL_STRING,     "token_literal_string" },
+			{TokenType::TOKEN_LITERAL_IDENTIFIER, "token_literal_identifier" },
+			{TokenType::TOKEN_NATIVE,             "token_native" },
+			{TokenType::TOKEN_LET,                "token_let" },
+			{TokenType::TOKEN_MUT,                "token_mut" },
+			{TokenType::TOKEN_IF,                 "token_if" },
+			{TokenType::TOKEN_ELSE,               "token_else" },
+			{TokenType::TOKEN_FOR,                "token_for" },
+			{TokenType::TOKEN_WHILE,              "token_while" },
+			{TokenType::TOKEN_CONTINUE,           "token_continue" },
+			{TokenType::TOKEN_BREAK,              "token_break" },
+			{TokenType::TOKEN_RETURN,             "token_return" },
+			{TokenType::TOKEN_FN,                 "token_function" },
+			{TokenType::TOKEN_STRUCT,             "token_struct" },
+			{TokenType::TOKEN_TRUE,               "token_true" },
+			{TokenType::TOKEN_FALSE,              "token_false" },
+			{TokenType::TOKEN_EOF,                "[EOF]" },
 		};
-		if (!types.contains(type)) [[unlikely]] {
-			return types.at(token_type_t::token_unknown);
+		if (!k_types.contains(type)) [[unlikely]] {
+			return k_types.at(TokenType::TOKEN_UNKNOWN);
 		}
-		return types.at(type);
+		return k_types.at(type);
 	}
 
-	token_t::token_t(token_type_t type, value_t value)
+	Token::Token(TokenType type, value_t value)
 		: _type(type), _value(std::move(value)) {}
 
-	token_t::operator std::string() const
+	Token::operator std::string() const
 	{
-		const auto& type_string = token_type_to_string(_type);
 		const auto& value_string = std::visit([](const auto& value) -> std::string {
 				if constexpr (std::is_same_v<std::remove_cvref_t<decltype(value)>, empty_t>)
 				{
@@ -88,6 +87,7 @@ namespace soul
 					return std::to_string(value);
 				}
 			}, _value);
-		return std::string(std::format("[type: {}, value: {}]", token_type_to_string(_type), value_string));
+		return std::string(std::format("[type: {}, value: {}]",
+		                               token_type_to_string_view(_type), value_string));
 	}
 }

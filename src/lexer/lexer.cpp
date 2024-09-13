@@ -3,48 +3,48 @@
 #include <charconv>
 #include <unordered_map>
 
-namespace soul
-{
-	static bool is_eof(lexer_t::char_t c);
-	static bool is_whitespace(lexer_t::char_t c);
-	static bool is_alpha(lexer_t::char_t c);
-	static bool is_digit(lexer_t::char_t c);
-	static bool is_hex_digit(lexer_t::char_t c);
-	static bool is_quote(lexer_t::char_t c);
+namespace soul {
+	static bool is_eof(Lexer::char_t c);
 
-	[[nodiscard]] std::vector<token_t> lexer_t::tokenize(std::string_view script)
-	{
+	static bool is_whitespace(Lexer::char_t c);
+
+	static bool is_alpha(Lexer::char_t c);
+
+	static bool is_digit(Lexer::char_t c);
+
+	static bool is_hex_digit(Lexer::char_t c);
+
+	static bool is_quote(Lexer::char_t c);
+
+	[[nodiscard]] std::vector<Token> Lexer::tokenize(std::string_view script) {
 		_current_offset = 0;
 		_start_index = 0;
 		_script = script;
 		_diagnostics.clear();
 
-		if (script.empty())
-		{
-			return { token_t(token_type_t::token_eof) };
+		if (script.empty()) {
+			return {Token(TokenType::TOKEN_EOF)};
 		}
 
-		std::vector<token_t> result;
-		for(;;)
-		{
+		std::vector<Token> result;
+		for (;;) {
 			auto result_token = scan_token();
-			if (!result_token.has_value() || result_token->type() == token_type_t::token_eof)
+			if (!result_token.has_value() || result_token->type() == TokenType::TOKEN_EOF)
 				break;
 			result.push_back(std::move(*result_token));
 		}
-		result.emplace_back(token_type_t::token_eof);
+		result.emplace_back(TokenType::TOKEN_EOF);
 		return result;
 	}
 
-	std::optional<token_t> lexer_t::scan_token()
-	{
+	std::optional<Token> Lexer::scan_token() {
 		skip_whitespace();
 
 		_start_index = _current_offset;
 		char_t c = peek();
 
 		if (is_eof(c))
-			return token_t(token_type_t::token_eof);
+			return Token(TokenType::TOKEN_EOF);
 
 		if (is_alpha(c))
 			return create_identifier_token();
@@ -56,27 +56,46 @@ namespace soul
 			return create_string_token();
 
 		// Special characters
-		static const std::unordered_map<std::string_view, token_type_t> k_tokens = {
-			// Single character tokens
-			{ ";", token_type_t::token_semicolon },    { "?", token_type_t::token_question_mark },
-			{ "%", token_type_t::token_percent },      { "^", token_type_t::token_caret },
-			{ ".", token_type_t::token_dot },          { ",", token_type_t::token_comma },
-			{ "(", token_type_t::token_paren_left },   { ")", token_type_t::token_paren_right },
-			{ "{", token_type_t::token_brace_left },   { "}", token_type_t::token_brace_right },
-			{ "[", token_type_t::token_bracket_left }, { "]", token_type_t::token_bracket_right },
+		static const std::unordered_map<std::string_view, TokenType> k_tokens = {
+				// Single character tokens
+				{";",  TokenType::TOKEN_SEMICOLON},
+				{"?",  TokenType::TOKEN_QUESTION_MARK},
+				{"%",  TokenType::TOKEN_PERCENT},
+				{"^",  TokenType::TOKEN_CARET},
+				{".",  TokenType::TOKEN_DOT},
+				{",",  TokenType::TOKEN_COMMA},
+				{"(",  TokenType::TOKEN_PAREN_LEFT},
+				{")",  TokenType::TOKEN_PAREN_RIGHT},
+				{"{",  TokenType::TOKEN_BRACE_LEFT},
+				{"}",  TokenType::TOKEN_BRACE_RIGHT},
+				{"[",  TokenType::TOKEN_BRACKET_LEFT},
+				{"]",  TokenType::TOKEN_BRACKET_RIGHT},
 
-			// One or two character tokens
-			{ ":", token_type_t::token_colon },     { "::", token_type_t::token_double_colon },
-			{ "=", token_type_t::token_equal },     { "==", token_type_t::token_double_equal },
-			{ "!", token_type_t::token_bang },      { "!=", token_type_t::token_bang_equal },
-			{ ">", token_type_t::token_greater },   { ">=", token_type_t::token_greater_equal },
-			{ "<", token_type_t::token_less },      { "<=", token_type_t::token_less_equal },
-			{ "+", token_type_t::token_plus },      { "+=", token_type_t::token_plus_equal },  { "++", token_type_t::token_double_plus },
-			{ "-", token_type_t::token_minus },     { "-=", token_type_t::token_minus_equal }, { "--", token_type_t::token_double_minus },
-			{ "*", token_type_t::token_star },      { "*=", token_type_t::token_star_equal },
-			{ "/", token_type_t::token_slash },     { "/=", token_type_t::token_slash_equal },
-			{ "&", token_type_t::token_ampersand }, { "&&", token_type_t::token_double_ampersand },
-			{ "|", token_type_t::token_pipe },      { "||", token_type_t::token_double_pipe },
+				// One or two character tokens
+				{":",  TokenType::TOKEN_COLON},
+				{"::", TokenType::TOKEN_DOUBLE_COLON},
+				{"=",  TokenType::TOKEN_EQUAL},
+				{"==", TokenType::TOKEN_DOUBLE_EQUAL},
+				{"!",  TokenType::TOKEN_BANG},
+				{"!=", TokenType::TOKEN_BANG_EQUAL},
+				{">",  TokenType::TOKEN_GREATER},
+				{">=", TokenType::TOKEN_GREATER_EQUAL},
+				{"<",  TokenType::TOKEN_LESS},
+				{"<=", TokenType::TOKEN_LESS_EQUAL},
+				{"+",  TokenType::TOKEN_PLUS},
+				{"+=", TokenType::TOKEN_PLUS_EQUAL},
+				{"++", TokenType::TOKEN_DOUBLE_PLUS},
+				{"-",  TokenType::TOKEN_MINUS},
+				{"-=", TokenType::TOKEN_MINUS_EQUAL},
+				{"--", TokenType::TOKEN_DOUBLE_MINUS},
+				{"*",  TokenType::TOKEN_STAR},
+				{"*=", TokenType::TOKEN_STAR_EQUAL},
+				{"/",  TokenType::TOKEN_SLASH},
+				{"/=", TokenType::TOKEN_SLASH_EQUAL},
+				{"&",  TokenType::TOKEN_AMPERSAND},
+				{"&&", TokenType::TOKEN_DOUBLE_AMPERSAND},
+				{"|",  TokenType::TOKEN_PIPE},
+				{"||", TokenType::TOKEN_DOUBLE_PIPE},
 		};
 
 		c = advance();
@@ -87,42 +106,41 @@ namespace soul
 
 		const auto current_token = this->current_token();
 		if (k_tokens.contains(current_token))
-			return token_t(k_tokens.at(current_token));
+			return Token(k_tokens.at(current_token));
 
-		diagnostic(diagnostic_code_t::error_lexer_unrecognized_token);
+		diagnostic(DiagnosticCode::ERROR_LEXER_UNRECOGNIZED_TOKEN);
 		return std::nullopt;
 	}
 
-	token_t lexer_t::create_identifier_token()
-	{
+	Token Lexer::create_identifier_token() {
 		while (is_alpha(peek()))
 			advance();
 
 		// Keywords
-		static const std::unordered_map<std::string_view, token_type_t> k_keywords = {
-			// Keywords
-			{ "break",    token_type_t::token_break },
-			{ "continue", token_type_t::token_continue },
-			{ "else",     token_type_t::token_else },
-			{ "false",    token_type_t::token_false },
-			{ "fn",       token_type_t::token_fn },
-			{ "for",      token_type_t::token_for },
-			{ "if",       token_type_t::token_if },
-			{ "let",      token_type_t::token_let },
-			{ "mut",      token_type_t::token_mut },
-			{ "native",   token_type_t::token_native },
-			{ "return",   token_type_t::token_return },
-			{ "struct",   token_type_t::token_struct },
-			{ "true",     token_type_t::token_true },
-			{ "while",    token_type_t::token_while },
+		static const std::unordered_map<std::string_view, TokenType> k_keywords = {
+				// Keywords
+				{"break",    TokenType::TOKEN_BREAK},
+				{"continue", TokenType::TOKEN_CONTINUE},
+				{"else",     TokenType::TOKEN_ELSE},
+				{"false",    TokenType::TOKEN_FALSE},
+				{"fn",       TokenType::TOKEN_FN},
+				{"for",      TokenType::TOKEN_FOR},
+				{"if",       TokenType::TOKEN_IF},
+				{"let",      TokenType::TOKEN_LET},
+				{"mut",      TokenType::TOKEN_MUT},
+				{"native",   TokenType::TOKEN_NATIVE},
+				{"return",   TokenType::TOKEN_RETURN},
+				{"struct",   TokenType::TOKEN_STRUCT},
+				{"true",     TokenType::TOKEN_TRUE},
+				{"while",    TokenType::TOKEN_WHILE},
 		};
 
 		const auto current_token = this->current_token();
 		if (k_keywords.contains(current_token))
-			return token_t(k_keywords.at(current_token));
+			return Token(k_keywords.at(current_token));
 
 		// Identifier
-		return token_t(token_type_t::token_literal_identifier, std::string(current_token));
+		return Token(TokenType::TOKEN_LITERAL_IDENTIFIER, std::string(current_token));
 	}
 
 	// TODO(sand_noodles):
@@ -130,65 +148,59 @@ namespace soul
 	//   Add support for scanning:
 	//   - binary (ex. 0x0111b)
 	//   - hex (ex. 0xFF)
-	std::optional<token_t> lexer_t::create_numeric_token()
-	{
+	std::optional<Token> Lexer::create_numeric_token() {
 		char c = peek();
 		if (peek() == '-')
 			c = advance();
 
-		while(!is_eof(c) && (is_hex_digit(c) || c == '.' || c == 'x')) {
+		while (!is_eof(c) && (is_hex_digit(c) || c == '.' || c == 'x')) {
 			c = advance();
 		}
 
-		const auto create_token = [this] <is_value_t T> (std::string_view token, token_type_t type) -> std::optional<token_t> {
+		const auto create_token = [this]<is_value_t T>(std::string_view token, TokenType type) -> std::optional<Token> {
 			T value = 0;
 			const auto [_, error_code] = std::from_chars(token.data(), token.data() + token.size(), value);
 
 			if (error_code == std::errc{}) [[likely]] {
-				return token_t(type, value); // No error.
+				return Token(type, value); // No error.
 			} else if (error_code == std::errc::invalid_argument) {
-				diagnostic(diagnostic_code_t::error_lexer_value_is_not_a_number);
+				diagnostic(DiagnosticCode::ERROR_LEXER_VALUE_IS_NOT_A_NUMBER);
 				return std::nullopt;
 			} else if (error_code == std::errc::result_out_of_range) {
-				diagnostic(diagnostic_code_t::error_lexer_value_out_of_range);
+				diagnostic(DiagnosticCode::ERROR_LEXER_VALUE_OUT_OF_RANGE);
 				return std::nullopt;
 			}
 
-			diagnostic(diagnostic_code_t::error_lexer_unrecognized_token);
+			diagnostic(DiagnosticCode::ERROR_LEXER_UNRECOGNIZED_TOKEN);
 			return std::nullopt;
 		};
 
 		const auto current_token = this->current_token();
 		return current_token.find('.') != std::string_view::npos ?
-			create_token.operator()<double>(current_token, token_type_t::token_literal_float) :
-			create_token.operator()<int64_t>(current_token, token_type_t::token_literal_integer);
+		       create_token.operator()<double>(current_token, TokenType::TOKEN_LITERAL_FLOAT) :
+		       create_token.operator()<int64_t>(current_token, TokenType::TOKEN_LITERAL_INTEGER);
 	}
 
-	std::optional<token_t> lexer_t::create_string_token()
-	{
+	std::optional<Token> Lexer::create_string_token() {
 		char_t c = advance(); // Skip "
-		while(!is_quote(c) && !is_eof(c))
-		{
+		while (!is_quote(c) && !is_eof(c)) {
 			c = advance();
 		}
 
 		if (is_eof(c)) {
-			diagnostic(diagnostic_code_t::error_lexer_unterminated_string);
+			diagnostic(DiagnosticCode::ERROR_LEXER_UNTERMINATED_STRING);
 			return std::nullopt;
 		}
 
 		const auto current_token = _script.substr(_start_index + 1, _current_offset - _start_index - 1);
 		advance();
-		return token_t(token_type_t::token_literal_string, std::string(current_token));
+		return Token(TokenType::TOKEN_LITERAL_STRING, std::string(current_token));
 	}
 
-	void lexer_t::skip_whitespace()
-	{
-		for(;;)
-		{
+	void Lexer::skip_whitespace() {
+		for (;;) {
 			char_t c = peek();
-			switch(c)
-			{
+			switch (c) {
 				case ' ':
 				case '\r':
 				case '\t':
@@ -198,8 +210,7 @@ namespace soul
 				case '#':
 					advance(); // Skip the '#'
 					c = peek();
-					while (!is_eof(c) && (c != '\n' || c != '\r'))
-					{
+					while (!is_eof(c) && (c != '\n' || c != '\r')) {
 						advance(); // Skip the '#'
 						c = peek();
 					}
@@ -210,22 +221,19 @@ namespace soul
 		}
 	}
 
-	lexer_t::char_t lexer_t::peek(size_t count) const
-	{
+	Lexer::char_t Lexer::peek(size_t count) const {
 		if (_current_offset + count >= _script.size()) {
 			return '\0';
 		}
 		return _script[_current_offset + count];
 	}
 
-	lexer_t::char_t lexer_t::advance()
-	{
+	Lexer::char_t Lexer::advance() {
 		_current_offset++;
 		return peek();
 	}
 
-	std::string_view lexer_t::current_token() const
-	{
+	std::string_view Lexer::current_token() const {
 		return _script.substr(_start_index, _current_offset - _start_index);
 	}
 
@@ -233,33 +241,27 @@ namespace soul
 	//
 	//
 
-	static bool is_eof(lexer_t::char_t c)
-	{
+	static bool is_eof(Lexer::char_t c) {
 		return c == '\0';
 	}
 
-	static bool is_whitespace(lexer_t::char_t c)
-	{
+	static bool is_whitespace(Lexer::char_t c) {
 		return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 	}
 
-	static bool is_alpha(lexer_t::char_t c)
-	{
-		return (c >= 'a' && c <= 'z') ||  (c >= 'A' && c <= 'Z') || c == '_';
+	static bool is_alpha(Lexer::char_t c) {
+		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 	}
 
-	static bool is_digit(lexer_t::char_t c)
-	{
+	static bool is_digit(Lexer::char_t c) {
 		return c >= '0' && c <= '9';
 	}
 
-	static bool is_hex_digit(lexer_t::char_t c)
-	{
+	static bool is_hex_digit(Lexer::char_t c) {
 		return is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 	}
 
-	static bool is_quote(lexer_t::char_t c)
-	{
+	static bool is_quote(Lexer::char_t c) {
 		return c == '"' || c == '\'';
 	}
 }  // namespace soul

@@ -8,18 +8,18 @@ namespace soul
 	 * @brief Represents a 'Assign' expression in the Abstract Syntax Tree (AST).
 	 * Contains an expression assigned to another expression.
 	 */
-	class assign_t : public ast_node_acceptor_t<assign_t>
+	class AssignNode : public ASTNodeAcceptor<AssignNode>
 	{
 		public:
-			using dependency_t = ast_node_t::dependency_t;
+			using dependency_t = ASTNode::dependency_t;
 
 		private:
 			dependency_t _lhs;
 			dependency_t _rhs;
 
 		public:
-			explicit assign_t(dependency_t lhs, dependency_t rhs);
-			~assign_t() override = default;
+			explicit AssignNode(dependency_t lhs, dependency_t rhs);
+			~AssignNode() override = default;
 
 			/**
 			 * @brief Constructs new Assign expression node.

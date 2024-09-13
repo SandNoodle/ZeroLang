@@ -12,7 +12,7 @@ namespace soul
 	/**
 	 * @brief Class used performing a lexical analysis on the given input text.
 	 */
-	class lexer_t
+	class Lexer
 	{
 		public:
 			using char_t = char;
@@ -21,7 +21,7 @@ namespace soul
 			std::string_view _script;
 			size_t _start_index    = 0;
 			size_t _current_offset = 0;
-			mutable std::vector<diagnostic_t> _diagnostics;
+			mutable std::vector<Diagnostic> _diagnostics;
 
 		public:
 			/**
@@ -30,22 +30,22 @@ namespace soul
 			 * @param script Script that will be parsed / tokenized.
 			 * @return Tokenized sequence of a given script.
 			 */
-			[[nodiscard]] std::vector<token_t> tokenize(std::string_view script);
+			[[nodiscard]] std::vector<Token> tokenize(std::string_view script);
 
 			/**
 			 * @brief Returns all diagnostic messages collected during lexing.
 			 * @detail If not diagnostic messages were collected, the vector is empty.
 			 */
-			[[nodiscard]] const std::vector<diagnostic_t>& diagnostics() const noexcept
+			[[nodiscard]] const std::vector<Diagnostic>& diagnostics() const noexcept
 			{
 				return _diagnostics;
 			}
 
 		private:
-			std::optional<token_t> scan_token();
-			token_t create_identifier_token();
-			std::optional<token_t> create_numeric_token();
-			std::optional<token_t> create_string_token();
+			std::optional<Token> scan_token();
+			Token create_identifier_token();
+			std::optional<Token> create_numeric_token();
+			std::optional<Token> create_string_token();
 
 			/**
 			 * @brief Creates diagnostic message.
@@ -53,7 +53,7 @@ namespace soul
 			 * @param args Arguments to format the diagnostic string with.
 			 */
 			template <typename... Args>
-			void diagnostic(diagnostic_code_t code, Args&&... args) const
+			void diagnostic(DiagnosticCode code, Args&&... args) const
 			{
 				_diagnostics.emplace_back(code, std::forward<Args>(args)...);
 			}

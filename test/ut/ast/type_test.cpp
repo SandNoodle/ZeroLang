@@ -6,42 +6,42 @@ namespace soul::ut
 {
 	TEST(TypeSystemTest, DefaultConstructor)
 	{
-		type_t type;
-		ASSERT_TRUE(type.is<type_t::unknown_t>());
+		Type type;
+		ASSERT_TRUE(type.is<Type::unknown_t>());
 	}
 
 	TEST(TypeSystemTest, Copy)
 	{
-		type_t expected_type((array_type_t(type_t(scalar_type_t::type_float))));
-		ASSERT_TRUE(expected_type.is<array_type_t>());
-		ASSERT_TRUE(expected_type.get<array_type_t>().type().is<scalar_type_t>());
-		ASSERT_EQ(expected_type.get<array_type_t>().type().get<scalar_type_t>(), scalar_type_t::type_float);
+		Type expected_type((ArrayType(Type(ScalarType::type_float))));
+		ASSERT_TRUE(expected_type.is<ArrayType>());
+		ASSERT_TRUE(expected_type.get<ArrayType>().type().is<ScalarType>());
+		ASSERT_EQ(expected_type.get<ArrayType>().type().get<ScalarType>(), ScalarType::type_float);
 
-		type_t result_type = expected_type;
-		ASSERT_TRUE(result_type.is<array_type_t>());
-		ASSERT_TRUE(result_type.get<array_type_t>().type().is<scalar_type_t>());
-		ASSERT_EQ(result_type.get<array_type_t>().type().get<scalar_type_t>(), scalar_type_t::type_float);
+		Type result_type = expected_type;
+		ASSERT_TRUE(result_type.is<ArrayType>());
+		ASSERT_TRUE(result_type.get<ArrayType>().type().is<ScalarType>());
+		ASSERT_EQ(result_type.get<ArrayType>().type().get<ScalarType>(), ScalarType::type_float);
 
 		ASSERT_EQ(expected_type, result_type);
 	}
 
 	TEST(TypeSystemTest, Move)
 	{
-		type_t expected_type(scalar_type_t::type_boolean);
-		ASSERT_TRUE(expected_type.is<scalar_type_t>());
-		ASSERT_EQ(expected_type.get<scalar_type_t>(), scalar_type_t::type_boolean);
+		Type expected_type(ScalarType::type_boolean);
+		ASSERT_TRUE(expected_type.is<ScalarType>());
+		ASSERT_EQ(expected_type.get<ScalarType>(), ScalarType::type_boolean);
 
-		type_t result_type(struct_type_t({type_t(scalar_type_t::type_integer), type_t(scalar_type_t::type_string)}));
-		ASSERT_TRUE(result_type.is<struct_type_t>());
-		const auto& types = result_type.get<struct_type_t>().types();
+		Type result_type(StructType({Type(ScalarType::type_integer), Type(ScalarType::type_string)}));
+		ASSERT_TRUE(result_type.is<StructType>());
+		const auto& types = result_type.get<StructType>().types();
 		ASSERT_EQ(types.size(), 2);
-		ASSERT_TRUE(types[0].is<scalar_type_t>());
-		EXPECT_EQ(types[0].get<scalar_type_t>(), scalar_type_t::type_integer);
-		ASSERT_TRUE(types[1].is<scalar_type_t>());
-		EXPECT_EQ(types[1].get<scalar_type_t>(), scalar_type_t::type_string);
+		ASSERT_TRUE(types[0].is<ScalarType>());
+		EXPECT_EQ(types[0].get<ScalarType>(), ScalarType::type_integer);
+		ASSERT_TRUE(types[1].is<ScalarType>());
+		EXPECT_EQ(types[1].get<ScalarType>(), ScalarType::type_string);
 
 		result_type = std::move(expected_type);
-		ASSERT_TRUE(result_type.is<scalar_type_t>());
-		ASSERT_EQ(result_type.get<scalar_type_t>(), scalar_type_t::type_boolean);
+		ASSERT_TRUE(result_type.is<ScalarType>());
+		ASSERT_EQ(result_type.get<ScalarType>(), ScalarType::type_boolean);
 	}
 }  // namespace soul::ut

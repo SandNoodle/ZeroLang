@@ -5,33 +5,33 @@
 
 namespace soul
 {
-	std::string_view get_base_diagnostic_message(diagnostic_code_t code)
+	std::string_view get_base_diagnostic_message(DiagnosticCode code)
 	{
-		static const std::unordered_map<diagnostic_code_t, std::string_view> k_messages = {
-				{ diagnostic_code_t::error_lexer_unrecognized_token, "unrecognized token" },
-				{ diagnostic_code_t::error_lexer_value_is_not_a_number, "value is not a number" },
-				{ diagnostic_code_t::error_lexer_value_out_of_range, "value is out of range" },
-				{ diagnostic_code_t::error_lexer_unterminated_string, "unterminated string" },
-				{ diagnostic_code_t::error_parser_out_of_range, "cannot peek the next token: out of range" },
+		static const std::unordered_map<DiagnosticCode, std::string_view> k_messages = {
+				{DiagnosticCode::ERROR_LEXER_UNRECOGNIZED_TOKEN,    "unrecognized token" },
+				{DiagnosticCode::ERROR_LEXER_VALUE_IS_NOT_A_NUMBER, "value is not a number" },
+				{DiagnosticCode::ERROR_LEXER_VALUE_OUT_OF_RANGE,    "value is out of range" },
+				{DiagnosticCode::ERROR_LEXER_UNTERMINATED_STRING,   "unterminated string" },
+				{DiagnosticCode::ERROR_PARSER_OUT_OF_RANGE,         "cannot peek the next token: out of range" },
 		};
 		return k_messages.at(code);
 	}
 
-	[[nodiscard]] diagnostic_code_t diagnostic_t::code() const
+	[[nodiscard]] DiagnosticCode Diagnostic::code() const
 	{
 		return this->_code;
 	}
 
-	std::string diagnostic_t::message() const
+	[[nodiscard]] std::string Diagnostic::message() const
 	{
 		std::stringstream ss;
 		ss << "ERROR"; // TODO: Other types
-		ss <<  std::format(" [E{:04}", static_cast<std::underlying_type_t<diagnostic_code_t>>(_code)) << "]: ";
+		ss << std::format(" [E{:04}", static_cast<std::underlying_type_t<DiagnosticCode>>(_code)) << "]: ";
 		ss << _message << '\n';
 		return ss.str();
 	}
 
-	diagnostic_t::operator std::string() const
+	Diagnostic::operator std::string() const
 	{
 		return "unimplemented.";
 	}

@@ -9,25 +9,25 @@ namespace soul
 	// Array
 	//
 
-	array_type_t::array_type_t(const array_type_t& other) noexcept
-		: _contained_type(std::make_unique<type_t>(*other._contained_type.get())) {}
+	ArrayType::ArrayType(const ArrayType& other) noexcept
+		: _contained_type(std::make_unique<Type>(*other._contained_type.get())) {}
 
-	array_type_t::array_type_t(array_type_t&& other) noexcept
-		: _contained_type(std::make_unique<type_t>(*other._contained_type.get())) {}
+	ArrayType::ArrayType(ArrayType&& other) noexcept
+		: _contained_type(std::make_unique<Type>(*other._contained_type.get())) {}
 
-	array_type_t::array_type_t(type_t contained_type)
-		: _contained_type(std::make_unique<type_t>(std::move(contained_type))) {}
+	ArrayType::ArrayType(Type contained_type)
+		: _contained_type(std::make_unique<Type>(std::move(contained_type))) {}
 
-	array_type_t& array_type_t::operator=(const array_type_t& other) noexcept
+	ArrayType& ArrayType::operator=(const ArrayType& other) noexcept
 	{
 		if (this == &other)
 			return *this;
 
-		this->_contained_type = std::make_unique<type_t>(*other._contained_type.get());
+		this->_contained_type = std::make_unique<Type>(*other._contained_type.get());
 		return *this;
 	}
 
-	array_type_t& array_type_t::operator=(array_type_t&& other) noexcept
+	ArrayType& ArrayType::operator=(ArrayType&& other) noexcept
 	{
 		if (this == &other)
 			return *this;
@@ -36,17 +36,17 @@ namespace soul
 		return *this;
 	}
 
-	bool array_type_t::operator==(const array_type_t& other) const noexcept
+	bool ArrayType::operator==(const ArrayType& other) const noexcept
 	{
 		return *this->_contained_type == *other._contained_type;
 	}
 
-	auto array_type_t::operator<=>(const array_type_t& other) const noexcept
+	auto ArrayType::operator<=>(const ArrayType& other) const noexcept
 	{
 		return std::tie(*this->_contained_type.get()) <=> std::tie(*other._contained_type.get());
 	}
 
-	array_type_t::operator std::string() const
+	ArrayType::operator std::string() const
 	{
 		std::stringstream ss;
 		ss << std::string(*this->_contained_type);
@@ -54,12 +54,12 @@ namespace soul
 		return ss.str();
 	}
 
-	[[nodiscard]] const type_t& array_type_t::type() const noexcept
+	[[nodiscard]] const Type& ArrayType::type() const noexcept
 	{
 		return *_contained_type;
 	}
 
-	[[nodiscard]] type_t& array_type_t::type() noexcept
+	[[nodiscard]] Type& ArrayType::type() noexcept
 	{
 		return *_contained_type;
 	}
@@ -68,10 +68,10 @@ namespace soul
 	// Struct
 	//
 
-	struct_type_t::struct_type_t(std::vector<type_t> types)
+	StructType::StructType(std::vector<Type> types)
 		: _types(std::move(types)) {}
 
-	auto struct_type_t::operator<=>(const struct_type_t& other) const noexcept
+	auto StructType::operator<=>(const StructType& other) const noexcept
 	{
 		return std::lexicographical_compare_three_way(this->_types.begin(),
 			                                          this->_types.end(),
@@ -82,7 +82,7 @@ namespace soul
 			                                          });
 	}
 
-	struct_type_t::operator std::string() const
+	StructType::operator std::string() const
 	{
 		std::stringstream ss;
 		ss << "(";
@@ -96,12 +96,12 @@ namespace soul
 		return ss.str();
 	}
 
-    [[nodiscard]] const std::vector<type_t>& struct_type_t::types() const noexcept
+    [[nodiscard]] const std::vector<Type>& StructType::types() const noexcept
 	{
 		return this->_types;
 	}
 
-	[[nodiscard]] std::vector<type_t>& struct_type_t::types() noexcept
+	[[nodiscard]] std::vector<Type>& StructType::types() noexcept
 	{
 		return this->_types;
 	}
@@ -110,18 +110,18 @@ namespace soul
 	// Type
 	//
 
-	type_t::operator std::string() const
+	Type::operator std::string() const
 	{
 		return std::visit([](const auto& arg) -> std::string {
 			using T = std::decay_t<decltype(arg)>;
-			if constexpr (std::is_same_v<T, scalar_type_t>) {
-				static const std::unordered_map<scalar_type_t, std::string> k_types = {
-					{ scalar_type_t::type_boolean,   "bool" },
-					{ scalar_type_t::type_character, "char" },
-					{ scalar_type_t::type_float,     "float" },
-					{ scalar_type_t::type_integer,   "integer" },
-					{ scalar_type_t::type_string,    "str" },
-					{ scalar_type_t::type_void,      "void" },
+			if constexpr (std::is_same_v<T, ScalarType>) {
+				static const std::unordered_map<ScalarType, std::string> k_types = {
+					{ScalarType::type_boolean,   "bool" },
+					{ScalarType::type_character, "char" },
+					{ScalarType::type_float,     "float" },
+					{ScalarType::type_integer,   "integer" },
+					{ScalarType::type_string,    "str" },
+					{ScalarType::type_void,      "void" },
 				};
 				return k_types.at(arg);
 			} else if constexpr (std::is_constructible_v<T, std::string>) {
@@ -132,7 +132,7 @@ namespace soul
 		}, _type);
 	}
 
-	std::strong_ordering operator<=>(const type_t& lhs, const type_t& rhs) noexcept
+	std::strong_ordering operator<=>(const Type& lhs, const Type& rhs) noexcept
 	{
 		return std::tie(lhs._type) <=> std::tie(rhs._type);
 	}

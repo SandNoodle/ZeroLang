@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ast/ast.h"
+#include "common/types.h"
 
-#include <cstdint>
 #include <string>
 #include <variant>
 #include <type_traits>
@@ -10,9 +10,9 @@
 namespace soul
 {
 	struct boolean_literal_t { bool value; };
-	struct float_literal_t { double value; };
+	struct float_literal_t { f64 value; };
 	struct function_literal_t { std::string value; };
-	struct integer_literal_t { int64_t value; };
+	struct integer_literal_t { i64 value; };
 	struct string_literal_t { std::string value; };
 	struct variable_literal_t { std::string value; };
 
@@ -30,7 +30,7 @@ namespace soul
 	 * @brief Represents a 'Literal' expression
 	 * in the Abstract Syntax Tree (AST).
 	 */
-	class literal_t : public ast_node_acceptor_t<literal_t>
+	class LiteralNode : public ASTNodeAcceptor<LiteralNode>
 	{
 		public:
 			using null_t = std::monostate;
@@ -48,8 +48,8 @@ namespace soul
 			value_t _value = null_t{};
 
 		public:
-			explicit literal_t(const value_t& value = null_t{});
-			~literal_t() override = default;
+			explicit LiteralNode(const value_t& value = null_t{});
+			~LiteralNode() override = default;
 
 			/**
 			 * @brief Constructs new Literal expression node.

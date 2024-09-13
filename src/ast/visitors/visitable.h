@@ -4,17 +4,17 @@
 
 namespace soul
 {
-    class visitor_t;
+    class Visitor;
 
     /**
-     * @brief Base interface class for objects that can be visited by a vistor.
+     * @brief Base interface class for objects that can be visited by a visitor.
      */
-    class visitable_t
+    class IVisitable
     {
 		public:
-			virtual void accept(visitor_t& visitor) = 0;
-			virtual void accept(visitor_t& visitor) const = 0;
+			virtual void accept(Visitor& visitor) = 0;
+			virtual void accept(Visitor& visitor) const = 0;
 
-			friend visitor_t;
+			friend Visitor;
     };
 }  // namespace soul

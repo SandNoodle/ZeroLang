@@ -7,14 +7,14 @@ namespace soul::ut
 	class LexerTest : public ::testing::Test
 	{
 		protected:
-			soul::lexer_t _lexer;
+			soul::Lexer _lexer;
 
-			static bool has_eof_token(const std::vector<token_t>& tokens)
+			static bool has_eof_token(const std::vector<Token>& tokens)
 			{
 				if (tokens.empty())
 					return false;
 
-				const auto& expected_token = token_t(token_type_t::token_eof);
+				const auto& expected_token = Token(TokenType::TOKEN_EOF);
 				const auto& actual_token = tokens.back();
 				return expected_token == actual_token;
 			}
@@ -25,7 +25,7 @@ namespace soul::ut
 		const std::string_view empty_string = "\0";
 		const auto result_tokens = _lexer.tokenize(empty_string);
 		ASSERT_EQ(result_tokens.size(), 1);
-		ASSERT_EQ(result_tokens[0].type(), token_type_t::token_eof);
+		ASSERT_EQ(result_tokens[0].type(), TokenType::TOKEN_EOF);
 		ASSERT_TRUE(result_tokens[0].no_value());
 		ASSERT_TRUE(_lexer.diagnostics().empty());
 	}
@@ -43,7 +43,7 @@ namespace soul::ut
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index)
 		{
-			const auto& expected_token = token_t(token_type_t::token_literal_identifier, expected_values[index]);
+			const auto& expected_token = Token(TokenType::TOKEN_LITERAL_IDENTIFIER, expected_values[index]);
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
 			ASSERT_TRUE(result_token.has<std::string>());
@@ -57,20 +57,20 @@ namespace soul::ut
 	{
 		const std::string_view string = "native let mut if else for while continue break return fn struct true false";
 		const std::vector expected_tokens = {
-			token_t(token_type_t::token_native),
-			token_t(token_type_t::token_let),
-			token_t(token_type_t::token_mut),
-			token_t(token_type_t::token_if),
-			token_t(token_type_t::token_else),
-			token_t(token_type_t::token_for),
-			token_t(token_type_t::token_while),
-			token_t(token_type_t::token_continue),
-			token_t(token_type_t::token_break),
-			token_t(token_type_t::token_return),
-			token_t(token_type_t::token_fn),
-			token_t(token_type_t::token_struct),
-			token_t(token_type_t::token_true),
-			token_t(token_type_t::token_false),
+				Token(TokenType::TOKEN_NATIVE),
+				Token(TokenType::TOKEN_LET),
+				Token(TokenType::TOKEN_MUT),
+				Token(TokenType::TOKEN_IF),
+				Token(TokenType::TOKEN_ELSE),
+				Token(TokenType::TOKEN_FOR),
+				Token(TokenType::TOKEN_WHILE),
+				Token(TokenType::TOKEN_CONTINUE),
+				Token(TokenType::TOKEN_BREAK),
+				Token(TokenType::TOKEN_RETURN),
+				Token(TokenType::TOKEN_FN),
+				Token(TokenType::TOKEN_STRUCT),
+				Token(TokenType::TOKEN_TRUE),
+				Token(TokenType::TOKEN_FALSE),
 		};
 		const auto result_tokens = _lexer.tokenize(string);
 
@@ -90,34 +90,34 @@ namespace soul::ut
 	TEST_F(LexerTest, SpecialCharacters)
 	{
 		const std::string_view string = "; ? % ^ . , ( ) { } [ ] : :: = == ! != > >= < <= + += ++ - -= -- * *= / /= & && | ||";
-		const std::vector<token_type_t> expected_types = {
+		const std::vector<TokenType> expected_types = {
 			// Single character tokens
-			token_type_t::token_semicolon, token_type_t::token_question_mark,
-			token_type_t::token_percent, token_type_t::token_caret,
-			token_type_t::token_dot, token_type_t::token_comma,
-			token_type_t::token_paren_left, token_type_t::token_paren_right,
-			token_type_t::token_brace_left, token_type_t::token_brace_right,
-			token_type_t::token_bracket_left, token_type_t::token_bracket_right,
+			TokenType::TOKEN_SEMICOLON, TokenType::TOKEN_QUESTION_MARK,
+			TokenType::TOKEN_PERCENT, TokenType::TOKEN_CARET,
+			TokenType::TOKEN_DOT, TokenType::TOKEN_COMMA,
+			TokenType::TOKEN_PAREN_LEFT, TokenType::TOKEN_PAREN_RIGHT,
+			TokenType::TOKEN_BRACE_LEFT, TokenType::TOKEN_BRACE_RIGHT,
+			TokenType::TOKEN_BRACKET_LEFT, TokenType::TOKEN_BRACKET_RIGHT,
 
 			// One or two character tokens
-			token_type_t::token_colon, token_type_t::token_double_colon,
-			token_type_t::token_equal, token_type_t::token_double_equal,
-			token_type_t::token_bang, token_type_t::token_bang_equal,
-			token_type_t::token_greater, token_type_t::token_greater_equal,
-			token_type_t::token_less, token_type_t::token_less_equal,
-			token_type_t::token_plus, token_type_t::token_plus_equal, token_type_t::token_double_plus,
-			token_type_t::token_minus, token_type_t::token_minus_equal, token_type_t::token_double_minus,
-			token_type_t::token_star, token_type_t::token_star_equal,
-			token_type_t::token_slash, token_type_t::token_slash_equal,
-			token_type_t::token_ampersand, token_type_t::token_double_ampersand,
-			token_type_t::token_pipe, token_type_t::token_double_pipe,
+			TokenType::TOKEN_COLON, TokenType::TOKEN_DOUBLE_COLON,
+			TokenType::TOKEN_EQUAL, TokenType::TOKEN_DOUBLE_EQUAL,
+			TokenType::TOKEN_BANG, TokenType::TOKEN_BANG_EQUAL,
+			TokenType::TOKEN_GREATER, TokenType::TOKEN_GREATER_EQUAL,
+			TokenType::TOKEN_LESS, TokenType::TOKEN_LESS_EQUAL,
+			TokenType::TOKEN_PLUS, TokenType::TOKEN_PLUS_EQUAL, TokenType::TOKEN_DOUBLE_PLUS,
+			TokenType::TOKEN_MINUS, TokenType::TOKEN_MINUS_EQUAL, TokenType::TOKEN_DOUBLE_MINUS,
+			TokenType::TOKEN_STAR, TokenType::TOKEN_STAR_EQUAL,
+			TokenType::TOKEN_SLASH, TokenType::TOKEN_SLASH_EQUAL,
+			TokenType::TOKEN_AMPERSAND, TokenType::TOKEN_DOUBLE_AMPERSAND,
+			TokenType::TOKEN_PIPE, TokenType::TOKEN_DOUBLE_PIPE,
 		};
 		const auto result_tokens = _lexer.tokenize(string);
 
 		ASSERT_EQ(expected_types.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_types.size(); ++index)
 		{
-			const auto& expected_token = token_t(expected_types[index]);
+			const auto& expected_token = Token(expected_types[index]);
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
 			EXPECT_TRUE(result_tokens[index].no_value()) << "Expected no value, but got: " << std::string(result_tokens[index]);
@@ -138,7 +138,7 @@ namespace soul::ut
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index)
 		{
-			const auto& expected_token = token_t(token_type_t::token_literal_integer, expected_values[index]);
+			const auto& expected_token = Token(TokenType::TOKEN_LITERAL_INTEGER, expected_values[index]);
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
 			ASSERT_TRUE(result_tokens[index].has<int64_t>()) << "Expected integer value, but got: " << std::string(result_tokens[index]);
@@ -159,7 +159,7 @@ namespace soul::ut
 
 		const auto& diagnostics = _lexer.diagnostics();
 		ASSERT_EQ(diagnostics.size(), 1);
-		ASSERT_EQ(diagnostics[0].code(), diagnostic_code_t::error_lexer_value_out_of_range);
+		ASSERT_EQ(diagnostics[0].code(), DiagnosticCode::ERROR_LEXER_VALUE_OUT_OF_RANGE);
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_FloatingPoint)
@@ -173,7 +173,7 @@ namespace soul::ut
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index)
 		{
-			const auto& expected_token = token_t(token_type_t::token_literal_float, expected_values[index]);
+			const auto& expected_token = Token(TokenType::TOKEN_LITERAL_FLOAT, expected_values[index]);
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
 			ASSERT_TRUE(result_tokens[index].has<double>()) << "Expected floating point value, but got: " << std::string(result_tokens[index]);
@@ -188,15 +188,15 @@ namespace soul::ut
 	{
 		const std::string_view string = "0 0.0 -4.14 5 8.72 20 -40 -1024.0 0.02";
 		const std::vector expected_tokens = {
-			token_t(token_type_t::token_literal_integer, static_cast<int64_t>(0)),
-			token_t(token_type_t::token_literal_float, static_cast<double>(0.0)),
-			token_t(token_type_t::token_literal_float, static_cast<double>(-4.14)),
-			token_t(token_type_t::token_literal_integer, static_cast<int64_t>(5)),
-			token_t(token_type_t::token_literal_float, static_cast<double>(8.72)),
-			token_t(token_type_t::token_literal_integer, static_cast<int64_t>(20)),
-			token_t(token_type_t::token_literal_integer, static_cast<int64_t>(-40)),
-			token_t(token_type_t::token_literal_float, static_cast<double>(-1024.0)),
-			token_t(token_type_t::token_literal_float, static_cast<double>(0.02)),
+				Token(TokenType::TOKEN_LITERAL_INTEGER, static_cast<int64_t>(0)),
+				Token(TokenType::TOKEN_LITERAL_FLOAT, static_cast<double>(0.0)),
+				Token(TokenType::TOKEN_LITERAL_FLOAT, static_cast<double>(-4.14)),
+				Token(TokenType::TOKEN_LITERAL_INTEGER, static_cast<int64_t>(5)),
+				Token(TokenType::TOKEN_LITERAL_FLOAT, static_cast<double>(8.72)),
+				Token(TokenType::TOKEN_LITERAL_INTEGER, static_cast<int64_t>(20)),
+				Token(TokenType::TOKEN_LITERAL_INTEGER, static_cast<int64_t>(-40)),
+				Token(TokenType::TOKEN_LITERAL_FLOAT, static_cast<double>(-1024.0)),
+				Token(TokenType::TOKEN_LITERAL_FLOAT, static_cast<double>(0.02)),
 		};
 		const auto result_tokens = _lexer.tokenize(string);
 
@@ -206,7 +206,7 @@ namespace soul::ut
 			const auto& expected_token = expected_tokens[index];
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
-			if (result_token.type() == token_type_t::token_literal_float)
+			if (result_token.type() == TokenType::TOKEN_LITERAL_FLOAT)
 			{
 				ASSERT_TRUE(result_token.has<double>() == expected_token.has<double>());
 				EXPECT_EQ(expected_token.get<double>(), result_token.get<double>());
@@ -233,7 +233,7 @@ namespace soul::ut
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index)
 		{
-			const auto expected_token = token_t(token_type_t::token_literal_string, expected_values[index]);
+			const auto expected_token = Token(TokenType::TOKEN_LITERAL_STRING, expected_values[index]);
 			const auto& result_token = result_tokens[index];
 			ASSERT_EQ(expected_token, result_token);
 			ASSERT_TRUE(result_tokens[index].has<std::string>()) << "Expected string value, but got: " << std::string(result_tokens[index]);
@@ -254,7 +254,7 @@ namespace soul::ut
 
 		const auto& diagnostics = _lexer.diagnostics();
 		ASSERT_EQ(diagnostics.size(), 1);
-		ASSERT_EQ(diagnostics[0].code(), diagnostic_code_t::error_lexer_unterminated_string);
+		ASSERT_EQ(diagnostics[0].code(), DiagnosticCode::ERROR_LEXER_UNTERMINATED_STRING);
 	}
 
 	TEST_F(LexerTest, All)
@@ -267,22 +267,22 @@ namespace soul::ut
 			}
 		)";
 		const std::vector expected_tokens = {
-			token_t(token_type_t::token_fn),
-			token_t(token_type_t::token_literal_identifier, "main"),
-			token_t(token_type_t::token_double_colon),
-			token_t(token_type_t::token_literal_identifier, "void"),
-			token_t(token_type_t::token_brace_left),
-			token_t(token_type_t::token_let),
-			token_t(token_type_t::token_literal_identifier, "my_variable"),
-			token_t(token_type_t::token_colon),
-			token_t(token_type_t::token_literal_identifier, "str"),
-			token_t(token_type_t::token_equal),
-			token_t(token_type_t::token_literal_string, "my_string"),
-			token_t(token_type_t::token_semicolon),
-			token_t(token_type_t::token_return),
-			token_t(token_type_t::token_literal_integer, static_cast<int64_t>(0)),
-			token_t(token_type_t::token_semicolon),
-			token_t(token_type_t::token_brace_right),
+				Token(TokenType::TOKEN_FN),
+				Token(TokenType::TOKEN_LITERAL_IDENTIFIER, "main"),
+				Token(TokenType::TOKEN_DOUBLE_COLON),
+				Token(TokenType::TOKEN_LITERAL_IDENTIFIER, "void"),
+				Token(TokenType::TOKEN_BRACE_LEFT),
+				Token(TokenType::TOKEN_LET),
+				Token(TokenType::TOKEN_LITERAL_IDENTIFIER, "my_variable"),
+				Token(TokenType::TOKEN_COLON),
+				Token(TokenType::TOKEN_LITERAL_IDENTIFIER, "str"),
+				Token(TokenType::TOKEN_EQUAL),
+				Token(TokenType::TOKEN_LITERAL_STRING, "my_string"),
+				Token(TokenType::TOKEN_SEMICOLON),
+				Token(TokenType::TOKEN_RETURN),
+				Token(TokenType::TOKEN_LITERAL_INTEGER, static_cast<int64_t>(0)),
+				Token(TokenType::TOKEN_SEMICOLON),
+				Token(TokenType::TOKEN_BRACE_RIGHT),
 		};
 		const auto result_tokens = _lexer.tokenize(string);
 

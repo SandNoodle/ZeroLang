@@ -1,0 +1,59 @@
+Checks: '-*,
+
+clang-analyzer-core.*,
+
+clang-analyzer-security.*,
+
+clang-analyzer-cplusplus.*,
+
+clang-analyzer-unix.*,
+
+clang-analyzer-valist.*,
+
+#cppcoreguidelines-avoid-goto,
+#cppcoreguidelines-c-copy-assignment-signature,
+#cppcoreguidelines-explicit-virtual-functions,
+#cppcoreguidelines-interfaces-global-init,
+#cppcoreguidelines-no-malloc,
+#cppcoreguidelines-pro-type-const-cast,
+#cppcoreguidelines-pro-type-static-cast-downcast,
+#cppcoreguidelines-slicing,
+#cppcoreguidelines-virtual-class-destructor,
+readability-identifier-naming,
+
+bugprone-*,
+
+-clang-diagnostic-pragma-once-outside-header,
+
+performance-*,
+'
+
+CheckOptions:
+  - key: readability-identifier-naming.NamespaceCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.VariableCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.GlobalConstantPrefix
+    value: 'k_'
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.StaticConstantPrefix
+    value: 'k_'
+  - key: readability-identifier-naming.EnumCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.EnumConstantCase
+    value: 'UPPER_CASE'
+  - key: readability-identifier-naming.ClassCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.ClassMemberCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.ClassMemberPrefix
+    value: '_'
+  - key: readability-identifier-naming.FunctionCase
+    value: 'lower_case'
+
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: false
+
+  - key: bugprone-unchecked-optional-access.CheckName
+    value: true

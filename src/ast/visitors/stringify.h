@@ -6,7 +6,7 @@
 
 namespace soul
 {
-	class stringify_visitor_t : public visitor_t
+	class StringifyVisitor final : public Visitor
 	{
 		public:
 

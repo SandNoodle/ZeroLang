@@ -8,11 +8,11 @@ namespace soul
 	 * @brief Represents a 'Variable Declaration' statement
 	 * in the Abstract Syntax Tree (AST).
 	 */
-	class variable_declaration_t final : public ast_node_acceptor_t<variable_declaration_t>
+	class VariableDeclarationNode final : public ASTNodeAcceptor<VariableDeclarationNode>
 	{
 		public:
-			using dependency_t = ast_node_t::dependency_t;
-			using identifier_t = ast_node_t::identifier_t;
+			using dependency_t = ASTNode::dependency_t;
+			using identifier_t = ASTNode::identifier_t;
 
 		private:
 			identifier_t _identifier;
@@ -21,11 +21,11 @@ namespace soul
 			bool         _is_mutable;
 
 		public:
-			explicit variable_declaration_t(identifier_t&& identifier,
-				                            identifier_t&& type_identifier,
-				                            dependency_t&& expression,
-				                            bool is_mutable);
-			~variable_declaration_t() override = default;
+			explicit VariableDeclarationNode(identifier_t&& identifier,
+			                                 identifier_t&& type_identifier,
+			                                 dependency_t&& expression,
+			                                 bool is_mutable);
+			~VariableDeclarationNode() override = default;
 
 			/**
 			 * @brief Constructs new Variable Declaration statement node.

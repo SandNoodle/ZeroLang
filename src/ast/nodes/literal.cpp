@@ -2,11 +2,11 @@
 
 namespace soul
 {
-	literal_t::literal_t(const value_t& value)
+	LiteralNode::LiteralNode(const value_t& value)
 		: _value(value) {}
 
-	literal_t::dependency_t literal_t::create(const value_t& value)
+	LiteralNode::dependency_t LiteralNode::create(const value_t& value)
 	{
-		return std::make_unique<literal_t>(value);
+		return std::make_unique<LiteralNode>(value);
 	}
 }  // namespace soul

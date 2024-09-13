@@ -4,35 +4,35 @@
 
 namespace soul
 {
-	class assign_t;
-	class binary_t;
-	class block_t;
-	class function_declaration_t;
-	class literal_t;
-	class struct_declaration_t;
-	class unary_t;
-	class variable_declaration_t;
+	class AssignNode;
+	class BinaryNode;
+	class BlockNode;
+	class FunctionDeclarationNode;
+	class LiteralNode;
+	class StructDeclarationNode;
+	class UnaryNode;
+	class VariableDeclarationNode;
 
 	/**
 	 * @brief Base class for visiting nodes in the Abstract Syntax Tree.
 	 */
-	class visitor_t
+	class Visitor
 	{
 		public:
-			virtual ~visitor_t() = default;
+			virtual ~Visitor() = default;
 
 			#define DEFINE_VISIT(node)                                                    \
 				virtual void visit(node& param) { visit(std::as_const(param)); } \
 				virtual void visit(const node& param) {}
 
-			DEFINE_VISIT(assign_t);
-			DEFINE_VISIT(binary_t);
-			DEFINE_VISIT(block_t);
-			DEFINE_VISIT(function_declaration_t);
-			DEFINE_VISIT(literal_t);
-			DEFINE_VISIT(struct_declaration_t);
-			DEFINE_VISIT(unary_t);
-			DEFINE_VISIT(variable_declaration_t);
+			DEFINE_VISIT(AssignNode);
+			DEFINE_VISIT(BinaryNode);
+			DEFINE_VISIT(BlockNode);
+			DEFINE_VISIT(FunctionDeclarationNode);
+			DEFINE_VISIT(LiteralNode);
+			DEFINE_VISIT(StructDeclarationNode);
+			DEFINE_VISIT(UnaryNode);
+			DEFINE_VISIT(VariableDeclarationNode);
 
 			#undef DEFINE_VISIT
 	};

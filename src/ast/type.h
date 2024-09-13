@@ -1,6 +1,7 @@
 #pragma once
 
-#include <cstdint>
+#include "common/types.h"
+
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -12,7 +13,7 @@ namespace soul
 	/**
 	 * @brief Represents a 'Primitive' type in the language.
 	 */
-	enum class scalar_type_t : uint8_t
+	enum class ScalarType : u8
 	{
 		type_boolean,
 		type_character,
@@ -21,16 +22,16 @@ namespace soul
 		type_string,
 		type_void, // only for functions.
 	};
-	class array_type_t;
-	class struct_type_t;
-	class type_t;
+	class ArrayType;
+	class StructType;
+	class Type;
 
-	std::strong_ordering operator<=>(const type_t& lhs, const type_t& rhs) noexcept;
+	std::strong_ordering operator<=>(const Type& lhs, const Type& rhs) noexcept;
 
 	template <typename T>
-	concept is_type_t = std::same_as<T, scalar_type_t> //
-	                 || std::same_as<T, array_type_t>   //
-	                 || std::same_as<T, struct_type_t>  //
+	concept is_type_t = std::same_as<T, ScalarType> //
+	                 || std::same_as<T, ArrayType>   //
+	                 || std::same_as<T, StructType>  //
 	                 || std::same_as<T, std::monostate> //
 	;
 
@@ -38,80 +39,80 @@ namespace soul
 	 * @brief Represents an 'Array' type in the language.
 	 * Holds an underlying type making up the Array.
 	 */
-	class array_type_t
+	class ArrayType
 	{
 		private:
-			std::unique_ptr<type_t> _contained_type = std::make_unique<type_t>();
+			std::unique_ptr<Type> _contained_type = std::make_unique<Type>();
 
 		public:
-			array_type_t() noexcept = default;
-			array_type_t(const array_type_t&) noexcept;
-			array_type_t(array_type_t&&) noexcept;
-			explicit array_type_t(type_t contained_type);
+			ArrayType() noexcept = default;
+			ArrayType(const ArrayType&) noexcept;
+			ArrayType(ArrayType&&) noexcept;
+			explicit ArrayType(Type contained_type);
 
-			array_type_t& operator=(const array_type_t&) noexcept;
-			array_type_t& operator=(array_type_t&&) noexcept;
-			bool operator==(const array_type_t& other) const noexcept;
-			auto operator<=>(const array_type_t& other) const noexcept;
+			ArrayType& operator=(const ArrayType&) noexcept;
+			ArrayType& operator=(ArrayType&&) noexcept;
+			bool operator==(const ArrayType& other) const noexcept;
+			auto operator<=>(const ArrayType& other) const noexcept;
 			explicit operator std::string() const;
 
 			/** @brief Returns the underlying type. */
-			[[nodiscard]] const type_t& type() const noexcept;
+			[[nodiscard]] const Type& type() const noexcept;
 
 			/** @brief Returns the underlying type. */
-			[[nodiscard]] type_t& type() noexcept;
+			[[nodiscard]] Type& type() noexcept;
 	};
 
 	/**
 	 * @brief Represents a 'Struct' type in the language.
 	 * Holds multiple of underlying types making up the Struct.
 	 */
-	class struct_type_t
+	class StructType
 	{
 		private:
-			std::vector<type_t> _types;
+			std::vector<Type> _types;
 
 		public:
-			struct_type_t() noexcept = default;
-			struct_type_t(const struct_type_t&) noexcept = default;
-			struct_type_t(struct_type_t&&) noexcept = default;
-			explicit struct_type_t(std::vector<type_t> types);
+			StructType() noexcept = default;
+			StructType(const StructType&) noexcept = default;
+			StructType(StructType&&) noexcept = default;
+			explicit StructType(std::vector<Type> types);
 
-			struct_type_t& operator=(const struct_type_t&) noexcept = default;
-			struct_type_t& operator=(struct_type_t&&) noexcept = default;
-			bool operator==(const struct_type_t& other) const noexcept = default;
-			auto operator<=>(const struct_type_t& other) const noexcept;
+			StructType& operator=(const StructType&) noexcept = default;
+			StructType& operator=(StructType&&) noexcept = default;
+			bool operator==(const StructType& other) const noexcept = default;
+			auto operator<=>(const StructType& other) const noexcept;
 			explicit operator std::string() const;
 
 			/** @brief Returns the underlying types. */
-			[[nodiscard]] const std::vector<type_t>& types() const noexcept;
+			[[nodiscard]] const std::vector<Type>& types() const noexcept;
 
 			/** @brief Returns the underlying types. */
-			[[nodiscard]] std::vector<type_t>& types() noexcept;
+			[[nodiscard]] std::vector<Type>& types() noexcept;
 	};
 
 	/**
 	 * @brief Represents a 'Type' of a variable, function, etc. in the language.
 	 */
-	class type_t
+	class Type
 	{
 		public:
 			using unknown_t = std::monostate;
-			using variant_t = std::variant<unknown_t, scalar_type_t, array_type_t, struct_type_t>;
+			using variant_t = std::variant<unknown_t, ScalarType, ArrayType, StructType>;
 
 		private:
 			variant_t _type = unknown_t{};
 
 		public:
-			type_t() noexcept = default;
-			type_t(const type_t&) noexcept = default;
-			type_t(type_t&&) noexcept = default;
-			explicit type_t(is_type_t auto type)
+			Type() noexcept = default;
+			Type(const Type&) noexcept = default;
+			Type(Type&&) noexcept = default;
+			explicit Type(is_type_t auto type)
 			 : _type(std::move(type)) {}
 
-			type_t& operator=(const type_t&) noexcept = default;
-			type_t& operator=(type_t&&) noexcept = default;
-			bool operator==(const type_t&) const noexcept = default;
+			Type& operator=(const Type&) noexcept = default;
+			Type& operator=(Type&&) noexcept = default;
+			bool operator==(const Type&) const noexcept = default;
 			explicit operator std::string() const;
 
 			/**
@@ -147,11 +148,11 @@ namespace soul
 				return std::get<T>(_type);
 			}
 
-			friend std::strong_ordering operator<=>(const type_t& lhs, const type_t& rhs) noexcept;
+			friend std::strong_ordering operator<=>(const Type& lhs, const Type& rhs) noexcept;
 	};
 
 	template <typename T>
-	T& operator<<(T& stream, const type_t& type)
+	T& operator<<(T& stream, const Type& type)
 	{
 		stream << std::string(type);
 		return stream;

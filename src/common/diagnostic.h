@@ -1,6 +1,7 @@
 #pragma once
 
-#include <cstdint>
+#include "common/types.h"
+
 #include <string>
 #include <string_view>
 #include <format>
@@ -14,49 +15,49 @@ namespace soul
 	 * - <object> is either lexer, parser, compiler or type_checker.
 	 * - <diagnostic> is an unique diagnostic value.
 	 */
-	enum class diagnostic_code_t : uint8_t
+	enum class DiagnosticCode : u8
 	{
-		error_lexer_unrecognized_token,
-		error_lexer_value_is_not_a_number,
-		error_lexer_value_out_of_range,
-		error_lexer_unterminated_string,
-		error_parser_out_of_range,
+		ERROR_LEXER_UNRECOGNIZED_TOKEN,
+		ERROR_LEXER_VALUE_IS_NOT_A_NUMBER,
+		ERROR_LEXER_VALUE_OUT_OF_RANGE,
+		ERROR_LEXER_UNTERMINATED_STRING,
+		ERROR_PARSER_OUT_OF_RANGE,
 	};
 
 	/** * @brief Returns the base, un-formatted diagnostic message. */
-	std::string_view get_base_diagnostic_message(diagnostic_code_t);
+	std::string_view get_base_diagnostic_message(DiagnosticCode);
 
-	class diagnostic_t
+	class Diagnostic
 	{
 		public:
 
 		private:
-			diagnostic_code_t _code;
+			DiagnosticCode _code;
 			std::string _message;
 
 		public:
-			diagnostic_t() = delete;
-			diagnostic_t(const diagnostic_t&) noexcept = default;
-			diagnostic_t(diagnostic_t&&) noexcept = default;
+			Diagnostic() = delete;
+			Diagnostic(const Diagnostic&) noexcept = default;
+			Diagnostic(Diagnostic&&) noexcept = default;
 
 			template <typename... Args>
-			explicit diagnostic_t(diagnostic_code_t code, Args&&... args);
+			explicit Diagnostic(DiagnosticCode code, Args&&... args);
 
-			diagnostic_t& operator=(const diagnostic_t&) noexcept = default;
-			diagnostic_t& operator=(diagnostic_t&&) noexcept = default;
+			Diagnostic& operator=(const Diagnostic&) noexcept = default;
+			Diagnostic& operator=(Diagnostic&&) noexcept = default;
 
-			[[nodiscard]] diagnostic_code_t code() const;
+			[[nodiscard]] DiagnosticCode code() const;
 
 			/**
 			 * @brief Constructs human readable diagnostic message.
 			 */
-			std::string message() const;
+			[[nodiscard]] std::string message() const;
 
 			explicit operator std::string() const;
 	};
 
 	template<typename... Args>
-	diagnostic_t::diagnostic_t(diagnostic_code_t code, Args&&... args)
+	Diagnostic::Diagnostic(DiagnosticCode code, Args&&... args)
 		: _code(code)
 	{
 		std::string_view message = get_base_diagnostic_message(code);

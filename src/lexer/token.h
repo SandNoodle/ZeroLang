@@ -1,6 +1,7 @@
 #pragma once
 
-#include <cstdint>
+#include "common/types.h"
+
 #include <type_traits>
 #include <variant>
 #include <string>
@@ -8,72 +9,72 @@
 
 namespace soul
 {
-	enum class token_type_t : uint8_t
+	enum class TokenType : u8
 	{
 		// clang-format off
-		token_unknown,
+		TOKEN_UNKNOWN,
 
 		// Single character tokens
-		token_semicolon, token_question_mark,    // ;?
-		token_percent, token_caret,              // %^
-		token_dot, token_comma,                  // .,
-		token_paren_left, token_paren_right,     // ()
-		token_brace_left, token_brace_right,     // {}
-		token_bracket_left, token_bracket_right, // []
+		TOKEN_SEMICOLON, TOKEN_QUESTION_MARK,    // ;?
+		TOKEN_PERCENT, TOKEN_CARET,              // %^
+		TOKEN_DOT, TOKEN_COMMA,                  // .,
+		TOKEN_PAREN_LEFT, TOKEN_PAREN_RIGHT,     // ()
+		TOKEN_BRACE_LEFT, TOKEN_BRACE_RIGHT,     // {}
+		TOKEN_BRACKET_LEFT, TOKEN_BRACKET_RIGHT, // []
 
 		// One or two character tokens
-		token_colon, token_double_colon,                    // : ::
-		token_equal, token_double_equal,                    // = ==
-		token_bang, token_bang_equal,                       // ! !=
-		token_greater, token_greater_equal,                 // > >=
-		token_less, token_less_equal,                       // < <=
-		token_plus, token_plus_equal, token_double_plus,    // + += ++
-		token_minus, token_minus_equal, token_double_minus, // - -= --
-		token_star, token_star_equal,                       // * *=
-		token_slash, token_slash_equal,                     // / /=
-		token_ampersand, token_double_ampersand,            // & &&
-		token_pipe, token_double_pipe,                      // | ||
+		TOKEN_COLON, TOKEN_DOUBLE_COLON,                    // : ::
+		TOKEN_EQUAL, TOKEN_DOUBLE_EQUAL,                    // = ==
+		TOKEN_BANG, TOKEN_BANG_EQUAL,                       // ! !=
+		TOKEN_GREATER, TOKEN_GREATER_EQUAL,                 // > >=
+		TOKEN_LESS, TOKEN_LESS_EQUAL,                       // < <=
+		TOKEN_PLUS, TOKEN_PLUS_EQUAL, TOKEN_DOUBLE_PLUS,    // + += ++
+		TOKEN_MINUS, TOKEN_MINUS_EQUAL, TOKEN_DOUBLE_MINUS, // - -= --
+		TOKEN_STAR, TOKEN_STAR_EQUAL,                       // * *=
+		TOKEN_SLASH, TOKEN_SLASH_EQUAL,                     // / /=
+		TOKEN_AMPERSAND, TOKEN_DOUBLE_AMPERSAND,            // & &&
+		TOKEN_PIPE, TOKEN_DOUBLE_PIPE,                      // | ||
 
 		// Literals
-		token_literal_integer,    // 0, 1, 2, ...
-		token_literal_float,      // 3.14, 5.72, ...
-		token_literal_string,     // "my_string", ...
-		token_literal_identifier, // my_variable, ...
+		TOKEN_LITERAL_INTEGER,    // 0, 1, 2, ...
+		TOKEN_LITERAL_FLOAT,      // 3.14, 5.72, ...
+		TOKEN_LITERAL_STRING,     // "my_string", ...
+		TOKEN_LITERAL_IDENTIFIER, // my_variable, ...
 
 		// Keywords
-		token_break,
-		token_continue,
-		token_else,
-		token_false,
-		token_fn,
-		token_for,
-		token_if,
-		token_let,
-		token_mut,
-		token_native,
-		token_return,
-		token_struct,
-		token_true,
-		token_while,
+		TOKEN_BREAK,
+		TOKEN_CONTINUE,
+		TOKEN_ELSE,
+		TOKEN_FALSE,
+		TOKEN_FN,
+		TOKEN_FOR,
+		TOKEN_IF,
+		TOKEN_LET,
+		TOKEN_MUT,
+		TOKEN_NATIVE,
+		TOKEN_RETURN,
+		TOKEN_STRUCT,
+		TOKEN_TRUE,
+		TOKEN_WHILE,
 
 		// Special tokens
-		token_eof,   // End of File.
+		TOKEN_EOF,   // End of File.
 		// clang-format on
 	};
 
 	/** @brief Stringifies the token type. */
-	std::string_view token_type_to_string(token_type_t type);
+	std::string_view token_type_to_string_view(TokenType type);
 
 	template <typename T>
-	T& operator<<(T& stream, const token_type_t& token)
+	T& operator<<(T& stream, const TokenType& token)
 	{
-		stream << token_type_to_string(token);
+		stream << token_type_to_string_view(token);
 		return stream;
 	}
 
 	template <typename T>
-	concept is_value_t = std::same_as<T, int64_t>         //
-	                  || std::same_as<T, double>          //
+	concept is_value_t = std::same_as<T, i64>             //
+	                  || std::same_as<T, f64>             //
 	                  || std::same_as<T, std::string>     //
 	                  || std::same_as<T, std::monostate>  //
 	;
@@ -82,25 +83,25 @@ namespace soul
 	 * @brief Class representing a single lexical token.
 	 * Otherwise known as a 'Lexeme'.
 	 */
-	class token_t
+	class Token
 	{
 		public:
 			using empty_t = std::monostate;
-			using value_t = std::variant<empty_t, int64_t, double, std::string>;
+			using value_t = std::variant<empty_t, i64, f64, std::string>;
 
 		private:
-			token_type_t _type  = token_type_t::token_unknown;
+			TokenType _type  = TokenType::TOKEN_UNKNOWN;
 			value_t      _value = empty_t{};
 
 		public:
-			explicit token_t(token_type_t type, value_t value = empty_t{});
+			explicit Token(TokenType type, value_t value = empty_t{});
 
-			bool operator==(const token_t&) const noexcept = default;
-			auto operator<=>(const token_t&) const noexcept = default;
+			bool operator==(const Token&) const noexcept = default;
+			auto operator<=>(const Token&) const noexcept = default;
 			explicit operator std::string() const;
 
 			/** @brief Returns the token's type. */
-			[[nodiscard]] constexpr token_type_t type() const
+			[[nodiscard]] constexpr TokenType type() const
 			{
 				return _type;
 			}
@@ -149,7 +150,7 @@ namespace soul
 	};
 
 	template <typename T>
-	T& operator<<(T& stream, const token_t& token)
+	T& operator<<(T& stream, const Token& token)
 	{
 		stream << std::string(token);
 		return stream;
