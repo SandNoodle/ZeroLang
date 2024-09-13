@@ -19,21 +19,21 @@ namespace soul
 	class Visitor
 	{
 		public:
-			virtual ~Visitor() = default;
+		virtual ~Visitor() = default;
 
-			#define DEFINE_VISIT(node)                                                    \
-				virtual void visit(node& param) { visit(std::as_const(param)); } \
-				virtual void visit(const node& param) {}
+#define DEFINE_VISIT(node)                                           \
+	virtual void visit(node& param) { visit(std::as_const(param)); } \
+	virtual void visit(const node& param) {}
 
-			DEFINE_VISIT(AssignNode);
-			DEFINE_VISIT(BinaryNode);
-			DEFINE_VISIT(BlockNode);
-			DEFINE_VISIT(FunctionDeclarationNode);
-			DEFINE_VISIT(LiteralNode);
-			DEFINE_VISIT(StructDeclarationNode);
-			DEFINE_VISIT(UnaryNode);
-			DEFINE_VISIT(VariableDeclarationNode);
+		DEFINE_VISIT(AssignNode);
+		DEFINE_VISIT(BinaryNode);
+		DEFINE_VISIT(BlockNode);
+		DEFINE_VISIT(FunctionDeclarationNode);
+		DEFINE_VISIT(LiteralNode);
+		DEFINE_VISIT(StructDeclarationNode);
+		DEFINE_VISIT(UnaryNode);
+		DEFINE_VISIT(VariableDeclarationNode);
 
-			#undef DEFINE_VISIT
+#undef DEFINE_VISIT
 	};
 }  // namespace soul

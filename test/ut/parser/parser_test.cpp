@@ -10,14 +10,14 @@ namespace soul::ut
 	class ParserTest : public ::testing::Test
 	{
 		protected:
-			soul::Lexer _lexer;
-			soul::Parser _parser;
+		soul::Lexer  _lexer;
+		soul::Parser _parser;
 	};
 
 	TEST_F(ParserTest, VariableDeclaration)
 	{
-		const std::string_view script = "let my_cheeseburger : int = 32";
-		auto tokens = _lexer.tokenize(script);
+		const std::string_view      script      = "let my_cheeseburger : int = 32";
+		auto                        tokens      = _lexer.tokenize(script);
 		const ASTNode::dependency_t result_tree = _parser.parse(tokens);
 		ASSERT_TRUE(result_tree);
 
@@ -27,13 +27,13 @@ namespace soul::ut
 
 	TEST_F(ParserTest, DISABLED_BlockStatement_Empty)
 	{
-		const std::string_view script = "{}";
-		auto tokens = _lexer.tokenize(script);
+		const std::string_view      script      = "{}";
+		auto                        tokens      = _lexer.tokenize(script);
 		const ASTNode::dependency_t result_tree = _parser.parse(tokens);
 		ASSERT_TRUE(result_tree);
 
 		std::vector<ASTNode::dependency_t> statements;
-		ASTNode::dependency_t expected_tree = nullptr; // TODO
+		ASTNode::dependency_t              expected_tree = nullptr;  // TODO
 		ASSERT_EQ(expected_tree, result_tree);
 	}
-}
+}  // namespace soul::ut

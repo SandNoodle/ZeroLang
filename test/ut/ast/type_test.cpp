@@ -31,7 +31,7 @@ namespace soul::ut
 		ASSERT_TRUE(expected_type.is<ScalarType>());
 		ASSERT_EQ(expected_type.get<ScalarType>(), ScalarType::type_boolean);
 
-		Type result_type(StructType({Type(ScalarType::type_integer), Type(ScalarType::type_string)}));
+		Type result_type(StructType({ Type(ScalarType::type_integer), Type(ScalarType::type_string) }));
 		ASSERT_TRUE(result_type.is<StructType>());
 		const auto& types = result_type.get<StructType>().types();
 		ASSERT_EQ(types.size(), 2);

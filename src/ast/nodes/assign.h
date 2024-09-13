@@ -11,22 +11,22 @@ namespace soul
 	class AssignNode : public ASTNodeAcceptor<AssignNode>
 	{
 		public:
-			using dependency_t = ASTNode::dependency_t;
+		using dependency_t = ASTNode::dependency_t;
 
 		private:
-			dependency_t _lhs;
-			dependency_t _rhs;
+		dependency_t _lhs;
+		dependency_t _rhs;
 
 		public:
-			explicit AssignNode(dependency_t lhs, dependency_t rhs);
-			~AssignNode() override = default;
+		explicit AssignNode(dependency_t lhs, dependency_t rhs);
+		~AssignNode() override = default;
 
-			/**
-			 * @brief Constructs new Assign expression node.
-			 * @param lhs Expression to assign to.
-			 * @param rhs Expression to assign from.
-			 * @return New 'Assign' expression node.
-			 */
-			static dependency_t create(dependency_t lhs, dependency_t rhs);
+		/**
+		 * @brief Constructs new Assign expression node.
+		 * @param lhs Expression to assign to.
+		 * @param rhs Expression to assign from.
+		 * @return New 'Assign' expression node.
+		 */
+		static dependency_t create(dependency_t lhs, dependency_t rhs);
 	};
 }  // namespace soul

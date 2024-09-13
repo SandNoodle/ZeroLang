@@ -2,9 +2,9 @@
 
 #include "common/types.h"
 
+#include <format>
 #include <string>
 #include <string_view>
-#include <format>
 
 namespace soul
 {
@@ -30,37 +30,35 @@ namespace soul
 	class Diagnostic
 	{
 		public:
-
 		private:
-			DiagnosticCode _code;
-			std::string _message;
+		DiagnosticCode _code;
+		std::string    _message;
 
 		public:
-			Diagnostic() = delete;
-			Diagnostic(const Diagnostic&) noexcept = default;
-			Diagnostic(Diagnostic&&) noexcept = default;
+		Diagnostic()                           = delete;
+		Diagnostic(const Diagnostic&) noexcept = default;
+		Diagnostic(Diagnostic&&) noexcept      = default;
 
-			template <typename... Args>
-			explicit Diagnostic(DiagnosticCode code, Args&&... args);
+		template <typename... Args>
+		explicit Diagnostic(DiagnosticCode code, Args&&... args);
 
-			Diagnostic& operator=(const Diagnostic&) noexcept = default;
-			Diagnostic& operator=(Diagnostic&&) noexcept = default;
+		Diagnostic& operator=(const Diagnostic&) noexcept = default;
+		Diagnostic& operator=(Diagnostic&&) noexcept      = default;
 
-			[[nodiscard]] DiagnosticCode code() const;
+		[[nodiscard]] DiagnosticCode code() const;
 
-			/**
-			 * @brief Constructs human readable diagnostic message.
-			 */
-			[[nodiscard]] std::string message() const;
+		/**
+		 * @brief Constructs human readable diagnostic message.
+		 */
+		[[nodiscard]] std::string message() const;
 
-			explicit operator std::string() const;
+		explicit operator std::string() const;
 	};
 
-	template<typename... Args>
-	Diagnostic::Diagnostic(DiagnosticCode code, Args&&... args)
-		: _code(code)
+	template <typename... Args>
+	Diagnostic::Diagnostic(DiagnosticCode code, Args&&... args) : _code(code)
 	{
 		std::string_view message = get_base_diagnostic_message(code);
-		this->_message = std::vformat(message, std::make_format_args(std::forward<Args>(args)...));
+		this->_message           = std::vformat(message, std::make_format_args(std::forward<Args>(args)...));
 	}
 }  // namespace soul

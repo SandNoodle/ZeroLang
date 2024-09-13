@@ -2,10 +2,10 @@
 
 #include "common/types.h"
 
-#include <type_traits>
-#include <variant>
 #include <string>
 #include <string_view>
+#include <type_traits>
+#include <variant>
 
 namespace soul
 {
@@ -59,7 +59,7 @@ namespace soul
 
 		// Special tokens
 		TOKEN_EOF,   // End of File.
-		// clang-format on
+		            // clang-format on
 	};
 
 	/** @brief Stringifies the token type. */
@@ -77,7 +77,7 @@ namespace soul
 	                  || std::same_as<T, f64>             //
 	                  || std::same_as<T, std::string>     //
 	                  || std::same_as<T, std::monostate>  //
-	;
+		;
 
 	/**
 	 * @brief Class representing a single lexical token.
@@ -86,67 +86,61 @@ namespace soul
 	class Token
 	{
 		public:
-			using empty_t = std::monostate;
-			using value_t = std::variant<empty_t, i64, f64, std::string>;
+		using empty_t = std::monostate;
+		using value_t = std::variant<empty_t, i64, f64, std::string>;
 
 		private:
-			TokenType _type  = TokenType::TOKEN_UNKNOWN;
-			value_t      _value = empty_t{};
+		TokenType _type  = TokenType::TOKEN_UNKNOWN;
+		value_t   _value = empty_t{};
 
 		public:
-			explicit Token(TokenType type, value_t value = empty_t{});
+		explicit Token(TokenType type, value_t value = empty_t{});
 
-			bool operator==(const Token&) const noexcept = default;
-			auto operator<=>(const Token&) const noexcept = default;
-			explicit operator std::string() const;
+		bool     operator==(const Token&) const noexcept  = default;
+		auto     operator<=>(const Token&) const noexcept = default;
+		explicit operator std::string() const;
 
-			/** @brief Returns the token's type. */
-			[[nodiscard]] constexpr TokenType type() const
-			{
-				return _type;
-			}
+		/** @brief Returns the token's type. */
+		[[nodiscard]] constexpr TokenType type() const { return _type; }
 
-			/**
-			 * @brief Verifies if the token is of a specific value type.
-			 * @tparam T Type of value to verify.
-			 * @return true if it is, false otherwise.
-			 */
-			template <is_value_t T>
-			[[nodiscard]] constexpr bool has() const
-			{
-				return std::holds_alternative<T>(_value);
-			}
+		/**
+		 * @brief Verifies if the token is of a specific value type.
+		 * @tparam T Type of value to verify.
+		 * @return true if it is, false otherwise.
+		 */
+		template <is_value_t T>
+		[[nodiscard]] constexpr bool has() const
+		{
+			return std::holds_alternative<T>(_value);
+		}
 
-			/**
-			 * @brief Verifies that token holds no value.
-			 * @return true if token does not contain a value, false otherwise.
-			 */
-			[[nodiscard]] constexpr bool no_value() const
-			{
-				return std::holds_alternative<empty_t>(_value);
-			}
+		/**
+		 * @brief Verifies that token holds no value.
+		 * @return true if token does not contain a value, false otherwise.
+		 */
+		[[nodiscard]] constexpr bool no_value() const { return std::holds_alternative<empty_t>(_value); }
 
-			/**
-			 * @brief Returns the value that token holds.
-			 * @tparam T Type of value to return.
-			 * @return Value held in a token of type T.
-			 */
-			template <is_value_t T>
-			[[nodiscard]] constexpr const T& get() const
-			{
-				return std::get<T>(_value);
-			}
+		/**
+		 * @brief Returns the value that token holds.
+		 * @tparam T Type of value to return.
+		 * @return Value held in a token of type T.
+		 */
+		template <is_value_t T>
+		[[nodiscard]] constexpr const T& get() const
+		{
+			return std::get<T>(_value);
+		}
 
-            /**
-             * @brief Returns the value that token holds.
-             * @tparam T Type of value to return.
-             * @return Value held in a token of type T.
-             */
-            template <is_value_t T>
-            [[nodiscard]] constexpr T& get()
-            {
-                return std::get<T>(_value);
-            }
+		/**
+		 * @brief Returns the value that token holds.
+		 * @tparam T Type of value to return.
+		 * @return Value held in a token of type T.
+		 */
+		template <is_value_t T>
+		[[nodiscard]] constexpr T& get()
+		{
+			return std::get<T>(_value);
+		}
 	};
 
 	template <typename T>

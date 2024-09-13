@@ -9,11 +9,9 @@ namespace soul
 	class StringifyVisitor final : public Visitor
 	{
 		public:
-
 		private:
-			std::string _string;
+		std::string _string;
 
 		public:
-
 	};
-}
+}  // namespace soul

@@ -12,22 +12,22 @@ namespace soul
 	class UnaryNode final : public ASTNodeAcceptor<UnaryNode>
 	{
 		public:
-			using dependency_t = ASTNode::dependency_t;
+		using dependency_t = ASTNode::dependency_t;
 
 		private:
-			ASTNodeOperator _operator;
-			dependency_t _expr;
+		ASTNodeOperator _operator;
+		dependency_t    _expr;
 
 		public:
-			explicit UnaryNode(dependency_t expr, ASTNodeOperator op);
-			~UnaryNode() override = default;
+		explicit UnaryNode(dependency_t expr, ASTNodeOperator op);
+		~UnaryNode() override = default;
 
-			/**
-			 * @brief Constructs new Unary expression node.
-			 * @param expr Expression to be bound by an operator.
-			 * @param op Operator binding the expression.
-			 * @return New 'Unary' expression node.
-			 */
-			static dependency_t create(dependency_t expr, ASTNodeOperator op);
+		/**
+		 * @brief Constructs new Unary expression node.
+		 * @param expr Expression to be bound by an operator.
+		 * @param op Operator binding the expression.
+		 * @return New 'Unary' expression node.
+		 */
+		static dependency_t create(dependency_t expr, ASTNodeOperator op);
 	};
 }  // namespace soul
