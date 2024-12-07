@@ -2,12 +2,12 @@
 
 namespace soul
 {
-	BinaryNode::BinaryNode(dependency_t lhs, dependency_t rhs, ASTNodeOperator op)
-		: _lhs(std::move(lhs)), _rhs(std::move(rhs)), _operator(op)
+	BinaryNode::BinaryNode(Dependency lhs, Dependency rhs, ASTNodeOperator op)
+		: lhs(std::move(lhs)), rhs(std::move(rhs)), op(op)
 	{
 	}
 
-	BinaryNode::dependency_t BinaryNode::create(dependency_t lhs, dependency_t rhs, ASTNodeOperator op)
+	BinaryNode::Dependency BinaryNode::create(Dependency lhs, Dependency rhs, ASTNodeOperator op)
 	{
 		return std::make_unique<BinaryNode>(std::move(lhs), std::move(rhs), op);
 	}

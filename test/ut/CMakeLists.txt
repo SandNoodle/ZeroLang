@@ -17,7 +17,6 @@ enable_testing()
 
 add_executable(
         ${PROJECT_NAME}
-        ast/type_test.cpp
         lexer/lexer_test.cpp
         parser/parser_test.cpp
 )

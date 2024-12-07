@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ast/type.h"
-#include "ast/visitors/visitable.h"
 #include "ast/visitors/visitor.h"
 
 #include <memory>
@@ -11,47 +9,40 @@
 
 namespace soul
 {
+	class IVisitable
+	{
+		public:
+		virtual void accept(IVisitor& visitor)       = 0;
+		virtual void accept(IVisitor& visitor) const = 0;
+
+		friend IVisitor;
+	};
+
 	/**
 	 * @brief Represents a single Node in the Abstract Syntax Tree (AST).
 	 */
 	class ASTNode : public IVisitable
 	{
 		public:
-		using dependency_t   = std::unique_ptr<ASTNode>;
-		using dependencies_t = std::vector<dependency_t>;
-		using identifier_t   = std::string;
-
-		protected:
-		Type _type{};
+		using Dependency   = std::unique_ptr<ASTNode>;
+		using Dependencies = std::vector<Dependency>;
+		using Reference    = ASTNode*;
+		using References   = std::vector<Reference>;
+		using Identifier   = std::string;
 
 		public:
 		virtual ~ASTNode() = default;
-
-		/**
-		 * @brief Returns underlying type of the node,
-		 * or type_t::empty_t otherwise.
-		 */
-		[[nodiscard]] virtual const Type& type() const noexcept { return _type; }
-
-		/**
-		 * @brief Returns underlying type of the node,
-		 * or type_t::empty_t otherwise.
-		 */
-		[[nodiscard]] virtual Type& type() noexcept { return _type; }
 	};
 
 	/**
-	 * @brief Class that automatically calls accept method on a node.
-	 * @tparam DerivedT Type derived from ast_node_t.
-	 * @important if DerivedT does not derive from ast_node_t,
-	 * its an Undefined Behavior then.
+	 * @brief Class that automatically calls accept method on a given AST node.
+	 * @tparam DerivedT Type to call visitor on.
 	 */
 	template <typename DerivedT>
-	class ASTNodeAcceptor : public ASTNode
+	class VisitorAcceptor : public ASTNode
 	{
 		private:
-		void accept(Visitor& visitor) override { visitor.visit(*static_cast<DerivedT*>(this)); }
-
-		void accept(Visitor& visitor) const override { visitor.visit(*static_cast<const DerivedT*>(this)); }
+		void accept(IVisitor& visitor) override { visitor.visit(static_cast<DerivedT&>(*this)); }
+		void accept(IVisitor& visitor) const override { visitor.visit(static_cast<const DerivedT&>(*this)); }
 	};
 }  // namespace soul

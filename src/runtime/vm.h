@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/diagnostic.h"
-#include "common/types.h"
+#include "core/types.h"
 
 #include <vector>
 #include <type_traits>

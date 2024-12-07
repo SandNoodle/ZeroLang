@@ -2,9 +2,9 @@
 
 namespace soul
 {
-	UnaryNode::UnaryNode(dependency_t expr, ASTNodeOperator op) : _expr(std::move(expr)), _operator(op) {}
+	UnaryNode::UnaryNode(Dependency expr, ASTNodeOperator op) : expr(std::move(expr)), op(op) {}
 
-	UnaryNode::dependency_t UnaryNode::create(dependency_t expr, ASTNodeOperator op)
+	UnaryNode::Dependency UnaryNode::create(Dependency expr, ASTNodeOperator op)
 	{
 		return std::make_unique<UnaryNode>(std::move(expr), op);
 	}

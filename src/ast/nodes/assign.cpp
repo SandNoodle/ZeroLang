@@ -2,9 +2,9 @@
 
 namespace soul
 {
-	AssignNode::AssignNode(dependency_t lhs, dependency_t rhs) : _lhs(std::move(lhs)), _rhs(std::move(rhs)) {}
+	AssignNode::AssignNode(Dependency lhs, Dependency rhs) : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 
-	AssignNode::dependency_t AssignNode::create(dependency_t lhs, dependency_t rhs)
+	AssignNode::Dependency AssignNode::create(Dependency lhs, Dependency rhs)
 	{
 		return std::make_unique<AssignNode>(std::move(lhs), std::move(rhs));
 	}

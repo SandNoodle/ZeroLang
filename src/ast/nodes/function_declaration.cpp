@@ -2,23 +2,23 @@
 
 namespace soul
 {
-	FunctionDeclarationNode::FunctionDeclarationNode(identifier_t&&   identifier,
-	                                                 identifier_t&&   return_type_identifier,
-	                                                 dependencies_t&& parameters,
-	                                                 dependencies_t&& statements)
-		: _identifier(std::move(identifier)),
-		  _return_type_identifier(std::move(return_type_identifier)),
-		  _parameters(std::move(parameters)),
-		  _statements(std::move(statements))
+	FunctionDeclarationNode::FunctionDeclarationNode(Identifier   identifier,
+	                                                 Identifier   return_type_identifier,
+	                                                 Dependencies parameters,
+	                                                 Dependencies statements)
+		: name(std::move(identifier)),
+		  return_type(std::move(return_type_identifier)),
+		  parameters(std::move(parameters)),
+		  statements(std::move(statements))
 	{
 	}
 
-	FunctionDeclarationNode::dependency_t FunctionDeclarationNode::create(identifier_t&&   identifier,
-	                                                                      identifier_t&&   return_type_identifier,
-	                                                                      dependencies_t&& parameters,
-	                                                                      dependencies_t&& statements)
+	FunctionDeclarationNode::Dependency FunctionDeclarationNode::create(Identifier   name,
+	                                                                    Identifier   return_type,
+	                                                                    Dependencies parameters,
+	                                                                    Dependencies statements)
 	{
 		return std::make_unique<FunctionDeclarationNode>(
-			std::move(identifier), std::move(return_type_identifier), std::move(parameters), std::move(statements));
+			std::move(name), std::move(return_type), std::move(parameters), std::move(statements));
 	}
 }  // namespace soul

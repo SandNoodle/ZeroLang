@@ -18,10 +18,10 @@ namespace soul::ut
 	{
 		const std::string_view      script      = "let my_cheeseburger : int = 32";
 		auto                        tokens      = _lexer.tokenize(script);
-		const ASTNode::dependency_t result_tree = _parser.parse(tokens);
+		const ASTNode::Dependency   result_tree = _parser.parse(tokens);
 		ASSERT_TRUE(result_tree);
 
-		ASTNode::dependency_t expected_tree = nullptr;
+		ASTNode::Dependency expected_tree = nullptr;
 		ASSERT_EQ(expected_tree, result_tree);
 	}
 
@@ -29,11 +29,11 @@ namespace soul::ut
 	{
 		const std::string_view      script      = "{}";
 		auto                        tokens      = _lexer.tokenize(script);
-		const ASTNode::dependency_t result_tree = _parser.parse(tokens);
+		const ASTNode::Dependency   result_tree = _parser.parse(tokens);
 		ASSERT_TRUE(result_tree);
 
-		std::vector<ASTNode::dependency_t> statements;
-		ASTNode::dependency_t              expected_tree = nullptr;  // TODO
+		std::vector<ASTNode::Dependency> statements;
+		ASTNode::Dependency              expected_tree = nullptr;  // TODO
 		ASSERT_EQ(expected_tree, result_tree);
 	}
 }  // namespace soul::ut

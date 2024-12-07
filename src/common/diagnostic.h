@@ -1,10 +1,11 @@
 #pragma once
 
-#include "common/types.h"
+#include "core/types.h"
 
 #include <format>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace soul
 {
@@ -17,11 +18,11 @@ namespace soul
 	 */
 	enum class DiagnosticCode : u8
 	{
-		ERROR_LEXER_UNRECOGNIZED_TOKEN,
-		ERROR_LEXER_VALUE_IS_NOT_A_NUMBER,
-		ERROR_LEXER_VALUE_OUT_OF_RANGE,
-		ERROR_LEXER_UNTERMINATED_STRING,
-		ERROR_PARSER_OUT_OF_RANGE,
+		ErrorLexerUnrecognizedToken,
+		ErrorLexerValueIsNotANumber,
+		ErrorLexerValueOutOfRange,
+		ErrorLexerUnterminatedString,
+		ErrorParserOutOfRange,
 	};
 
 	/** * @brief Returns the base, un-formatted diagnostic message. */
@@ -61,4 +62,6 @@ namespace soul
 		std::string_view message = get_base_diagnostic_message(code);
 		this->_message           = std::vformat(message, std::make_format_args(std::forward<Args>(args)...));
 	}
+
+	using Diagnostics = std::vector<Diagnostic>;
 }  // namespace soul

@@ -9,18 +9,18 @@ namespace soul
 	 * @brief Represents a 'Binary' expression in the Abstract Syntax Tree (AST).
 	 * Contains two operands bound by an operator.
 	 */
-	class BinaryNode final : public ASTNodeAcceptor<BinaryNode>
+	class BinaryNode final : public VisitorAcceptor<BinaryNode>
 	{
 		public:
-		using dependency_t = ASTNode::dependency_t;
-
-		private:
-		ASTNodeOperator _operator;
-		dependency_t    _lhs;
-		dependency_t    _rhs;
+		using Dependency = ASTNode::Dependency;
 
 		public:
-		explicit BinaryNode(dependency_t lhs, dependency_t rhs, ASTNodeOperator op);
+		ASTNodeOperator op  = ASTNodeOperator::Unknown;
+		Dependency      lhs = nullptr;
+		Dependency      rhs = nullptr;
+
+		public:
+		explicit BinaryNode(Dependency lhs, Dependency rhs, ASTNodeOperator op);
 		~BinaryNode() override = default;
 
 		/**
@@ -30,6 +30,6 @@ namespace soul
 		 * @param op Operator binding the two sides together.
 		 * @return New 'Binary' expression node.
 		 */
-		static dependency_t create(dependency_t lhs, dependency_t rhs, ASTNodeOperator op);
+		static Dependency create(Dependency lhs, Dependency rhs, ASTNodeOperator op);
 	};
 }  // namespace soul

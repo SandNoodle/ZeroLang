@@ -1,37 +1,41 @@
 #pragma once
 
-#include "common/types.h"
+#include "core/types.h"
 
 #include <string_view>
 
 namespace soul
 {
+	enum class TokenType : u8;
+
 	/** Represents operator binding nodes, ex. binary, unary, ... */
 	enum class ASTNodeOperator : u8
 	{
+		Unknown,  // Yet to be resolved or an error value.
+
 		// Arithmetic
-		OPERATOR_ADD,
-		OPERATOR_SUBTRACT,
-		OPERATOR_MULTIPLY,
-		OPERATOR_DIVIDE,
-		OPERATOR_MODULO,
-		OPERATOR_INCREMENT,
-		OPERATOR_DECREMENT,
+		Add,
+		Subtract,
+		Multiply,
+		Divide,
+		Modulo,
+		Increment,
+		Decrement,
 
 		// Comparison
-		OPERATOR_EQUAL,
-		OPERATOR_NOT_EQUAL,
-		OPERATOR_GREATER,
-		OPERATOR_GREATER_EQUAL,
-		OPERATOR_LESS,
-		OPERATOR_LESS_EQUAL,
+		Equal,
+		NotEqual,
+		Greater,
+		GreaterEqual,
+		Less,
+		LessEqual,
 
 		// Logical
-		OPERATOR_LOGICAL_NOT,
-		OPERATOR_LOGICAL_AND,
-		OPERATOR_LOGICAL_OR,
+		LogicalNot,
+		LogicalAnd,
+		LogicalOr,
 	};
+	ASTNodeOperator to_node_operator(TokenType);
+	std::string_view to_string(ASTNodeOperator);
 
-	/** @brief Stringifies the AST Node's operator. */
-	std::string_view ast_node_operator_to_string(ASTNodeOperator op);
 }  // namespace soul

@@ -10,27 +10,27 @@ namespace soul
 	 * @brief Represents a 'Struct Declaration' statement
 	 * in the Abstract Syntax Tree (AST).
 	 */
-	class StructDeclarationNode final : public ASTNodeAcceptor<StructDeclarationNode>
+	class StructDeclarationNode final : public VisitorAcceptor<StructDeclarationNode>
 	{
 		public:
-		using dependency_t   = ASTNode::dependency_t;
-		using dependencies_t = std::vector<dependency_t>;
-		using identifier_t   = ASTNode::identifier_t;
-
-		private:
-		identifier_t   _identifier;
-		dependencies_t _parameters;
+		using Dependency   = ASTNode::Dependency;
+		using Dependencies = std::vector<Dependency>;
+		using Identifier   = ASTNode::Identifier;
 
 		public:
-		explicit StructDeclarationNode(identifier_t&& identifier, dependencies_t&& parameters);
+		Identifier   name;
+		Dependencies parameters;
+
+		public:
+		explicit StructDeclarationNode(Identifier name, Dependencies parameters);
 		~StructDeclarationNode() override = default;
 
 		/**
 		 * @brief Constructs new Struct Declaration statement node.
-		 * @param identifier Name of the Struct to be identified by.
+		 * @param name Name of the Struct to be identified by.
 		 * @param statements Variable declarations making this struct.
 		 * @return New 'Struct Declaration' statement node.
 		 */
-		static dependency_t create(identifier_t&& identifier, dependencies_t&& statements);
+		static Dependency create(Identifier name, Dependencies statements);
 	};
 }  // namespace soul

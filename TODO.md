@@ -8,7 +8,7 @@
     - [x] Implement
     - [x] Write UTs.
     - [ ] Write Benchmarks.
-- [ ] Visitor traversable AST
+- [ ] IVisitor traversable AST
     - [ ] Implement
     - [ ] Write UTs.
 - [ ] Parser

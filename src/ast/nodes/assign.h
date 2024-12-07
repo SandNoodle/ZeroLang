@@ -8,17 +8,17 @@ namespace soul
 	 * @brief Represents a 'Assign' expression in the Abstract Syntax Tree (AST).
 	 * Contains an expression assigned to another expression.
 	 */
-	class AssignNode : public ASTNodeAcceptor<AssignNode>
+	class AssignNode : public VisitorAcceptor<AssignNode>
 	{
 		public:
-		using dependency_t = ASTNode::dependency_t;
-
-		private:
-		dependency_t _lhs;
-		dependency_t _rhs;
+		using Dependency = ASTNode::Dependency;
 
 		public:
-		explicit AssignNode(dependency_t lhs, dependency_t rhs);
+		Dependency lhs;
+		Dependency rhs;
+
+		public:
+		explicit AssignNode(Dependency lhs, Dependency rhs);
 		~AssignNode() override = default;
 
 		/**
@@ -27,6 +27,6 @@ namespace soul
 		 * @param rhs Expression to assign from.
 		 * @return New 'Assign' expression node.
 		 */
-		static dependency_t create(dependency_t lhs, dependency_t rhs);
+		static Dependency create(Dependency lhs, Dependency rhs);
 	};
 }  // namespace soul

@@ -2,45 +2,43 @@
 
 #include "ast/ast.h"
 
-#include <vector>
-
 namespace soul
 {
 	/**
 	 * @brief Represents a 'Function Declaration' statement
 	 * in the Abstract Syntax Tree (AST).
 	 */
-	class FunctionDeclarationNode final : public ASTNodeAcceptor<FunctionDeclarationNode>
+	class FunctionDeclarationNode final : public VisitorAcceptor<FunctionDeclarationNode>
 	{
 		public:
-		using dependency_t   = ASTNode::dependency_t;
-		using dependencies_t = ASTNode::dependencies_t;
-		using identifier_t   = ASTNode::identifier_t;
-
-		private:
-		identifier_t   _identifier;
-		identifier_t   _return_type_identifier;
-		dependencies_t _parameters;
-		dependencies_t _statements;
+		using Dependency   = ASTNode::Dependency;
+		using Dependencies = ASTNode::Dependencies;
+		using Identifier   = ASTNode::Identifier;
 
 		public:
-		explicit FunctionDeclarationNode(identifier_t&&   identifier,
-		                                 identifier_t&&   return_type_identifier,
-		                                 dependencies_t&& parameters,
-		                                 dependencies_t&& statements);
+		Identifier   name;
+		Identifier   return_type;
+		Dependencies parameters;
+		Dependencies statements;
+
+		public:
+		explicit FunctionDeclarationNode(Identifier   identifier,
+		                                 Identifier   return_type_identifier,
+		                                 Dependencies parameters,
+		                                 Dependencies statements);
 		~FunctionDeclarationNode() override = default;
 
 		/**
 		 * @brief Constructs new Function Declaration statement node.
-		 * @param identifier
-		 * @param returntype_identifier
-		 * @param parameters
-		 * @param statements
+		 * @param name Name of the function.
+		 * @param return_type Type which this function returns.
+		 * @param parameters [Optional] Parameters this function takes.
+		 * @param statements [Optional] Statements this function executes.
 		 * @return New 'Function Declaration' statement node.
 		 */
-		static dependency_t create(identifier_t&&   identifier,
-		                           identifier_t&&   return_type_identifier,
-		                           dependencies_t&& parameters,
-		                           dependencies_t&& statements);
+		static Dependency create(Identifier   name,
+		                         Identifier   return_type,
+		                         Dependencies parameters,
+		                         Dependencies statements);
 	};
 }  // namespace soul

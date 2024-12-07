@@ -16,12 +16,15 @@ namespace soul
 	 */
 	class Parser
 	{
-		private:
-		std::span<Token>                _tokens;
-		size_t                          _current_index = 0;
-		bool                            _had_panic     = false;
-		bool                            _had_error     = false;
-		mutable std::vector<Diagnostic> _diagnostics;
+		public:
+		struct Context
+		{
+			std::span<const Token> tokens        = {};
+			std::size_t      current_index = 0;
+			bool             had_panic     = false;
+			bool             had_error     = false;
+			Diagnostics      diagnostics;
+		};
 
 		public:
 		/**
@@ -29,72 +32,42 @@ namespace soul
 		 * @param tokens tokens to be parsed.
 		 * @return AST if the parsing was a success, nullptr otherwise.
 		 */
-		ASTNode::dependency_t parse(std::span<Token> tokens);
-
-		/**
-		 * @brief Returns all diagnostic messages collected during parsing.
-		 * @detail If not diagnostic messages were collected, the vector is empty.
-		 */
-		[[nodiscard]] const std::vector<Diagnostic>& diagnostics() const noexcept { return _diagnostics; }
+		ASTNode::Dependency parse(std::span<const Token> tokens);
 
 		private:
-		ASTNode::dependency_t parse_statement();
-		ASTNode::dependency_t parse_expression();
+		ASTNode::Dependency parse_statement(Context& context);
+		ASTNode::Dependency parse_expression(Context& context);
 
-		ASTNode::dependency_t   parse_variable_declaration();
-		ASTNode::dependency_t   parse_function_declaration();
-		ASTNode::dependencies_t parse_block_statement();
+		ASTNode::Dependency parse_assign(Context& context);
+		ASTNode::Dependency parse_binary(Context& context);
+		ASTNode::Dependency parse_for_loop(Context& context);
+		ASTNode::Dependency parse_foreach_loop(Context& context);
+		ASTNode::Dependency parse_function_declaration(Context& context);
+		ASTNode::Dependency parse_literal(Context& context);
+		ASTNode::Dependency parse_struct_declaration(Context& context);
+		ASTNode::Dependency parse_variable_declaration(Context& context,
+		                                               bool     require_keyword    = true,
+		                                               bool     require_expression = true,
+		                                               bool     require_semicolon  = true);
+		ASTNode::Dependency parse_while_loop(Context& context);
 
-		/**
-		 * @Brief Returns the type of the current token.
-		 * @return Type of the current token, or EOF otherwise.
-		 */
-		TokenType current_token_type();
-
-		/**
-		 * @brief
-		 */
-		void synchronize();
-
-		/**
-		 * @brief Advances the parser to the next token.
-		 * @detail If there are no more tokens left - its an noop and
-		 * a diagnostic error is emitted.
-		 */
-		void advance();
+		ASTNode::Dependencies parse_block_statement(Context& context);
 
 		/**
-		 * @brief Creates diagnostic message.
-		 * @param code Diagnostic code - determines the message.
-		 * @param args Arguments to format the diagnostic string with.
+		 * @brief Verifies that the current token is of a given type.
+		 * @return If it does match then the token is consumed and returned; false otherwise.
 		 */
-		template <typename... Args>
-		void diagnostic(DiagnosticCode code, Args&&... args) const
-		{
-			_diagnostics.emplace_back(code, std::forward<Args>(args)...);
-		}
+		std::optional<Token> require(Context& context, TokenType type);
+		std::optional<Token> require_any(Context& context, std::span<const TokenType> types);
 
 		/**
-		 * @brief Verifies that the next token has to be of a given type.
-		 * @return If it is, then that token is returned and advance() is called.
-		 * If not, std::nullopt is returned and the _has_error is set.
+		 * @brief Verifies that the current token is of a given type.
+		 * @return If it does match then true is returned and the token is consumed; false otherwise.
 		 */
-		[[nodiscard]] std::optional<Token> require(TokenType type);
+		bool match(Context& context, TokenType type);
+		bool match_any(Context& context, std::span<const TokenType> types);
 
-		/**
-		 * @brief Verifies that the next token is of a given type.
-		 * @detail If the token is matched, then advance() is called.
-		 * @return Returns true if it is, false otherwise.
-		 */
-		[[nodiscard]] bool match(TokenType type);
-
-		/**
-		 * @brief Verifies that the next token is one of a given types.
-		 * @detail If the token is matched, then advance() is called.
-		 * @return Returns true if it is, false otherwise.
-		 */
-		[[nodiscard]] bool match_any(std::span<TokenType> types);
-
-		[[nodiscard]] static bool is_synchronization_token(TokenType token);
+		void synchronize(Context& context);
 	};
+
 }  // namespace soul

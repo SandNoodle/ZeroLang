@@ -2,14 +2,13 @@
 
 namespace soul
 {
-	StructDeclarationNode::StructDeclarationNode(identifier_t&& identifier, dependencies_t&& parameters)
-		: _identifier(std::move(identifier)), _parameters(std::move(parameters))
+	StructDeclarationNode::StructDeclarationNode(Identifier name, Dependencies parameters)
+		: name(std::move(name)), parameters(std::move(parameters))
 	{
 	}
 
-	StructDeclarationNode::dependency_t StructDeclarationNode::create(identifier_t&&   identifier,
-	                                                                  dependencies_t&& parameters)
+	StructDeclarationNode::Dependency StructDeclarationNode::create(Identifier name, Dependencies parameters)
 	{
-		return std::make_unique<StructDeclarationNode>(std::move(identifier), std::move(parameters));
+		return std::make_unique<StructDeclarationNode>(std::move(name), std::move(parameters));
 	}
 }  // namespace soul

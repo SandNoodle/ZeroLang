@@ -15,7 +15,7 @@ namespace soul
 	class Lexer
 	{
 		public:
-		using char_t = char;
+		using Char = char;
 
 		private:
 		std::string_view                _script;
@@ -55,10 +55,15 @@ namespace soul
 			_diagnostics.emplace_back(code, std::forward<Args>(args)...);
 		}
 
-		void   skip_whitespace();
-		char_t peek(size_t count = 0) const;
-		char_t advance();
-
+		void             skip_whitespace();
 		std::string_view current_token() const;
+		Char             peek(size_t count = 0) const;
+		Char             advance();
+		bool             is_eof(Lexer::Char c);
+		bool             is_whitespace(Lexer::Char c);
+		bool             is_alpha(Lexer::Char c);
+		bool             is_digit(Lexer::Char c);
+		bool             is_hex_digit(Lexer::Char c);
+		bool             is_quote(Lexer::Char c);
 	};
 }  // namespace soul

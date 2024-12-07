@@ -1,0 +1,43 @@
+
+# This is a comment.
+
+# This is a variable declaration.
+# It is immutable by default.
+let my_variable : i32 = 540;
+
+# Mutable variables are declared like so:
+let mut my_variable : i32 = 540;
+my_variable = 250; # Can be reasigned.
+
+# Basic types: i32, i64, f32, f64, str, char, void (functions), <struct>, <enum>
+
+# Enums are declared like this:
+enum MyEnum
+{
+    Terran,
+    Zerg,
+    Gay,
+}
+
+# Structs are composite types and are declared like so:
+struct MyStruct
+{
+	health     : i32;
+	health_max : i32;
+	mana       : i32;
+	mana_max   : i32;
+}
+
+# Function definition
+fn my_function() :: void { }
+
+# ... parentheses can be skipped if the function takes no params.
+fn my_function :: void { }
+
+# Calling functions
+fn main :: void
+{
+
+
+
+}
