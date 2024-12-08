@@ -3,15 +3,57 @@
 #include "ast/ast_operator.h"
 #include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
+#include "ast/nodes/for_loop.h"
+#include "ast/nodes/foreach_loop.h"
 #include "ast/nodes/function_declaration.h"
+#include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
-#include "ast/nodes/loop.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
 
+#include <utility>
+
 namespace soul
 {
+	struct Parser::Context
+	{
+		std::span<const Token> tokens        = {};
+		std::size_t            current_index = 0;
+		bool                   had_panic     = false;
+		bool                   had_error     = false;
+	};
+
+	enum class Parser::Precedence : u8
+	{
+		None,
+		Assign,          // =
+		Or,              // ||
+		And,             // &&
+		Equal,           // == !=
+		Compare,         // < > <= =>
+		Additive,        // + -
+		Multiplicative,  // * /
+		Unary,           // ! -
+		Call,
+		Primary,
+	};
+
+	struct Parser::PrecedenceRule
+	{
+		public:
+		typedef ASTNode::Dependency (Parser::*PrefixFn)(Parser::Context&);
+		typedef ASTNode::Dependency (Parser::*InfixFn)(Parser::Context&, ASTNode::Dependency);
+
+		public:
+		Precedence precedence;
+		PrefixFn   prefix;
+		InfixFn    infix;
+	};
+
+	static constexpr auto k_literal_types
+		= { TokenType::LiteralInteger, TokenType::LiteralFloat, TokenType::LiteralString };
+
 	ASTNode::Dependency Parser::parse(std::span<const Token> tokens)
 	{
 		if (tokens.empty()) {
@@ -23,7 +65,6 @@ namespace soul
 			.current_index = 0,
 			.had_panic     = false,
 			.had_error     = false,
-			.diagnostics   = {},
 		};
 
 		ASTNode::Dependencies statements;
@@ -37,6 +78,10 @@ namespace soul
 				synchronize(parsing_context);
 			}
 		}
+
+		// TODO: This should not be a function declaration node.
+		//       At the very least it should be a Module node.
+		return FunctionDeclarationNode::create("", "", {}, std::move(statements));
 	}
 
 	ASTNode::Dependency Parser::parse_statement(Context& context)
@@ -58,14 +103,57 @@ namespace soul
 			default:
 				break;
 		}
-		return nullptr;  // TODO
+
+		return parse_expression_statement(context);
 	}
 
-	ASTNode::Dependency Parser::parse_expression(Context& context) {}
+	ASTNode::Dependency Parser::parse_expression(Context& context)
+	{
+		// NOTE: Starting precedence has to be at least one higher than no precedence.
+		return parse_expression_with_precedence(
+			context, static_cast<Parser::Precedence>(std::to_underlying(Parser::Precedence::None) + 1));
+	}
+
+	ASTNode::Dependency Parser::parse_expression_statement(Context& context)
+	{
+		const auto            next_type      = context.tokens[context.current_index + 1].type();
+		static constexpr auto k_assign_types = {
+			TokenType::Equal, TokenType::PlusEqual, TokenType::MinusEqual, TokenType::StarEqual, TokenType::SlashEqual
+		};
+		if (std::ranges::find(k_assign_types, next_type) != std::end(k_assign_types)) {
+			return parse_assign(context);
+		}
+
+		return parse_expression(context);
+	}
+
+	ASTNode::Dependency Parser::parse_expression_with_precedence(Context& context, Precedence precedence)
+	{
+		// NOTE: Skip the operand token, no matter what it is.
+		auto previous_type = context.tokens[context.current_index++].type();
+
+		auto prefix_rule = get_precedence_rule(previous_type).prefix;
+		if (!prefix_rule) {
+			// Error! Expected expression.
+			return nullptr;
+		}
+		auto prefix_expression = (this->*prefix_rule)(context);
+		while (precedence <= get_precedence_rule(context.tokens[context.current_index].type()).precedence) {
+			previous_type   = context.tokens[context.current_index++].type();
+			auto infix_rule = get_precedence_rule(previous_type).infix;
+			if (!infix_rule) {
+				// Error! Expected expression.
+				return nullptr;
+			}
+			prefix_expression = (this->*infix_rule)(context, std::move(prefix_expression));
+		}
+
+		return prefix_expression;
+	}
 
 	ASTNode::Dependency Parser::parse_assign(Context& context)
 	{
-		// <assign_statement> ::= <expression> = <expression>;
+		// <assign_statement> ::= <expression> '=' <expression> ';'
 
 		// <expression>
 		auto lhs = parse_expression(context);
@@ -74,7 +162,7 @@ namespace soul
 			return nullptr;
 		}
 
-		// =
+		// '='
 		if (const auto result = require(context, TokenType::Equal); !result) {
 			context.had_panic = true;
 			return nullptr;
@@ -87,7 +175,7 @@ namespace soul
 			return nullptr;
 		}
 
-		// ;
+		// ';'
 		if (const auto result = require(context, TokenType::Semicolon); !result) {
 			context.had_panic = true;
 			return nullptr;
@@ -96,15 +184,9 @@ namespace soul
 		return AssignNode::create(std::move(lhs), std::move(rhs));
 	}
 
-	ASTNode::Dependency Parser::parse_binary(Context& context)
+	ASTNode::Dependency Parser::parse_binary(Context& context, ASTNode::Dependency lhs)
 	{
 		// <binary_expression> ::= <expression> <binary_operator> <expression>
-
-		// <expression>
-		auto lhs = parse_expression(context);
-		if (!lhs) {
-			return nullptr;
-		}
 
 		// <binary_operator>
 		static constexpr auto k_binary_operators = {
@@ -132,7 +214,8 @@ namespace soul
 		}
 
 		// <expression>
-		auto rhs = parse_expression(context);
+		auto precedence = get_precedence_rule(binary_operator->type()).precedence;
+		auto rhs        = parse_expression_with_precedence(context, precedence);
 		if (!rhs) {
 			return nullptr;
 		}
@@ -142,14 +225,14 @@ namespace soul
 
 	ASTNode::Dependency Parser::parse_for_loop(Context& context)
 	{
-		// <for_loop> ::= <for> ( [<expression>] ; [<expression>] ; [<expression>] ) <block_statement>
+		// <for_loop> ::= <for> '(' [ <expression> ] ';' [<expression>] ';' [<expression>] ')' <block_statement>
 
 		// <for>
 		if (const auto result = require(context, TokenType::KeywordFor); !result) {
 			return nullptr;
 		}
 
-		// (
+		// '('
 		if (const auto result = require(context, TokenType::ParenLeft); !result) {
 			return nullptr;
 		}
@@ -161,7 +244,7 @@ namespace soul
 		// [Optional] <expression>
 		auto initialization = parse_expression(context);
 
-		// ;
+		// ';'
 		if (const auto result = match(context, TokenType::Semicolon); !result) {
 			return nullptr;
 		}
@@ -169,7 +252,7 @@ namespace soul
 		// [Optional] <expression>
 		auto condition = parse_expression(context);
 
-		// ;
+		// ';'
 		if (const auto result = match(context, TokenType::Semicolon); !result) {
 			return nullptr;
 		}
@@ -177,7 +260,7 @@ namespace soul
 		// [Optional] <expression>
 		auto update = parse_expression(context);
 
-		// )
+		// ')'
 		if (const auto result = require(context, TokenType::ParenRight); !result) {
 			return nullptr;
 		}
@@ -185,19 +268,20 @@ namespace soul
 		// <block_statement>
 		auto statements = parse_block_statement(context);
 
-		return LoopNode::create(std::move(initialization), std::move(condition), std::move(update), std::move(statements));
+		return ForLoopNode::create(
+			std::move(initialization), std::move(condition), std::move(update), std::move(statements));
 	}
 
 	ASTNode::Dependency Parser::parse_foreach_loop(Context& context)
 	{
-		// <foreach_loop> ::=  <foreach> ( <short_variable_declaration> <in> <expression> ) <block_statement>
+		// <foreach_loop> ::= <foreach> '(' <short_variable_declaration> <in> <expression> ')' <block_statement>
 
 		// <foreach>
 		if (const auto result = require(context, TokenType::KeywordForeach); !result) {
 			return nullptr;
 		}
 
-		// (
+		// '('
 		if (const auto result = require(context, TokenType::ParenLeft); !result) {
 			return nullptr;
 		}
@@ -207,20 +291,34 @@ namespace soul
 		}
 
 		// <short_variable_declaration>
+		auto variable = parse_variable_declaration(context, false, false, false);
+		if (!variable) {
+			// Error! Variable declaration is required for 'foreach' loops.
+			return nullptr;
+		}
 
 		// <in>
+		if (const auto result = require(context, TokenType::KeywordIn); !result) {
+			return nullptr;
+		}
 
 		// <expression>
+		auto in_expression = parse_expression(context);
+		if (!in_expression) {
+			// Error! 'In' Expression is required for 'foreach' loops.
+			return nullptr;
+		}
 
 		// <block_statement>
 		auto statements = parse_block_statement(context);
 
-		return LoopNode::create(std::move(), std::move(), std::move(), std::move(statements));
+		return ForeachLoopNode::create(std::move(variable), std::move(in_expression), std::move(statements));
 	}
 
 	ASTNode::Dependency Parser::parse_function_declaration(Context& context)
 	{
-		// <function_declaration> ::= <fn> <name_identifier> [<parameter_list>] :: <type_identifier> <block_statement>
+		// <function_declaration> ::= <fn> <name_identifier> [ <parameter_list> ] '::' <type_identifier>
+		// <block_statement>
 
 		// <fn>
 		if (const auto result = require(context, TokenType::KeywordFn); !result) {
@@ -236,7 +334,7 @@ namespace soul
 		// [Optional] <parameter_list>
 		ASTNode::Dependencies parameters;
 		if (const auto has_parenthesis = match(context, TokenType::ParenLeft); has_parenthesis) {
-			// <parameter_list> ::= ( [<short_variable_declaration> [, ...]] )
+			// <parameter_list> ::= '(' [ <short_variable_declaration> [ ',' ... ] ] ')'
 
 			// If the next token is not a closing parenthesis we assume that the list of parameters is not empty.
 			if (const auto has_parameters = match(context, TokenType::ParenRight); has_parameters) {
@@ -262,7 +360,7 @@ namespace soul
 			}
 		}
 
-		// ::
+		// '::'
 		if (const auto result = require(context, TokenType::DoubleColon); !result) {
 			return nullptr;
 		}
@@ -286,9 +384,6 @@ namespace soul
 	{
 		// <literal> ::= <integer_literal> | <float_literal> | <string_literal>
 
-		static constexpr auto k_literal_types
-			= { TokenType::LiteralInteger, TokenType::LiteralFloat, TokenType::LiteralString };
-
 		auto value_token = require_any(context, k_literal_types);
 		if (!value_token) {
 			return nullptr;
@@ -297,9 +392,46 @@ namespace soul
 		return LiteralNode::create(std::move(value_token->value()));
 	}
 
+	ASTNode::Dependency Parser::parse_if(Context& context)
+	{
+		// <if_statement> ::= <if> '(' <expression> ')' <block_statement> [ <else> <block_statement> ]
+
+		// <if>
+		if (const auto result = require(context, TokenType::KeywordIf); !result) {
+			return nullptr;
+		}
+
+		// '('
+		if (const auto result = require(context, TokenType::ParenLeft); !result) {
+			return nullptr;
+		}
+
+		// <expression>
+		auto condition = parse_expression(context);
+		if (!condition) {
+			return nullptr;
+		}
+
+		// ')'
+		if (const auto result = require(context, TokenType::ParenRight); !result) {
+			return nullptr;
+		}
+
+		// <block statement>
+		auto if_statements = parse_block_statement(context);
+
+		// [ <else> <block_statement> ]
+		ASTNode::Dependencies else_statements;
+		if (const auto result = match(context, TokenType::KeywordElse); result) {
+			else_statements = parse_block_statement(context);
+		}
+
+		return IfNode::create(std::move(condition), std::move(if_statements), std::move(else_statements));
+	}
+
 	ASTNode::Dependency Parser::parse_struct_declaration(Context& context)
 	{
-		// <struct_declaration> ::= <struct> <name_identifier> { <short_variable_declaration> [, ...] }
+		// <struct_declaration> ::= <struct> <name_identifier> '{' <short_variable_declaration> [ ',' ... ] '}'
 
 		// <struct>
 		if (const auto result = require(context, TokenType::KeywordStruct); !result) {
@@ -312,7 +444,7 @@ namespace soul
 			return nullptr;
 		}
 
-		// {
+		// '{'
 		if (const auto result = require(context, TokenType::BraceLeft); !result) {
 			return nullptr;
 		}
@@ -351,14 +483,14 @@ namespace soul
 	                                                       bool     require_expression,
 	                                                       bool     require_semicolon)
 	{
-		// <variable_declaration> ::= <let> [<mut>] <name_identifier> : <type_identifier> = <expression>;
+		// <variable_declaration> ::= <let> [ <mut> ] <name_identifier> ':' <type_identifier> '=' <expression> ';'
 
 		// <let>
 		if (const auto result = require(context, TokenType::KeywordLet); require_keyword && !result) {
 			return nullptr;
 		}
 
-		// [<mut>]
+		// [ <mut> ]
 		const bool is_mutable = require_keyword && match(context, TokenType::KeywordMut);
 
 		// <name_identifier>
@@ -367,7 +499,7 @@ namespace soul
 			return nullptr;
 		}
 
-		// :
+		// ':'
 		if (const auto result = require(context, TokenType::Colon); !result) {
 			return nullptr;
 		}
@@ -380,7 +512,7 @@ namespace soul
 
 		ASTNode::Dependency expression = nullptr;
 		if (require_expression) {
-			// =
+			// '='
 			if (const auto result = require(context, TokenType::Equal); !result) {
 				return nullptr;
 			}
@@ -392,7 +524,7 @@ namespace soul
 			}
 		}
 
-		// ;
+		// ';'
 		if (const auto result = match(context, TokenType::Semicolon); require_semicolon && !result) {
 			return nullptr;
 		}
@@ -403,16 +535,22 @@ namespace soul
 		                                       is_mutable);
 	}
 
+	ASTNode::Dependency Parser::parse_unary(Context& context)
+	{
+		// TODO
+		return nullptr;
+	}
+
 	ASTNode::Dependency Parser::parse_while_loop(Context& context)
 	{
-		// <while_loop_statement> ::=  while ( <expression> ) <block_statement>
+		// <while_loop_statement> ::=  while '(' <expression> ')' <block_statement>
 
 		// <while>
 		if (const auto result = require(context, TokenType::KeywordWhile); !result) {
 			return nullptr;
 		}
 
-		// (
+		// '('
 		if (const auto result = require(context, TokenType::ParenLeft); !result) {
 			return nullptr;
 		}
@@ -428,7 +566,7 @@ namespace soul
 			return nullptr;
 		}
 
-		// )
+		// ')'
 		if (const auto result = require(context, TokenType::ParenRight); !result) {
 			return nullptr;
 		}
@@ -436,10 +574,30 @@ namespace soul
 		// <block_statement>
 		auto statements = parse_block_statement(context);
 
-		return LoopNode::create(nullptr, std::move(condition), nullptr, std::move(statements));
+		return ForLoopNode::create(nullptr, std::move(condition), nullptr, std::move(statements));
 	}
 
-	ASTNode::Dependencies Parser::parse_block_statement(Context& context) {}
+	ASTNode::Dependencies Parser::parse_block_statement(Context& context)
+	{
+		// <block_statement> ::= '{' [ <statements> ] '}'
+
+		if (const auto result = require(context, TokenType::BraceLeft); !result) {
+			// TODO: Should this return empty?
+			return {};
+		}
+
+		ASTNode::Dependencies statements;
+		while (!match(context, TokenType::BraceRight)) {
+			auto statement = parse_statement(context);
+			if (!statement) {
+				// TODO: Should this return empty?
+				return {};
+			}
+			statements.push_back(std::move(statement));
+		}
+
+		return statements;
+	}
 
 	std::optional<Token> Parser::require(Context& context, TokenType type)
 	{
@@ -494,4 +652,25 @@ namespace soul
 		}
 		context.had_panic = false;
 	}
+
+	Parser::PrecedenceRule Parser::get_precedence_rule(TokenType type) const noexcept
+	{
+		if (std::ranges::find(k_literal_types, type) != std::end(k_literal_types)) {
+			return PrecedenceRule{ Parser::Precedence::None, &Parser::parse_literal, nullptr };
+		}
+
+		switch (type) {
+			case TokenType::Minus:
+				return PrecedenceRule{ Parser::Precedence::Additive, &Parser::parse_unary, &Parser::parse_binary };
+			case TokenType::Plus:
+				return PrecedenceRule{ Parser::Precedence::Additive, nullptr, &Parser::parse_binary };
+			case TokenType::Star:
+			case TokenType::Slash:
+				return PrecedenceRule{ Parser::Precedence::Multiplicative, nullptr, &Parser::parse_binary };
+			default:
+				break;
+		}
+
+		return PrecedenceRule{ Precedence::None, nullptr, nullptr };  // No precedence.
+	};
 }  // namespace soul

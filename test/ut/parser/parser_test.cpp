@@ -25,7 +25,7 @@ namespace soul::ut
 		ASSERT_EQ(expected_tree, result_tree);
 	}
 
-	TEST_F(ParserTest, DISABLED_BlockStatement_Empty)
+	TEST_F(ParserTest, BlockStatement_Empty)
 	{
 		const std::string_view      script      = "{}";
 		auto                        tokens      = _lexer.tokenize(script);

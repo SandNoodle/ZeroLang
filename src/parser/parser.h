@@ -5,6 +5,7 @@
 #include "lexer/token.h"
 
 #include <format>
+#include <functional>
 #include <optional>
 #include <span>
 
@@ -17,14 +18,9 @@ namespace soul
 	class Parser
 	{
 		public:
-		struct Context
-		{
-			std::span<const Token> tokens        = {};
-			std::size_t      current_index = 0;
-			bool             had_panic     = false;
-			bool             had_error     = false;
-			Diagnostics      diagnostics;
-		};
+		struct Context;
+		struct PrecedenceRule;
+		enum class Precedence : u8;
 
 		public:
 		/**
@@ -35,16 +31,20 @@ namespace soul
 		ASTNode::Dependency parse(std::span<const Token> tokens);
 
 		private:
-		ASTNode::Dependency parse_statement(Context& context);
 		ASTNode::Dependency parse_expression(Context& context);
+		ASTNode::Dependency parse_expression_statement(Context& context);
+		ASTNode::Dependency parse_expression_with_precedence(Context& context, Precedence precedence);
+		ASTNode::Dependency parse_statement(Context& context);
 
 		ASTNode::Dependency parse_assign(Context& context);
-		ASTNode::Dependency parse_binary(Context& context);
+		ASTNode::Dependency parse_binary(Context& context, ASTNode::Dependency lhs);
 		ASTNode::Dependency parse_for_loop(Context& context);
 		ASTNode::Dependency parse_foreach_loop(Context& context);
 		ASTNode::Dependency parse_function_declaration(Context& context);
+		ASTNode::Dependency parse_if(Context& context);
 		ASTNode::Dependency parse_literal(Context& context);
 		ASTNode::Dependency parse_struct_declaration(Context& context);
+		ASTNode::Dependency parse_unary(Context& context);
 		ASTNode::Dependency parse_variable_declaration(Context& context,
 		                                               bool     require_keyword    = true,
 		                                               bool     require_expression = true,
@@ -68,6 +68,7 @@ namespace soul
 		bool match_any(Context& context, std::span<const TokenType> types);
 
 		void synchronize(Context& context);
-	};
 
+		PrecedenceRule get_precedence_rule(TokenType type) const noexcept;
+	};
 }  // namespace soul
