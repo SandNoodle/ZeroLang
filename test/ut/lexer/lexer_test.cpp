@@ -262,7 +262,7 @@ namespace soul::ut
 	TEST_F(LexerTest, All)
 	{
 		const std::string_view string          = R"(
-			fn main :: void
+			fn main (some_var : int) :: void
 			{
 				let my_variable : str = "my_string";
 				return 0;
@@ -271,6 +271,11 @@ namespace soul::ut
 		const std::vector      expected_tokens = {
             Token(TokenType::KeywordFn),
             Token(TokenType::LiteralIdentifier, "main"),
+            Token(TokenType::ParenLeft),
+            Token(TokenType::LiteralIdentifier, "some_var"),
+            Token(TokenType::Colon),
+            Token(TokenType::LiteralIdentifier, "int"),
+            Token(TokenType::ParenRight),
             Token(TokenType::DoubleColon),
             Token(TokenType::LiteralIdentifier, "void"),
             Token(TokenType::BraceLeft),
