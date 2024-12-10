@@ -23,6 +23,7 @@ namespace soul
 		public:
 		LiteralNode(ValueType value);
 		~LiteralNode() override = default;
+		operator std::string() const noexcept;
 
 		/**
 		 * @brief Constructs new Literal node.

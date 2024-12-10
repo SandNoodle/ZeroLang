@@ -67,7 +67,17 @@ namespace soul
 		bool match(Context& context, TokenType type);
 		bool match_any(Context& context, std::span<const TokenType> types);
 
+		/** @brief Advances the parser forwards and returns the (now) previous token. */
+		const Token& advance(Context& context) const noexcept;
+
+		/**
+		 * @brief Tries to advance the parser up until synchronization token is encountered, removing panic in the
+		 * process.
+		 */
 		void synchronize(Context& context);
+
+		/** Peeks at an N token relative to the current one. Clamped to bounds. */
+		TokenType peek_type(const Context& context, std::ptrdiff_t count = 0) const noexcept;
 
 		PrecedenceRule get_precedence_rule(TokenType type) const noexcept;
 	};

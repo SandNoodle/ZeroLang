@@ -12,20 +12,25 @@ namespace soul
 	{
 		private:
 		std::stringstream _ss;
-		bool _print_types;
+		std::size_t       _indent = 0;
 
 		public:
-		StringifyVisitor(bool print_types = true);
+		StringifyVisitor();
 
 		std::string string() const;
 
-		void visit(const AssignNode& node) override;
-		void visit(const BinaryNode& node) override;
-		void visit(const BlockNode& node) override;
-		void visit(const FunctionDeclarationNode& node) override;
-		void visit(const LiteralNode& node) override;
-		void visit(const StructDeclarationNode& node) override;
-		void visit(const UnaryNode& node) override;
-		void visit(const VariableDeclarationNode& node) override;
+		using DefaultTraverseVisitor::visit;
+		void accept(const ASTNode::Reference node) override;
+		void visit(const AssignNode&) override;
+		void visit(const BinaryNode&) override;
+		void visit(const ForLoopNode&) override;
+		void visit(const ForeachLoopNode&) override;
+		void visit(const FunctionDeclarationNode&) override;
+		void visit(const IfNode&) override;
+		void visit(const LiteralNode&) override;
+		void visit(const ModuleNode&) override;
+		void visit(const StructDeclarationNode&) override;
+		void visit(const UnaryNode&) override;
+		void visit(const VariableDeclarationNode&) override;
 	};
 }  // namespace soul

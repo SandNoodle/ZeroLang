@@ -3,8 +3,8 @@
 #include "common/diagnostic.h"
 #include "core/types.h"
 
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 namespace soul
 {
@@ -32,10 +32,10 @@ namespace soul
 		std::vector<Diagnostic> _diagnostics;
 
 		public:
-		VirtualMachine()                     = default;
+		VirtualMachine()                               = default;
 		VirtualMachine(const VirtualMachine&) noexcept = delete;
 		VirtualMachine(VirtualMachine&&) noexcept      = default;
-		~VirtualMachine()                    = default;
+		~VirtualMachine()                              = default;
 
 		private:
 	};

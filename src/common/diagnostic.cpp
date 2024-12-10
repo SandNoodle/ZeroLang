@@ -8,11 +8,11 @@ namespace soul
 	std::string_view get_base_diagnostic_message(DiagnosticCode code)
 	{
 		static const std::unordered_map<DiagnosticCode, std::string_view> k_messages = {
-			{ DiagnosticCode::ErrorLexerUnrecognizedToken,    "unrecognized token"                       },
-			{ DiagnosticCode::ErrorLexerValueIsNotANumber, "value is not a number"                    },
+			{ DiagnosticCode::ErrorLexerUnrecognizedToken,  "unrecognized token"                       },
+			{ DiagnosticCode::ErrorLexerValueIsNotANumber,  "value is not a number"                    },
 			{ DiagnosticCode::ErrorLexerValueOutOfRange,    "value is out of range"                    },
-			{ DiagnosticCode::ErrorLexerUnterminatedString,   "unterminated string"                      },
-			{ DiagnosticCode::ErrorParserOutOfRange,         "cannot peek the next token: out of range" },
+			{ DiagnosticCode::ErrorLexerUnterminatedString, "unterminated string"                      },
+			{ DiagnosticCode::ErrorParserOutOfRange,        "cannot peek the next token: out of range" },
 		};
 		return k_messages.at(code);
 	}

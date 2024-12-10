@@ -35,7 +35,7 @@ namespace soul
 		LogicalAnd,
 		LogicalOr,
 	};
-	ASTNodeOperator to_node_operator(TokenType);
+	ASTNodeOperator  to_node_operator(TokenType);
 	std::string_view to_string(ASTNodeOperator);
 
 }  // namespace soul

@@ -8,6 +8,7 @@
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
+#include "ast/nodes/module.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
@@ -79,27 +80,25 @@ namespace soul
 			}
 		}
 
-		// TODO: This should not be a function declaration node.
-		//       At the very least it should be a Module node.
-		return FunctionDeclarationNode::create("", "", {}, std::move(statements));
+		return ModuleNode::create("", std::move(statements));
 	}
 
 	ASTNode::Dependency Parser::parse_statement(Context& context)
 	{
-		const auto type = context.tokens[context.current_index].type();
+		const auto type = peek_type(context, 0);
 		switch (type) {
 			case TokenType::KeywordFn:
 				return parse_function_declaration(context);
 			case TokenType::KeywordFor:
-				return nullptr;  // TODO
+				return parse_for_loop(context);
 			case TokenType::KeywordIf:
-				return nullptr;  // TODO
+				return parse_if(context);
 			case TokenType::KeywordLet:
 				return parse_variable_declaration(context);
 			case TokenType::KeywordStruct:
 				return parse_struct_declaration(context);
 			case TokenType::KeywordWhile:
-				return nullptr;  // TODO
+				return parse_while_loop(context);
 			default:
 				break;
 		}
@@ -116,7 +115,7 @@ namespace soul
 
 	ASTNode::Dependency Parser::parse_expression_statement(Context& context)
 	{
-		const auto            next_type      = context.tokens[context.current_index + 1].type();
+		const auto            next_type      = peek_type(context);
 		static constexpr auto k_assign_types = {
 			TokenType::Equal, TokenType::PlusEqual, TokenType::MinusEqual, TokenType::StarEqual, TokenType::SlashEqual
 		};
@@ -129,18 +128,18 @@ namespace soul
 
 	ASTNode::Dependency Parser::parse_expression_with_precedence(Context& context, Precedence precedence)
 	{
-		// NOTE: Skip the operand token, no matter what it is.
-		auto previous_type = context.tokens[context.current_index++].type();
+		auto current_type = peek_type(context);
 
-		auto prefix_rule = get_precedence_rule(previous_type).prefix;
+		auto prefix_rule = get_precedence_rule(current_type).prefix;
 		if (!prefix_rule) {
-			// Error! Expected expression.
+			// Error!
 			return nullptr;
 		}
 		auto prefix_expression = (this->*prefix_rule)(context);
-		while (precedence <= get_precedence_rule(context.tokens[context.current_index].type()).precedence) {
-			previous_type   = context.tokens[context.current_index++].type();
-			auto infix_rule = get_precedence_rule(previous_type).infix;
+
+		while (precedence <= get_precedence_rule(peek_type(context)).precedence) {
+			current_type    = peek_type(context);
+			auto infix_rule = get_precedence_rule(current_type).infix;
 			if (!infix_rule) {
 				// Error! Expected expression.
 				return nullptr;
@@ -601,8 +600,8 @@ namespace soul
 
 	std::optional<Token> Parser::require(Context& context, TokenType type)
 	{
-		if (context.tokens[context.current_index].type() == type) {
-			return context.tokens[context.current_index++];
+		if (peek_type(context, 0) == type) {
+			return advance(context);
 		}
 		return std::nullopt;
 	}
@@ -619,7 +618,7 @@ namespace soul
 
 	bool Parser::match(Context& context, TokenType type)
 	{
-		if (context.tokens[context.current_index].type() == type) {
+		if (peek_type(context, 0) == type) {
 			context.current_index++;
 			return true;
 		}
@@ -634,6 +633,15 @@ namespace soul
 			}
 		}
 		return false;
+	}
+
+	const Token& Parser::advance(Context& context) const noexcept
+	{
+		context.current_index++;
+		if (context.current_index > context.tokens.size()) {
+			return context.tokens.back();
+		}
+		return context.tokens[context.current_index - 1];
 	}
 
 	void Parser::synchronize(Context& context)
@@ -651,6 +659,14 @@ namespace soul
 			context.current_index++;
 		}
 		context.had_panic = false;
+	}
+
+	TokenType Parser::peek_type(const Context& context, std::ptrdiff_t count) const noexcept
+	{
+		if (context.current_index + count < 0 || context.current_index + count >= context.tokens.size()) {
+			return TokenType::EndOfFile;
+		}
+		return context.tokens[context.current_index + count].type();
 	}
 
 	Parser::PrecedenceRule Parser::get_precedence_rule(TokenType type) const noexcept

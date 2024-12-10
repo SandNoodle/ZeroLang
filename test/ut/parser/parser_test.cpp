@@ -1,39 +1,42 @@
 #include <gtest/gtest.h>
 
 #include "ast/ast.h"
+#include "ast/nodes/literal.h"
+#include "ast/nodes/module.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/visitors/stringify.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 
 namespace soul::ut
 {
-	class ParserTest : public ::testing::Test
+	using namespace std::string_view_literals;
+
+	struct Case
+	{
+		std::string case_name;
+		std::string case_path;
+		std::string input;
+		std::string expected;
+	};
+
+	class ParserTest : public ::testing::TestWithParam<Case>
 	{
 		protected:
 		soul::Lexer  _lexer;
 		soul::Parser _parser;
 	};
 
-	TEST_F(ParserTest, VariableDeclaration)
+	TEST_P(ParserTest, Foo)
 	{
-		const std::string_view      script      = "let my_cheeseburger : int = 32";
-		auto                        tokens      = _lexer.tokenize(script);
-		const ASTNode::Dependency   result_tree = _parser.parse(tokens);
-		ASSERT_TRUE(result_tree);
+		const auto& param = GetParam();
 
-		ASTNode::Dependency expected_tree = nullptr;
-		ASSERT_EQ(expected_tree, result_tree);
-	}
+		const auto tokens      = _lexer.tokenize(param.input);
+		const auto result_tree = _parser.parse(tokens);
 
-	TEST_F(ParserTest, BlockStatement_Empty)
-	{
-		const std::string_view      script      = "{}";
-		auto                        tokens      = _lexer.tokenize(script);
-		const ASTNode::Dependency   result_tree = _parser.parse(tokens);
-		ASSERT_TRUE(result_tree);
+		StringifyVisitor stringify;
+		stringify.accept(result_tree.get());
 
-		std::vector<ASTNode::Dependency> statements;
-		ASTNode::Dependency              expected_tree = nullptr;  // TODO
-		ASSERT_EQ(expected_tree, result_tree);
+		ASSERT_EQ(stringify.string(), param.expected);
 	}
 }  // namespace soul::ut

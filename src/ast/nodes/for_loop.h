@@ -22,9 +22,9 @@ namespace soul
 
 		public:
 		explicit ForLoopNode(Dependency   initialization,
-		                  Dependency   condition,
-		                  Dependency   update,
-		                  Dependencies statements) noexcept;
+		                     Dependency   condition,
+		                     Dependency   update,
+		                     Dependencies statements) noexcept;
 		~ForLoopNode() override = default;
 
 		/**
