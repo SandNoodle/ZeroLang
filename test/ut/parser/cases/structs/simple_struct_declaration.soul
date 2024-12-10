@@ -1,0 +1,6 @@
+struct my_struct {
+	first_variable : int,
+	second_variable : string,
+	third_variable : bool,
+	fourth_variable : float,
+}
