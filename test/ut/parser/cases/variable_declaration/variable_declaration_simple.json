@@ -1,1 +1,1 @@
-{}
+{"type":"module_declaration","name":"__unnamed__","statements":[{"type":"variable_declaration","name":"my_cheeseburger","type_identifier":"int","is_mutable":false,"expression":{"value":"69420"}}]}

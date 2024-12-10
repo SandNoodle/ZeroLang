@@ -14,6 +14,8 @@
 
 namespace soul
 {
+	// TODO: Prettify the JSON?
+
 	static constexpr auto k_unnamed = "__unnamed__";
 
 	StringifyVisitor::StringifyVisitor() {}
