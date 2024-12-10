@@ -25,7 +25,7 @@ namespace soul
 	void StringifyVisitor::accept(const ASTNode::Reference node)
 	{
 		if (!node) {
-			_ss << "{\"__nullptr__\"}";
+			_ss << "\"__nullptr__\"";
 			return;
 		}
 		_ss << '{';
@@ -95,7 +95,7 @@ namespace soul
 	{
 		_ss << "\"type\":\"function_declaration\",";
 		_ss << "\"name\":\"" << (!node.name.empty() ? node.name : k_unnamed) << "\",";
-		_ss << "\"return_type\"" << (!node.return_type.empty() ? node.return_type : k_unnamed) << "\",";
+		_ss << "\"return_type\":\"" << (!node.return_type.empty() ? node.return_type : k_unnamed) << "\",";
 		_ss << "\"parameters\":[";
 		for (size_t index = 0; index < node.parameters.size(); ++index) {
 			accept(node.parameters[index].get());
