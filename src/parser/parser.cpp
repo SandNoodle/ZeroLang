@@ -53,7 +53,8 @@ namespace soul
 	};
 
 	static constexpr auto k_literal_types
-		= { TokenType::LiteralInteger, TokenType::LiteralFloat, TokenType::LiteralString };
+		= { TokenType::LiteralInteger,    TokenType::LiteralFloat, TokenType::LiteralString,
+		    TokenType::LiteralIdentifier, TokenType::KeywordTrue,  TokenType::KeywordFalse };
 
 	ASTNode::Dependency Parser::parse(std::span<const Token> tokens)
 	{
@@ -91,6 +92,8 @@ namespace soul
 				return parse_function_declaration(context);
 			case TokenType::KeywordFor:
 				return parse_for_loop(context);
+			case TokenType::KeywordForeach:
+				return parse_foreach_loop(context);
 			case TokenType::KeywordIf:
 				return parse_if(context);
 			case TokenType::KeywordLet:
@@ -308,6 +311,11 @@ namespace soul
 			return nullptr;
 		}
 
+		// ')'
+		if (const auto result = require(context, TokenType::ParenRight); !result) {
+			return nullptr;
+		}
+
 		// <block_statement>
 		auto statements = parse_block_statement(context);
 
@@ -387,7 +395,9 @@ namespace soul
 		if (!value_token) {
 			return nullptr;
 		}
-
+		if (value_token->type() == TokenType::KeywordTrue || value_token->type() == TokenType::KeywordFalse) {
+			return LiteralNode::create(static_cast<i64>(value_token->type() == TokenType::KeywordTrue));
+		}
 		return LiteralNode::create(std::move(value_token->value()));
 	}
 
@@ -543,6 +553,7 @@ namespace soul
 	ASTNode::Dependency Parser::parse_while_loop(Context& context)
 	{
 		// <while_loop_statement> ::=  while '(' <expression> ')' <block_statement>
+		//                          |  while <block_statement>
 
 		// <while>
 		if (const auto result = require(context, TokenType::KeywordWhile); !result) {
@@ -550,24 +561,26 @@ namespace soul
 		}
 
 		// '('
-		if (const auto result = require(context, TokenType::ParenLeft); !result) {
-			return nullptr;
-		}
+		ASTNode::Dependency condition = nullptr;
+		if (const auto has_parentheses = match(context, TokenType::ParenLeft); has_parentheses) {
+			if (const auto result = match(context, TokenType::ParenRight); result) {
+				// Error! Empty parentheses, expression is needed.
+				return nullptr;
+			}
 
-		if (const auto result = match(context, TokenType::ParenRight); result) {
-			// Error! Empty parentheses, expression is needed.
-			return nullptr;
-		}
+			// <expression>
+			condition = parse_expression(context);
+			if (!condition) {
+				return nullptr;
+			}
 
-		// <expression>
-		auto condition = parse_expression(context);
-		if (!condition) {
-			return nullptr;
-		}
-
-		// ')'
-		if (const auto result = require(context, TokenType::ParenRight); !result) {
-			return nullptr;
+			// ')'
+			if (const auto result = require(context, TokenType::ParenRight); !result) {
+				return nullptr;
+			}
+		} else {
+			// While loops without parentheses have implicit `true` condition.
+			condition = LiteralNode::create(static_cast<bool>(true));
 		}
 
 		// <block_statement>

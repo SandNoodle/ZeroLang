@@ -111,7 +111,7 @@ namespace soul
 				_ss << ",";
 			}
 		}
-		_ss << "],";
+		_ss << "]";
 	}
 
 	void StringifyVisitor::visit(const IfNode& node)
