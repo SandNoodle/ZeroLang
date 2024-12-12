@@ -336,7 +336,7 @@ namespace soul
 			// <parameter_list> ::= '(' [ <short_variable_declaration> [ ',' ... ] ] ')'
 
 			// If the next token is not a closing parenthesis we assume that the list of parameters is not empty.
-			if (const auto has_parameters = match(context, TokenType::ParenRight); has_parameters) {
+			if (const auto has_parameters = match(context, TokenType::ParenRight); !has_parameters) {
 				for (;;) {
 					if (const auto result = match(context, TokenType::EndOfFile); result) {
 						// Error! Parentheses were not matched!

@@ -1,0 +1,5 @@
+fn some_function(some_param : int) :: string {
+	let my_variable : int = 540;
+	let second_variable : float = 3.4;
+	let strings : string = "that is a string";
+}

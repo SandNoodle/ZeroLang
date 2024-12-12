@@ -259,10 +259,32 @@ namespace soul::ut
 		ASSERT_EQ(diagnostics[0].code(), DiagnosticCode::ErrorLexerUnterminatedString);
 	}
 
+	TEST_F(LexerTest, Compressed)
+	{
+		const std::string_view string          = "let variable:int=320;";
+		const std::vector      expected_tokens = {
+            Token(TokenType::KeywordLet), Token(TokenType::LiteralIdentifier, "variable"),
+            Token(TokenType::Colon),      Token(TokenType::LiteralIdentifier, "int"),
+            Token(TokenType::Equal),      Token(TokenType::LiteralInteger, static_cast<i64>(320)),
+            Token(TokenType::Semicolon),
+		};
+		const auto result_tokens = _lexer.tokenize(string);
+
+		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
+		for (size_t index = 0; index < expected_tokens.size(); ++index) {
+			const auto& expected_token = expected_tokens[index];
+			const auto& result_token   = result_tokens[index];
+			ASSERT_EQ(expected_token, result_token);
+		}
+
+		ASSERT_TRUE(has_eof_token(result_tokens));
+		ASSERT_TRUE(_lexer.diagnostics().empty());
+	}
+
 	TEST_F(LexerTest, All)
 	{
 		const std::string_view string          = R"(
-			fn main (some_var : int) :: void
+			fn main(some_var : int) :: void
 			{
 				let my_variable : str = "my_string";
 				return 0;

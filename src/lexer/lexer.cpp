@@ -2,7 +2,41 @@
 
 #include <algorithm>
 #include <charconv>
+#include <iostream>
 #include <unordered_map>
+
+#define MATCH_SINGLE_CHARACTER(character, token_type) \
+	case character:                                   \
+	{                                                 \
+		return Token(token_type);                     \
+	}
+
+#define MATCH_TWO_CHARACTERS(first_character, second_character, single_match, both_match) \
+	case first_character:                                                                 \
+	{                                                                                     \
+		if (peek() == second_character) {                                                 \
+			std::ignore = advance();                                                      \
+			return Token(TokenType(both_match));                                          \
+		}                                                                                 \
+		return Token(single_match);                                                       \
+	}
+
+#define MATCH_TWO_CHARACTERS_SPECIAL(                                                            \
+	first_character, second_char_a, second_char_b, single_match, double_match_a, double_match_b) \
+	case first_character:                                                                        \
+	{                                                                                            \
+		switch (peek()) {                                                                        \
+			case second_char_a:                                                                  \
+				std::ignore = advance();                                                         \
+				return Token(double_match_a);                                                    \
+			case second_char_b:                                                                  \
+				std::ignore = advance();                                                         \
+				return Token(double_match_b);                                                    \
+			default:                                                                             \
+				break;                                                                           \
+		}                                                                                        \
+		return Token(single_match);                                                              \
+	}
 
 namespace soul
 {
@@ -19,8 +53,11 @@ namespace soul
 
 		std::vector<Token> result;
 		for (;;) {
+			skip_whitespace();
 			auto result_token = scan_token();
-			if (!result_token.has_value() || result_token->type() == TokenType::EndOfFile) break;
+			if (!result_token) {
+				break;
+			}
 			result.push_back(std::move(*result_token));
 		}
 		result.emplace_back(TokenType::EndOfFile);
@@ -29,69 +66,60 @@ namespace soul
 
 	std::optional<Token> Lexer::scan_token()
 	{
-		skip_whitespace();
-
 		_start_index = _current_offset;
-		Char c       = peek();
 
-		if (is_eof(c)) return Token(TokenType::EndOfFile);
+		auto current_char = peek(0);
 
-		if (is_alpha(c)) return create_identifier_token();
+		if (is_eof(current_char)) {
+			return std::nullopt;
+		}
 
-		if (is_digit(c) || (c == '-' && is_digit(peek(1)))) return create_numeric_token();
+		if (is_alpha(current_char)) {
+			return create_identifier_token();
+		}
 
-		if (is_quote(c)) return create_string_token();
+		if (is_digit(current_char) || current_char == '-' && is_digit(peek(1))) {
+			return create_numeric_token();
+		}
+
+		if (is_quote(current_char)) {
+			return create_string_token();
+		}
 
 		// Special characters
-		static const std::unordered_map<std::string_view, TokenType> k_tokens = {
-			// Single character tokens
-			{ ";",  TokenType::Semicolon       },
-			{ "?",  TokenType::QuestionMark    },
-			{ "%",  TokenType::Percent         },
-			{ "^",  TokenType::Caret           },
-			{ ".",  TokenType::Dot             },
-			{ ",",  TokenType::Comma           },
-			{ "(",  TokenType::ParenLeft       },
-			{ ")",  TokenType::ParenRight      },
-			{ "{",  TokenType::BraceLeft       },
-			{ "}",  TokenType::BraceRight      },
-			{ "[",  TokenType::BracketLeft     },
-			{ "]",  TokenType::BracketRight    },
+		std::ignore = advance();
+		switch (current_char) {
+			// Simple cases, where there are no other characters to consider afterward.
+			MATCH_SINGLE_CHARACTER(';', TokenType::Semicolon)
+			MATCH_SINGLE_CHARACTER('?', TokenType::QuestionMark)
+			MATCH_SINGLE_CHARACTER('%', TokenType::Percent)
+			MATCH_SINGLE_CHARACTER('^', TokenType::Caret)
+			MATCH_SINGLE_CHARACTER('.', TokenType::Dot)
+			MATCH_SINGLE_CHARACTER(',', TokenType::Comma)
+			MATCH_SINGLE_CHARACTER('(', TokenType::ParenLeft)
+			MATCH_SINGLE_CHARACTER(')', TokenType::ParenRight)
+			MATCH_SINGLE_CHARACTER('{', TokenType::BraceLeft)
+			MATCH_SINGLE_CHARACTER('}', TokenType::BraceRight)
+			MATCH_SINGLE_CHARACTER('[', TokenType::BracketLeft)
+			MATCH_SINGLE_CHARACTER(']', TokenType::BracketRight)
 
-			// One or two character tokens
-			{ ":",  TokenType::Colon           },
-			{ "::", TokenType::DoubleColon     },
-			{ "=",  TokenType::Equal           },
-			{ "==", TokenType::DoubleEqual     },
-			{ "!",  TokenType::Bang            },
-			{ "!=", TokenType::BangEqual       },
-			{ ">",  TokenType::Greater         },
-			{ ">=", TokenType::GreaterEqual    },
-			{ "<",  TokenType::Less            },
-			{ "<=", TokenType::LessEqual       },
-			{ "+",  TokenType::Plus            },
-			{ "+=", TokenType::PlusEqual       },
-			{ "++", TokenType::DoublePlus      },
-			{ "-",  TokenType::Minus           },
-			{ "-=", TokenType::MinusEqual      },
-			{ "--", TokenType::DoubleMinus     },
-			{ "*",  TokenType::Star            },
-			{ "*=", TokenType::StarEqual       },
-			{ "/",  TokenType::Slash           },
-			{ "/=", TokenType::SlashEqual      },
-			{ "&",  TokenType::Ampersand       },
-			{ "&&", TokenType::DoubleAmpersand },
-			{ "|",  TokenType::Pipe            },
-			{ "||", TokenType::DoublePipe      },
-		};
+			// Two character tokens.
+			MATCH_TWO_CHARACTERS(':', ':', TokenType::Colon, TokenType::DoubleColon)
+			MATCH_TWO_CHARACTERS('=', '=', TokenType::Equal, TokenType::DoubleEqual)
+			MATCH_TWO_CHARACTERS('!', '=', TokenType::Bang, TokenType::BangEqual)
+			MATCH_TWO_CHARACTERS('>', '=', TokenType::Greater, TokenType::GreaterEqual)
+			MATCH_TWO_CHARACTERS('<', '=', TokenType::Less, TokenType::LessEqual)
+			MATCH_TWO_CHARACTERS('*', '=', TokenType::Star, TokenType::StarEqual)
+			MATCH_TWO_CHARACTERS('/', '=', TokenType::Slash, TokenType::SlashEqual)
+			MATCH_TWO_CHARACTERS('&', '&', TokenType::Ampersand, TokenType::DoubleAmpersand)
+			MATCH_TWO_CHARACTERS('|', '|', TokenType::Pipe, TokenType::DoublePipe)
 
-		c = advance();
-
-		// At maximum special tokens are a combination of two characters.
-		if (!is_eof(c) && !is_whitespace(c)) _current_offset++;
-
-		const auto current_token = this->current_token();
-		if (k_tokens.contains(current_token)) return Token(k_tokens.at(current_token));
+			// Special cases - second character might vary.
+			MATCH_TWO_CHARACTERS_SPECIAL('+', '+', '=', TokenType::Plus, TokenType::DoublePlus, TokenType::PlusEqual)
+			MATCH_TWO_CHARACTERS_SPECIAL('-', '-', '=', TokenType::Minus, TokenType::DoubleMinus, TokenType::MinusEqual)
+			default:
+				break;
+		}
 
 		diagnostic(DiagnosticCode::ErrorLexerUnrecognizedToken);
 		return std::nullopt;
@@ -137,9 +165,8 @@ namespace soul
 	std::optional<Token> Lexer::create_numeric_token()
 	{
 		// Create (potentially) numeric token.
-		char c = peek();
-		if (peek() == '-') c = advance();
-		while (!is_eof(c) && (is_hex_digit(c) || c == '.' || c == 'x')) {
+		auto c = peek();
+		while (!is_eof(c) && is_hex_digit(c) || c == '-' || c == '.' || c == 'x') {
 			c = advance();
 		}
 
@@ -169,18 +196,19 @@ namespace soul
 
 	std::optional<Token> Lexer::create_string_token()
 	{
-		Char c = advance();  // Skip "
-		while (!is_quote(c) && !is_eof(c)) {
-			c = advance();
+		std::ignore       = advance();  // Skip over the quotation.
+		auto current_char = peek();
+		while (!(is_quote(current_char) || is_eof(current_char))) {
+			current_char = advance();
 		}
 
-		if (is_eof(c)) {
+		if (is_eof(current_char)) {
 			diagnostic(DiagnosticCode::ErrorLexerUnterminatedString);
 			return std::nullopt;
 		}
 
-		const auto current_token = _script.substr(_start_index + 1, _current_offset - _start_index - 1);
-		advance();
+		std::ignore              = advance();  // Skip over the quotation.
+		const auto current_token = _script.substr(_start_index + 1, _current_offset - _start_index - 2);  // Exclude '"'
 		return Token(TokenType::LiteralString, std::string(current_token));
 	}
 
@@ -192,20 +220,20 @@ namespace soul
 	void Lexer::skip_whitespace()
 	{
 		for (;;) {
-			Char c = peek();
-			switch (c) {
+			auto current_char = peek();
+			switch (current_char) {
 				case ' ':
 				case '\r':
 				case '\t':
 				case '\n':
-					advance();
+					std::ignore = advance();
 					break;
 				case '#':
-					advance();  // Skip the '#'
-					c = peek();
-					while (!is_eof(c) && (c != '\n' || c != '\r')) {
-						advance();  // Skip the '#'
-						c = peek();
+					std::ignore  = advance();  // Skip the '#'
+					current_char = peek();
+					while (!is_eof(current_char) && (current_char != '\n' || current_char != '\r')) {
+						std::ignore  = advance();  // Skip the '#'
+						current_char = peek();
 					}
 					break;
 				default:

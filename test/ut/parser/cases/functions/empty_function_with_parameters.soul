@@ -1,0 +1,1 @@
+fn empty_function_with_parameters(x : int, y : float, c : string) :: void { }

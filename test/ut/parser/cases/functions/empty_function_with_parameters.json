@@ -1,0 +1,35 @@
+{
+  "type": "module_declaration",
+  "name": "__unnamed__",
+  "statements": [
+    {
+      "type": "function_declaration",
+      "name": "empty_function_with_parameters",
+      "return_type": "void",
+      "parameters": [
+        {
+          "type": "variable_declaration",
+          "name": "x",
+          "type_identifier": "int",
+          "is_mutable": false,
+          "expression": "__nullptr__"
+        },
+        {
+          "type": "variable_declaration",
+          "name": "y",
+          "type_identifier": "float",
+          "is_mutable": false,
+          "expression": "__nullptr__"
+        },
+        {
+          "type": "variable_declaration",
+          "name": "c",
+          "type_identifier": "string",
+          "is_mutable": false,
+          "expression": "__nullptr__"
+        }
+      ],
+      "statements": []
+    }
+  ]
+}
