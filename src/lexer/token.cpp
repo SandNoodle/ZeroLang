@@ -91,4 +91,13 @@ namespace soul
 			_value);
 		return std::string(std::format("[type: {}, value: {}]", to_string(_type), value_string));
 	}
+
+	[[nodiscard]] TokenType Token::type() const { return _type; }
+
+	[[nodiscard]] bool Token::is_type(const TokenType type) const noexcept { return _type == type; }
+
+	[[nodiscard]] bool Token::is_one_of_type(const TokenType t1, const TokenType t2) const noexcept
+	{
+		return _type == t1 || _type == t2;
+	}
 }  // namespace soul

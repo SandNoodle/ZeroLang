@@ -103,8 +103,9 @@ namespace soul::ut
 				std::filesystem::remove(param.expected_output_path);
 				std::ofstream file(param.expected_output_path);
 				file << stringify.string();
+				file.close();
 				GTEST_FAIL() << "Please turn off the `k_regenerate_cases` flag.";
-			} catch (std::exception& e) {
+			} catch (const std::exception& e) {
 				GTEST_FAIL() << "Failed to regenerate cases, because: " << e.what();
 			}
 

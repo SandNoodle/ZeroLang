@@ -17,44 +17,27 @@
 
 namespace soul
 {
-	struct Parser::Context
-	{
-		std::span<const Token> tokens        = {};
-		std::size_t            current_index = 0;
-		bool                   had_panic     = false;
-		bool                   had_error     = false;
-	};
-
-	enum class Parser::Precedence : u8
-	{
-		None,
-		Assign,          // =
-		Or,              // ||
-		And,             // &&
-		Equal,           // == !=
-		Compare,         // < > <= =>
-		Additive,        // + -
-		Multiplicative,  // * /
-		Unary,           // ! -
-		Call,
-		Primary,
-	};
 
 	struct Parser::PrecedenceRule
 	{
 		public:
 		typedef ASTNode::Dependency (Parser::*PrefixFn)(Parser::Context&);
 		typedef ASTNode::Dependency (Parser::*InfixFn)(Parser::Context&, ASTNode::Dependency);
+		typedef ASTNode::Dependency (Parser::*SuffixFn)(Parser::Context&);
 
 		public:
-		Precedence precedence;
-		PrefixFn   prefix;
-		InfixFn    infix;
+		Precedence precedence = Precedence::None;
+		PrefixFn   prefix     = nullptr;
+		InfixFn    infix      = nullptr;
+		SuffixFn   suffix     = nullptr;
 	};
 
 	static constexpr auto k_literal_types
 		= { TokenType::LiteralInteger,    TokenType::LiteralFloat, TokenType::LiteralString,
 		    TokenType::LiteralIdentifier, TokenType::KeywordTrue,  TokenType::KeywordFalse };
+
+	static constexpr auto k_compare_types
+		= { TokenType::Less, TokenType::LessEqual, TokenType::Greater, TokenType::GreaterEqual };
 
 	ASTNode::Dependency Parser::parse(std::span<const Token> tokens)
 	{
@@ -62,22 +45,16 @@ namespace soul
 			return nullptr;
 		}
 
-		auto parsing_context = Context{
-			.tokens        = tokens,
-			.current_index = 0,
-			.had_panic     = false,
-			.had_error     = false,
-		};
-
-		ASTNode::Dependencies statements;
-		while (!match(parsing_context, TokenType::EndOfFile)) {
+		Context               parsing_context(tokens);
+		ASTNode::Dependencies statements{};
+		while (!parsing_context.try_match(TokenType::EndOfFile)) {
 			auto statement = parse_statement(parsing_context);
 			if (statement) {
 				statements.push_back(std::move(statement));
 			}
 
 			if (parsing_context.had_panic) {
-				synchronize(parsing_context);
+				parsing_context.synchronize();
 			}
 		}
 
@@ -86,8 +63,7 @@ namespace soul
 
 	ASTNode::Dependency Parser::parse_statement(Context& context)
 	{
-		const auto type = peek_type(context, 0);
-		switch (type) {
+		switch (context.current_token()->type()) {
 			case TokenType::KeywordFn:
 				return parse_function_declaration(context);
 			case TokenType::KeywordFor:
@@ -118,11 +94,10 @@ namespace soul
 
 	ASTNode::Dependency Parser::parse_expression_statement(Context& context)
 	{
-		const auto            next_type      = peek_type(context);
 		static constexpr auto k_assign_types = {
 			TokenType::Equal, TokenType::PlusEqual, TokenType::MinusEqual, TokenType::StarEqual, TokenType::SlashEqual
 		};
-		if (std::ranges::find(k_assign_types, next_type) != std::end(k_assign_types)) {
+		if (std::ranges::find(k_assign_types, context.current_token()->type()) != std::end(k_assign_types)) {
 			return parse_assign(context);
 		}
 
@@ -131,17 +106,16 @@ namespace soul
 
 	ASTNode::Dependency Parser::parse_expression_with_precedence(Context& context, Precedence precedence)
 	{
-		auto current_type = peek_type(context);
-
-		auto prefix_rule = get_precedence_rule(current_type).prefix;
+		auto prefix_rule = get_precedence_rule(context.current_token()->type()).prefix;
 		if (!prefix_rule) {
 			// Error!
 			return nullptr;
 		}
 		auto prefix_expression = (this->*prefix_rule)(context);
 
-		while (precedence <= get_precedence_rule(peek_type(context)).precedence) {
-			current_type    = peek_type(context);
+		TokenType current_type = TokenType::Unknown;
+		while (precedence <= get_precedence_rule(context.current_token()->type()).precedence) {
+			current_type    = context.current_token()->type();
 			auto infix_rule = get_precedence_rule(current_type).infix;
 			if (!infix_rule) {
 				// Error! Expected expression.
@@ -165,7 +139,7 @@ namespace soul
 		}
 
 		// '='
-		if (const auto result = require(context, TokenType::Equal); !result) {
+		if (const auto result = context.require(TokenType::Equal); !result) {
 			context.had_panic = true;
 			return nullptr;
 		}
@@ -178,7 +152,7 @@ namespace soul
 		}
 
 		// ';'
-		if (const auto result = require(context, TokenType::Semicolon); !result) {
+		if (const auto result = context.require(TokenType::Semicolon); !result) {
 			context.had_panic = true;
 			return nullptr;
 		}
@@ -198,6 +172,7 @@ namespace soul
 			TokenType::Less,
 			TokenType::LessEqual,
 			TokenType::DoubleEqual,
+			TokenType::BangEqual,
 
 			// Arithmetic operators
 			TokenType::Plus,
@@ -210,7 +185,7 @@ namespace soul
 			TokenType::DoubleAmpersand,
 			TokenType::DoublePipe,
 		};
-		auto binary_operator = require_any(context, k_binary_operators);
+		auto binary_operator = context.require_any(k_binary_operators);
 		if (!binary_operator) {
 			return nullptr;
 		}
@@ -227,27 +202,28 @@ namespace soul
 
 	ASTNode::Dependency Parser::parse_for_loop(Context& context)
 	{
-		// <for_loop> ::= <for> '(' [ <expression> ] ';' [<expression>] ';' [<expression>] ')' <block_statement>
+		// <for_loop> ::= <for> '(' [ <short_variable_declaration> ] ';' [<expression>] ';' [<expression>] ')'
+		//                <block_statement>
 
 		// <for>
-		if (const auto result = require(context, TokenType::KeywordFor); !result) {
+		if (const auto result = context.require(TokenType::KeywordFor); !result) {
 			return nullptr;
 		}
 
 		// '('
-		if (const auto result = require(context, TokenType::ParenLeft); !result) {
+		if (const auto result = context.require(TokenType::ParenLeft); !result) {
 			return nullptr;
 		}
-		if (const auto result = match(context, TokenType::ParenRight); result) {
+		if (const auto result = context.try_match(TokenType::ParenRight); result) {
 			// Error! Empty parentheses, expression is needed.
 			return nullptr;
 		}
 
-		// [Optional] <expression>
-		auto initialization = parse_expression(context);
+		// [Optional] <short_variable_declaration>
+		auto initialization = parse_variable_declaration(context, false, true, false);
 
 		// ';'
-		if (const auto result = match(context, TokenType::Semicolon); !result) {
+		if (const auto result = context.try_match(TokenType::Semicolon); !result) {
 			return nullptr;
 		}
 
@@ -255,7 +231,7 @@ namespace soul
 		auto condition = parse_expression(context);
 
 		// ';'
-		if (const auto result = match(context, TokenType::Semicolon); !result) {
+		if (const auto result = context.try_match(TokenType::Semicolon); !result) {
 			return nullptr;
 		}
 
@@ -263,7 +239,7 @@ namespace soul
 		auto update = parse_expression(context);
 
 		// ')'
-		if (const auto result = require(context, TokenType::ParenRight); !result) {
+		if (const auto result = context.require(TokenType::ParenRight); !result) {
 			return nullptr;
 		}
 
@@ -279,15 +255,15 @@ namespace soul
 		// <foreach_loop> ::= <foreach> '(' <short_variable_declaration> <in> <expression> ')' <block_statement>
 
 		// <foreach>
-		if (const auto result = require(context, TokenType::KeywordForeach); !result) {
+		if (const auto result = context.require(TokenType::KeywordForeach); !result) {
 			return nullptr;
 		}
 
 		// '('
-		if (const auto result = require(context, TokenType::ParenLeft); !result) {
+		if (const auto result = context.require(TokenType::ParenLeft); !result) {
 			return nullptr;
 		}
-		if (const auto result = match(context, TokenType::ParenLeft); result) {
+		if (const auto result = context.try_match(TokenType::ParenLeft); result) {
 			// Error! Empty parentheses, expression is needed.
 			return nullptr;
 		}
@@ -300,7 +276,7 @@ namespace soul
 		}
 
 		// <in>
-		if (const auto result = require(context, TokenType::KeywordIn); !result) {
+		if (const auto result = context.require(TokenType::KeywordIn); !result) {
 			return nullptr;
 		}
 
@@ -312,7 +288,7 @@ namespace soul
 		}
 
 		// ')'
-		if (const auto result = require(context, TokenType::ParenRight); !result) {
+		if (const auto result = context.require(TokenType::ParenRight); !result) {
 			return nullptr;
 		}
 
@@ -328,25 +304,25 @@ namespace soul
 		// <block_statement>
 
 		// <fn>
-		if (const auto result = require(context, TokenType::KeywordFn); !result) {
+		if (const auto result = context.require(TokenType::KeywordFn); !result) {
 			return nullptr;
 		}
 
 		// <name_identifier>
-		const auto name_identifier = require(context, TokenType::LiteralIdentifier);
+		const auto name_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!name_identifier) {
 			return nullptr;
 		}
 
 		// [Optional] <parameter_list>
 		ASTNode::Dependencies parameters;
-		if (const auto has_parenthesis = match(context, TokenType::ParenLeft); has_parenthesis) {
+		if (const auto has_parenthesis = context.try_match(TokenType::ParenLeft); has_parenthesis) {
 			// <parameter_list> ::= '(' [ <short_variable_declaration> [ ',' ... ] ] ')'
 
 			// If the next token is not a closing parenthesis we assume that the list of parameters is not empty.
-			if (const auto has_parameters = match(context, TokenType::ParenRight); !has_parameters) {
+			if (const auto has_parameters = context.try_match(TokenType::ParenRight); !has_parameters) {
 				for (;;) {
-					if (const auto result = match(context, TokenType::EndOfFile); result) {
+					if (const auto result = context.try_match(TokenType::EndOfFile); result) {
 						// Error! Parentheses were not matched!
 						return nullptr;
 					}
@@ -359,7 +335,7 @@ namespace soul
 					}
 					parameters.push_back(std::move(parameter));
 					static constexpr auto k_continuation_types = { TokenType::Comma, TokenType::ParenRight };
-					if (const auto result = match_any(context, k_continuation_types); !result) {
+					if (const auto result = context.try_match_any(k_continuation_types); !result) {
 						// Parameter list was exhausted.
 						break;
 					}
@@ -368,12 +344,12 @@ namespace soul
 		}
 
 		// '::'
-		if (const auto result = require(context, TokenType::DoubleColon); !result) {
+		if (const auto result = context.require(TokenType::DoubleColon); !result) {
 			return nullptr;
 		}
 
 		// <type_identifier>
-		const auto type_identifier = require(context, TokenType::LiteralIdentifier);
+		const auto type_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!type_identifier) {
 			return nullptr;
 		}
@@ -391,7 +367,7 @@ namespace soul
 	{
 		// <literal> ::= <integer_literal> | <float_literal> | <string_literal>
 
-		auto value_token = require_any(context, k_literal_types);
+		auto value_token = context.require_any(k_literal_types);
 		if (!value_token) {
 			return nullptr;
 		}
@@ -406,12 +382,12 @@ namespace soul
 		// <if_statement> ::= <if> '(' <expression> ')' <block_statement> [ <else> <block_statement> ]
 
 		// <if>
-		if (const auto result = require(context, TokenType::KeywordIf); !result) {
+		if (const auto result = context.require(TokenType::KeywordIf); !result) {
 			return nullptr;
 		}
 
 		// '('
-		if (const auto result = require(context, TokenType::ParenLeft); !result) {
+		if (const auto result = context.require(TokenType::ParenLeft); !result) {
 			return nullptr;
 		}
 
@@ -422,7 +398,7 @@ namespace soul
 		}
 
 		// ')'
-		if (const auto result = require(context, TokenType::ParenRight); !result) {
+		if (const auto result = context.require(TokenType::ParenRight); !result) {
 			return nullptr;
 		}
 
@@ -431,7 +407,7 @@ namespace soul
 
 		// [ <else> <block_statement> ]
 		ASTNode::Dependencies else_statements;
-		if (const auto result = match(context, TokenType::KeywordElse); result) {
+		if (const auto result = context.try_match(TokenType::KeywordElse); result) {
 			else_statements = parse_block_statement(context);
 		}
 
@@ -443,24 +419,24 @@ namespace soul
 		// <struct_declaration> ::= <struct> <name_identifier> '{' <short_variable_declaration> [ ',' ... ] '}'
 
 		// <struct>
-		if (const auto result = require(context, TokenType::KeywordStruct); !result) {
+		if (const auto result = context.require(TokenType::KeywordStruct); !result) {
 			return nullptr;
 		}
 
 		// <name_identifier>
-		const auto name_identifier = require(context, TokenType::LiteralIdentifier);
+		const auto name_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!name_identifier) {
 			return nullptr;
 		}
 
 		// '{'
-		if (const auto result = require(context, TokenType::BraceLeft); !result) {
+		if (const auto result = context.require(TokenType::BraceLeft); !result) {
 			return nullptr;
 		}
 
 		ASTNode::Dependencies statements;
 		for (;;) {
-			if (const auto result = match(context, TokenType::EndOfFile); result) {
+			if (const auto result = context.try_match(TokenType::EndOfFile); result) {
 				// Error! Parentheses were not matched!
 				return nullptr;
 			}
@@ -473,14 +449,14 @@ namespace soul
 			}
 			statements.push_back(std::move(statement));
 			static constexpr auto k_continuation_types = { TokenType::Comma, TokenType::ParenRight };
-			if (const auto result = match_any(context, k_continuation_types); !result) {
+			if (const auto result = context.try_match_any(k_continuation_types); !result) {
 				// Parameter list was exhausted.
 				break;
 			}
 		}
 
 		// }
-		if (const auto result = require(context, TokenType::BraceRight); !result) {
+		if (const auto result = context.require(TokenType::BraceRight); !result) {
 			return nullptr;
 		}
 
@@ -495,26 +471,26 @@ namespace soul
 		// <variable_declaration> ::= <let> [ <mut> ] <name_identifier> ':' <type_identifier> '=' <expression> ';'
 
 		// <let>
-		if (const auto result = require(context, TokenType::KeywordLet); require_keyword && !result) {
+		if (const auto result = context.require(TokenType::KeywordLet); require_keyword && !result) {
 			return nullptr;
 		}
 
 		// [ <mut> ]
-		const bool is_mutable = require_keyword && match(context, TokenType::KeywordMut);
+		const bool is_mutable = require_keyword && context.try_match(TokenType::KeywordMut);
 
 		// <name_identifier>
-		const auto name_identifier = require(context, TokenType::LiteralIdentifier);
+		const auto name_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!name_identifier) {
 			return nullptr;
 		}
 
 		// ':'
-		if (const auto result = require(context, TokenType::Colon); !result) {
+		if (const auto result = context.require(TokenType::Colon); !result) {
 			return nullptr;
 		}
 
 		// <type_identifier>
-		const auto type_identifier = require(context, TokenType::LiteralIdentifier);
+		const auto type_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!type_identifier) {
 			return nullptr;
 		}
@@ -522,7 +498,7 @@ namespace soul
 		ASTNode::Dependency expression = nullptr;
 		if (require_expression) {
 			// '='
-			if (const auto result = require(context, TokenType::Equal); !result) {
+			if (const auto result = context.require(TokenType::Equal); !result) {
 				return nullptr;
 			}
 
@@ -534,8 +510,10 @@ namespace soul
 		}
 
 		// ';'
-		if (const auto result = match(context, TokenType::Semicolon); require_semicolon && !result) {
-			return nullptr;
+		if (require_semicolon) {
+			if (const auto result = context.try_match(TokenType::Semicolon); !result) {
+				return nullptr;
+			}
 		}
 
 		return VariableDeclarationNode::create(name_identifier->get<std::string>(),
@@ -543,6 +521,8 @@ namespace soul
 		                                       std::move(expression),
 		                                       is_mutable);
 	}
+
+	ASTNode::Dependency Parser::parse_suffix(Context& context) { return nullptr; }
 
 	ASTNode::Dependency Parser::parse_unary(Context& context)
 	{
@@ -556,14 +536,14 @@ namespace soul
 		//                          |  while <block_statement>
 
 		// <while>
-		if (const auto result = require(context, TokenType::KeywordWhile); !result) {
+		if (const auto result = context.require(TokenType::KeywordWhile); !result) {
 			return nullptr;
 		}
 
 		// '('
 		ASTNode::Dependency condition = nullptr;
-		if (const auto has_parentheses = match(context, TokenType::ParenLeft); has_parentheses) {
-			if (const auto result = match(context, TokenType::ParenRight); result) {
+		if (const auto has_parentheses = context.try_match(TokenType::ParenLeft); has_parentheses) {
+			if (const auto result = context.try_match(TokenType::ParenRight); result) {
 				// Error! Empty parentheses, expression is needed.
 				return nullptr;
 			}
@@ -575,7 +555,7 @@ namespace soul
 			}
 
 			// ')'
-			if (const auto result = require(context, TokenType::ParenRight); !result) {
+			if (const auto result = context.require(TokenType::ParenRight); !result) {
 				return nullptr;
 			}
 		} else {
@@ -593,13 +573,13 @@ namespace soul
 	{
 		// <block_statement> ::= '{' [ <statements> ] '}'
 
-		if (const auto result = require(context, TokenType::BraceLeft); !result) {
+		if (const auto result = context.require(TokenType::BraceLeft); !result) {
 			// TODO: Should this return empty?
 			return {};
 		}
 
 		ASTNode::Dependencies statements;
-		while (!match(context, TokenType::BraceRight)) {
+		while (!context.try_match(TokenType::BraceRight)) {
 			auto statement = parse_statement(context);
 			if (!statement) {
 				// TODO: Should this return empty?
@@ -611,53 +591,83 @@ namespace soul
 		return statements;
 	}
 
-	std::optional<Token> Parser::require(Context& context, TokenType type)
+	Parser::PrecedenceRule Parser::get_precedence_rule(TokenType type) const noexcept
 	{
-		if (peek_type(context, 0) == type) {
-			return advance(context);
+		if (std::ranges::find(k_literal_types, type) != std::end(k_literal_types)) {
+			return { Parser::Precedence::None, &Parser::parse_literal, nullptr };
+		}
+
+		if (std::ranges::find(k_compare_types, type) != std::end(k_compare_types)) {
+			return { Parser::Precedence::Compare, nullptr, &Parser::parse_binary, nullptr };
+		}
+
+		switch (type) {
+			case TokenType::Minus:
+				return { Parser::Precedence::Additive, &Parser::parse_unary, &Parser::parse_binary, nullptr };
+			case TokenType::Plus:
+				return { Parser::Precedence::Additive, nullptr, &Parser::parse_binary, nullptr };
+			case TokenType::DoublePlus:
+				return { Parser::Precedence::Call, &Parser::parse_unary, nullptr, &Parser::parse_suffix };
+			case TokenType::Star:
+			case TokenType::Slash:
+				return { Parser::Precedence::Multiplicative, nullptr, &Parser::parse_binary, nullptr };
+			default:
+				break;
+		}
+
+		return PrecedenceRule{ Precedence::None, nullptr, nullptr };  // No precedence.
+	}
+
+	Parser::Context::Context(std::span<const Token> tokens) : _tokens(tokens), _current_index(0) {}
+
+	std::optional<Token> Parser::Context::require(TokenType type)
+	{
+		if (current_token()->is_type(type)) {
+			return advance();
 		}
 		return std::nullopt;
 	}
 
-	std::optional<Token> Parser::require_any(Context& context, std::span<const TokenType> types)
+	std::optional<Token> Parser::Context::require_any(std::span<const TokenType> types)
 	{
-		for (const auto& type : types) {
-			if (const auto result = require(context, type); result) {
+		for (const auto type : types) {
+			if (const auto result = require(type); result) {
 				return result;
 			}
 		}
 		return std::nullopt;
 	}
 
-	bool Parser::match(Context& context, TokenType type)
+	bool Parser::Context::try_match(TokenType type)
 	{
-		if (peek_type(context, 0) == type) {
-			context.current_index++;
+		if (current_token()->is_type(type)) {
+			_current_index++;
 			return true;
 		}
+
 		return false;
 	}
 
-	bool Parser::match_any(Context& context, std::span<const TokenType> types)
+	bool Parser::Context::try_match_any(std::span<const TokenType> types)
 	{
-		for (const auto& type : types) {
-			if (const auto result = match(context, type); result) {
+		for (const auto type : types) {
+			if (const auto result = try_match(type); result) {
 				return result;
 			}
 		}
 		return false;
 	}
 
-	const Token& Parser::advance(Context& context) const noexcept
+	const Token& Parser::Context::advance() noexcept
 	{
-		context.current_index++;
-		if (context.current_index > context.tokens.size()) {
-			return context.tokens.back();
+		_current_index++;
+		if (_current_index > _tokens.size()) {
+			return _tokens.back();
 		}
-		return context.tokens[context.current_index - 1];
+		return _tokens[_current_index - 1];
 	}
 
-	void Parser::synchronize(Context& context)
+	void Parser::Context::synchronize()
 	{
 		static constexpr auto k_synchronization_tokens = {
 			TokenType::KeywordFn,     TokenType::KeywordLet,   TokenType::KeywordIf,
@@ -665,41 +675,18 @@ namespace soul
 			TokenType::KeywordStruct, TokenType::BraceLeft /* Scope */
 		};
 
-		while (!match(context, TokenType::EndOfFile)) {
-			if (match_any(context, k_synchronization_tokens)) {
+		while (!try_match(TokenType::EndOfFile)) {
+			if (try_match_any(k_synchronization_tokens)) {
 				break;  // Synchronized.
 			}
-			context.current_index++;
+			_current_index++;
 		}
-		context.had_panic = false;
+		had_panic = false;
 	}
 
-	TokenType Parser::peek_type(const Context& context, std::ptrdiff_t count) const noexcept
-	{
-		if (context.current_index + count < 0 || context.current_index + count >= context.tokens.size()) {
-			return TokenType::EndOfFile;
-		}
-		return context.tokens[context.current_index + count].type();
-	}
+	const Token* Parser::Context::previous_token() const noexcept { return &_tokens[_current_index - 1]; }
 
-	Parser::PrecedenceRule Parser::get_precedence_rule(TokenType type) const noexcept
-	{
-		if (std::ranges::find(k_literal_types, type) != std::end(k_literal_types)) {
-			return PrecedenceRule{ Parser::Precedence::None, &Parser::parse_literal, nullptr };
-		}
+	const Token* Parser::Context::current_token() const noexcept { return &_tokens[_current_index]; }
 
-		switch (type) {
-			case TokenType::Minus:
-				return PrecedenceRule{ Parser::Precedence::Additive, &Parser::parse_unary, &Parser::parse_binary };
-			case TokenType::Plus:
-				return PrecedenceRule{ Parser::Precedence::Additive, nullptr, &Parser::parse_binary };
-			case TokenType::Star:
-			case TokenType::Slash:
-				return PrecedenceRule{ Parser::Precedence::Multiplicative, nullptr, &Parser::parse_binary };
-			default:
-				break;
-		}
-
-		return PrecedenceRule{ Precedence::None, nullptr, nullptr };  // No precedence.
-	};
+	const Token* Parser::Context::next_token() const noexcept { return &_tokens[_current_index + 1]; }
 }  // namespace soul

@@ -101,8 +101,14 @@ namespace soul
 		auto     operator<=>(const Token&) const noexcept = default;
 		explicit operator std::string() const;
 
-		/** @brief Returns the token's type. */
-		[[nodiscard]] constexpr TokenType type() const { return _type; }
+		[[nodiscard]] TokenType type() const;
+		[[nodiscard]] bool      is_type(const TokenType type) const noexcept;
+		[[nodiscard]] bool      is_one_of_type(const TokenType t1, const TokenType t2) const noexcept;
+		template <typename... Types>
+		[[nodiscard]] bool is_one_of_type(const TokenType t1, Types... types) const noexcept
+		{
+			return _type == t1 || isOneOfTypes(std::forward<Types>(types)...);
+		}
 
 		/**
 		 * @brief Verifies if the token is of a specific value type.
