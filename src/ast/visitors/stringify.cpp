@@ -2,6 +2,7 @@
 
 #include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
+#include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
 #include "ast/nodes/function_declaration.h"
@@ -54,6 +55,15 @@ namespace soul::ast::visitors
 		_ss << "\"operator\":\"" << to_string(node.op) << "\",";
 		_ss << "\"rhs\":";
 		accept(node.rhs.get());
+	}
+
+	void StringifyVisitor::visit(const CastNode& node)
+	{
+		_ss << "\"type\":\"cast\",";
+		_ss << "\"type_identifier\":\"" << (!node.type_identifier.empty() ? node.type_identifier : k_unnamed) << "\",";
+		_ss << ',';
+		_ss << "\"expression\":";
+		accept(node.expression.get());
 	}
 
 	void StringifyVisitor::visit(const ForLoopNode& node)

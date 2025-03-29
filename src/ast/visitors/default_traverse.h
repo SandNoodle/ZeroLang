@@ -20,6 +20,7 @@ namespace soul::ast::visitors
 
 		virtual void visit(nodes::AssignNode&);
 		virtual void visit(nodes::BinaryNode&);
+		virtual void visit(nodes::CastNode&);
 		virtual void visit(nodes::ForLoopNode&);
 		virtual void visit(nodes::ForeachLoopNode&);
 		virtual void visit(nodes::FunctionDeclarationNode&);
@@ -32,6 +33,7 @@ namespace soul::ast::visitors
 
 		virtual void visit(const nodes::AssignNode&);
 		virtual void visit(const nodes::BinaryNode&);
+		virtual void visit(const nodes::CastNode&);
 		virtual void visit(const nodes::ForLoopNode&);
 		virtual void visit(const nodes::ForeachLoopNode&);
 		virtual void visit(const nodes::FunctionDeclarationNode&);

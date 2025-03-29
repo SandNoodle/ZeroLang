@@ -8,6 +8,7 @@ namespace soul::ast::visitors
 
 	void IVisitor::visit(AssignNode& node) { visit(std::as_const(node)); }
 	void IVisitor::visit(BinaryNode& node) { visit(std::as_const(node)); }
+	void IVisitor::visit(CastNode& node) { visit(std::as_const(node)); }
 	void IVisitor::visit(ForLoopNode& node) { visit(std::as_const(node)); }
 	void IVisitor::visit(ForeachLoopNode& node) { visit(std::as_const(node)); }
 	void IVisitor::visit(FunctionDeclarationNode& node) { visit(std::as_const(node)); }
@@ -20,6 +21,7 @@ namespace soul::ast::visitors
 
 	void IVisitor::visit(const AssignNode& node) { /* Does nothing. */ }
 	void IVisitor::visit(const BinaryNode& node) { /* Does nothing. */ }
+	void IVisitor::visit(const CastNode& node) { /* Does nothing. */ }
 	void IVisitor::visit(const ForLoopNode&) { /* Does nothing. */ }
 	void IVisitor::visit(const ForeachLoopNode&) { /* Does nothing. */ }
 	void IVisitor::visit(const FunctionDeclarationNode&) { /* Does nothing. */ }

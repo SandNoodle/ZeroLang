@@ -54,14 +54,14 @@ namespace soul::lexer::ut
 	TEST_F(LexerTest, Literals_Keywords)
 	{
 		const std::string_view string
-			= "native let mut in if else for foreach while continue break return fn struct true false";
+			= "native let mut in if else for foreach while cast continue break return fn struct true false";
 		const std::vector expected_tokens = {
-			Token(TokenType::KeywordNative),   Token(TokenType::KeywordLet),     Token(TokenType::KeywordMut),
-			Token(TokenType::KeywordIn),       Token(TokenType::KeywordIf),      Token(TokenType::KeywordElse),
-			Token(TokenType::KeywordFor),      Token(TokenType::KeywordForeach), Token(TokenType::KeywordWhile),
-			Token(TokenType::KeywordContinue), Token(TokenType::KeywordBreak),   Token(TokenType::KeywordReturn),
-			Token(TokenType::KeywordFn),       Token(TokenType::KeywordStruct),  Token(TokenType::KeywordTrue),
-			Token(TokenType::KeywordFalse),
+			Token(TokenType::KeywordNative), Token(TokenType::KeywordLet),      Token(TokenType::KeywordMut),
+			Token(TokenType::KeywordIn),     Token(TokenType::KeywordIf),       Token(TokenType::KeywordElse),
+			Token(TokenType::KeywordFor),    Token(TokenType::KeywordForeach),  Token(TokenType::KeywordWhile),
+			Token(TokenType::KeywordCast),   Token(TokenType::KeywordContinue), Token(TokenType::KeywordBreak),
+			Token(TokenType::KeywordReturn), Token(TokenType::KeywordFn),       Token(TokenType::KeywordStruct),
+			Token(TokenType::KeywordTrue),   Token(TokenType::KeywordFalse),
 		};
 		const auto result_tokens = _lexer.tokenize(string);
 

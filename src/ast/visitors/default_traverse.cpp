@@ -2,6 +2,7 @@
 
 #include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
+#include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
 #include "ast/nodes/function_declaration.h"
@@ -28,6 +29,7 @@ namespace soul::ast::visitors
 
 	void DefaultTraverseVisitor::visit(AssignNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(BinaryNode& node) { visit(std::as_const(node)); }
+	void DefaultTraverseVisitor::visit(CastNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(ForLoopNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(ForeachLoopNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(FunctionDeclarationNode& node) { visit(std::as_const(node)); }
@@ -49,6 +51,8 @@ namespace soul::ast::visitors
 		accept(node.lhs.get());
 		accept(node.rhs.get());
 	}
+
+	void DefaultTraverseVisitor::visit(const CastNode& node) { accept(node.expression.get()); }
 
 	void DefaultTraverseVisitor::visit(const ForLoopNode& node)
 	{

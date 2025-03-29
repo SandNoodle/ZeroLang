@@ -59,6 +59,7 @@ namespace soul
 			{ TokenType::KeywordFor,        "token_for"                },
 			{ TokenType::KeywordForeach,    "token_foreach"            },
 			{ TokenType::KeywordWhile,      "token_while"              },
+			{ TokenType::KeywordCast,       "token_cast"               },
 			{ TokenType::KeywordContinue,   "token_continue"           },
 			{ TokenType::KeywordBreak,      "token_break"              },
 			{ TokenType::KeywordReturn,     "token_return"             },

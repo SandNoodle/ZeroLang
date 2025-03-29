@@ -4,6 +4,7 @@ namespace soul::ast::nodes
 {
 	class AssignNode;
 	class BinaryNode;
+	class CastNode;
 	class ForLoopNode;
 	class ForeachLoopNode;
 	class FunctionDeclarationNode;

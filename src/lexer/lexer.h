@@ -18,10 +18,10 @@ namespace soul::lexer
 		using Char = char;
 
 		private:
-		std::string_view                _script;
-		size_t                          _start_index    = 0;
-		size_t                          _current_offset = 0;
-		mutable std::vector<Diagnostic> _diagnostics;
+		std::string_view    _script;
+		size_t              _start_index    = 0;
+		size_t              _current_offset = 0;
+		mutable Diagnostics _diagnostics;
 
 		public:
 		/**
@@ -36,7 +36,7 @@ namespace soul::lexer
 		 * @brief Returns all diagnostic messages collected during lexing.
 		 * @detail If not diagnostic messages were collected, the vector is empty.
 		 */
-		[[nodiscard]] const std::vector<Diagnostic>& diagnostics() const noexcept { return _diagnostics; }
+		[[nodiscard]] const Diagnostics& diagnostics() const noexcept { return _diagnostics; }
 
 		private:
 		std::optional<Token> scan_token();

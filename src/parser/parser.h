@@ -37,6 +37,7 @@ namespace soul::parser
 		ast::ASTNode::Dependency parse_statement(Context& context);
 
 		ast::ASTNode::Dependency parse_assign(Context& context);
+		ast::ASTNode::Dependency parse_cast(Context& context);
 		ast::ASTNode::Dependency parse_binary(Context& context, ast::ASTNode::Dependency lhs);
 		ast::ASTNode::Dependency parse_for_loop(Context& context);
 		ast::ASTNode::Dependency parse_foreach_loop(Context& context);

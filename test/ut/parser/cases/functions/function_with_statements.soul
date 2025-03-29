@@ -1,5 +1,5 @@
-fn some_function(some_param : int) :: string {
-	let my_variable : int = 540;
-	let second_variable : float = 3.4;
-	let strings : string = "that is a string";
+fn some_function(some_param : i32) :: str {
+	let my_variable : i32 = 540;
+	let second_variable : f32 = 3.4;
+	let strings : str = "that is a string";
 }

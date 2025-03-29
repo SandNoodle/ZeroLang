@@ -29,7 +29,7 @@ namespace soul
 	{
 		public:
 		private:
-		std::vector<Diagnostic> _diagnostics;
+		Diagnostics _diagnostics;
 
 		public:
 		VirtualMachine()                               = default;

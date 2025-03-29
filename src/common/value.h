@@ -39,11 +39,11 @@ namespace soul
 		Value(Value&&) noexcept      = default;
 		Value(Variant value);
 
-		Value&               operator=(const Value&) noexcept        = default;
-		Value&               operator=(Value&&) noexcept             = default;
-		bool                 operator==(const Value&) const noexcept = default;
+		Value&                operator=(const Value&) noexcept        = default;
+		Value&                operator=(Value&&) noexcept             = default;
+		bool                  operator==(const Value&) const noexcept = default;
 		std::partial_ordering operator<=>(const Value& other) const noexcept;
-		explicit             operator std::string() const noexcept;
+		explicit              operator std::string() const noexcept;
 
 		/**
 		 * @brief
@@ -59,6 +59,12 @@ namespace soul
 		 */
 		template <ValueKind T>
 		[[nodiscard]] constexpr const T& get() const noexcept
+		{
+			return std::get<T>(value);
+		}
+
+		template <ValueKind T>
+		[[nodiscard]] constexpr T& get() noexcept
 		{
 			return std::get<T>(value);
 		}

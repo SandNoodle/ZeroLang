@@ -44,6 +44,7 @@ namespace soul
 
 		// Keywords
 		KeywordBreak,
+		KeywordCast,
 		KeywordContinue,
 		KeywordElse,
 		KeywordFalse,

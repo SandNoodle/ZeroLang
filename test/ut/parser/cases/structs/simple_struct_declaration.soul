@@ -1,6 +1,6 @@
 struct my_struct {
-	first_variable : int,
-	second_variable : string,
+	first_variable : i32,
+	second_variable : str,
 	third_variable : bool,
-	fourth_variable : float,
+	fourth_variable : f32,
 }

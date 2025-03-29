@@ -1,1 +1,1 @@
-foreach (v:int in variables) {}
+foreach (v:i32 in variables) {}

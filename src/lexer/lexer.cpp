@@ -127,32 +127,43 @@ namespace soul::lexer
 
 	Token Lexer::create_identifier_token()
 	{
-		while (is_alpha(peek())) advance();
+		while (is_alpha(peek()) || is_digit(peek())) advance();
 
 		// Keywords
 		static const std::unordered_map<std::string_view, TokenType> k_keywords = {
 			// Keywords
-			{ "break",    TokenType::KeywordBreak    },
-            { "continue", TokenType::KeywordContinue },
-			{ "else",     TokenType::KeywordElse     },
-            { "false",    TokenType::KeywordFalse    },
-			{ "fn",       TokenType::KeywordFn       },
-            { "for",      TokenType::KeywordFor      },
-			{ "foreach",  TokenType::KeywordForeach  },
-            { "in",       TokenType::KeywordIn       },
-			{ "if",       TokenType::KeywordIf       },
-            { "let",      TokenType::KeywordLet      },
-			{ "mut",      TokenType::KeywordMut      },
-            { "native",   TokenType::KeywordNative   },
-			{ "return",   TokenType::KeywordReturn   },
-            { "struct",   TokenType::KeywordStruct   },
-			{ "true",     TokenType::KeywordTrue     },
-            { "while",    TokenType::KeywordWhile    },
+			{ "break",    TokenType::KeywordBreak      },
+			{ "cast",     TokenType::KeywordCast       },
+			{ "continue", TokenType::KeywordContinue   },
+			{ "else",     TokenType::KeywordElse       },
+			{ "false",    TokenType::KeywordFalse      },
+			{ "fn",       TokenType::KeywordFn         },
+			{ "for",      TokenType::KeywordFor        },
+			{ "foreach",  TokenType::KeywordForeach    },
+			{ "in",       TokenType::KeywordIn         },
+			{ "if",       TokenType::KeywordIf         },
+			{ "let",      TokenType::KeywordLet        },
+			{ "mut",      TokenType::KeywordMut        },
+			{ "native",   TokenType::KeywordNative     },
+			{ "return",   TokenType::KeywordReturn     },
+			{ "struct",   TokenType::KeywordStruct     },
+			{ "true",     TokenType::KeywordTrue       },
+			{ "while",    TokenType::KeywordWhile      },
+
+			// (Explicit) Primitive types
+			{ "i32",      TokenType::LiteralIdentifier },
+			{ "i64",      TokenType::LiteralIdentifier },
+			{ "f32",      TokenType::LiteralIdentifier },
+			{ "f64",      TokenType::LiteralIdentifier },
+			{ "str",      TokenType::LiteralIdentifier },
+			{ "chr",      TokenType::LiteralIdentifier },
+			{ "bool",     TokenType::LiteralIdentifier },
 		};
 
 		auto current_token = this->current_token();
 		if (k_keywords.contains(current_token)) {
-			return Token(k_keywords.at(current_token));
+			const auto type = k_keywords.at(current_token);
+			return Token(type, type == TokenType::LiteralIdentifier ? Value{ std::string(current_token) } : Value{});
 		}
 
 		// Identifier

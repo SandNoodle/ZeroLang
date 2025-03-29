@@ -18,13 +18,14 @@ namespace soul::ast::types
 		enum class Kind : u8
 		{
 			Unknown,
-			Void,
-			Int32,
-			Int64,
+			Boolean,
+			Char,
 			Float32,
 			Float64,
+			Int32,
+			Int64,
 			String,
-			Char,
+			Void,
 		};
 
 		public:
@@ -35,12 +36,5 @@ namespace soul::ast::types
 
 		bool               operator==(const PrimitiveType&) const noexcept  = default;
 		std::weak_ordering operator<=>(const PrimitiveType&) const noexcept = default;
-
-		/**
-		 * @brief TODO
-		 * @param expected_type
-		 * @return Returns true if it is, false otherwise.
-		 */
-		[[nodiscard]] constexpr bool is(Kind expected_type) const noexcept { return type == expected_type; }
 	};
 }  // namespace soul::ast::types

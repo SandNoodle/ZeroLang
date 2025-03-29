@@ -3,6 +3,7 @@
 #include "ast/ast_operator.h"
 #include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
+#include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
 #include "ast/nodes/function_declaration.h"
@@ -177,6 +178,56 @@ namespace soul::parser
 		return AssignNode::create(std::move(lhs), std::move(rhs));
 	}
 
+	ast::ASTNode::Dependency Parser::parse_cast(Context& context)
+	{
+		// <cast_expression> ::= <cast> '<' <type_identifier> '>' '(' <expression> ')'
+
+		// <cast>
+		if (const auto result = context.require(TokenType::KeywordCast); !result) {
+			context.had_panic = true;
+			return nullptr;
+		}
+
+		// '<'
+		if (const auto result = context.require(TokenType::Less); !result) {
+			context.had_panic = true;
+			return nullptr;
+		}
+
+		// <type_identifier>
+		auto type_identifier = context.require(TokenType::LiteralIdentifier);
+		if (!type_identifier) {
+			return nullptr;
+		}
+
+		// '>'
+		if (const auto result = context.require(TokenType::Greater); !result) {
+			context.had_panic = true;
+			return nullptr;
+		}
+
+		// '('
+		if (const auto result = context.require(TokenType::ParenLeft); !result) {
+			context.had_panic = true;
+			return nullptr;
+		}
+
+		// <expression>
+		auto expression = parse_expression(context);
+		if (!expression) {
+			context.had_panic = true;
+			return nullptr;
+		}
+
+		// ')'
+		if (const auto result = context.require(TokenType::ParenRight); !result) {
+			context.had_panic = true;
+			return nullptr;
+		}
+
+		return CastNode::create(std::move(type_identifier->value.get<std::string>()), std::move(expression));
+	}
+
 	ASTNode::Dependency Parser::parse_binary(Context& context, ASTNode::Dependency lhs)
 	{
 		// <binary_expression> ::= <expression> <binary_operator> <expression>
@@ -326,7 +377,7 @@ namespace soul::parser
 		}
 
 		// <name_identifier>
-		const auto name_identifier = context.require(TokenType::LiteralIdentifier);
+		auto name_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!name_identifier) {
 			return nullptr;
 		}
@@ -366,7 +417,7 @@ namespace soul::parser
 		}
 
 		// <type_identifier>
-		const auto type_identifier = context.require(TokenType::LiteralIdentifier);
+		auto type_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!type_identifier) {
 			return nullptr;
 		}
@@ -374,8 +425,8 @@ namespace soul::parser
 		// <block_statement>
 		auto statements = parse_block_statement(context);
 
-		return FunctionDeclarationNode::create(name_identifier->value.get<std::string>(),
-		                                       type_identifier->value.get<std::string>(),
+		return FunctionDeclarationNode::create(std::move(name_identifier->value.get<std::string>()),
+		                                       std::move(type_identifier->value.get<std::string>()),
 		                                       std::move(parameters),
 		                                       std::move(statements));
 	}
@@ -441,7 +492,7 @@ namespace soul::parser
 		}
 
 		// <name_identifier>
-		const auto name_identifier = context.require(TokenType::LiteralIdentifier);
+		auto name_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!name_identifier) {
 			return nullptr;
 		}
@@ -477,7 +528,8 @@ namespace soul::parser
 			return nullptr;
 		}
 
-		return StructDeclarationNode::create(name_identifier->value.get<std::string>(), std::move(statements));
+		return StructDeclarationNode::create(std::move(name_identifier->value.get<std::string>()),
+		                                     std::move(statements));
 	}
 
 	ASTNode::Dependency Parser::parse_variable_declaration(Context& context,
@@ -496,7 +548,7 @@ namespace soul::parser
 		const bool is_mutable = require_keyword && context.try_match(TokenType::KeywordMut);
 
 		// <name_identifier>
-		const auto name_identifier = context.require(TokenType::LiteralIdentifier);
+		auto name_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!name_identifier) {
 			return nullptr;
 		}
@@ -507,7 +559,7 @@ namespace soul::parser
 		}
 
 		// <type_identifier>
-		const auto type_identifier = context.require(TokenType::LiteralIdentifier);
+		auto type_identifier = context.require(TokenType::LiteralIdentifier);
 		if (!type_identifier) {
 			return nullptr;
 		}
@@ -533,8 +585,8 @@ namespace soul::parser
 			}
 		}
 
-		return VariableDeclarationNode::create(name_identifier->value.get<std::string>(),
-		                                       type_identifier->value.get<std::string>(),
+		return VariableDeclarationNode::create(std::move(name_identifier->value.get<std::string>()),
+		                                       std::move(type_identifier->value.get<std::string>()),
 		                                       std::move(expression),
 		                                       is_mutable);
 	}
@@ -611,7 +663,7 @@ namespace soul::parser
 	Parser::PrecedenceRule Parser::get_precedence_rule(TokenType type) const noexcept
 	{
 		if (std::ranges::find(k_literal_types, type) != std::end(k_literal_types)) {
-			return { Parser::Precedence::None, &Parser::parse_literal, nullptr };
+			return { Parser::Precedence::None, &Parser::parse_literal, nullptr, nullptr };
 		}
 
 		if (std::ranges::find(k_compare_types, type) != std::end(k_compare_types)) {
@@ -619,6 +671,8 @@ namespace soul::parser
 		}
 
 		switch (type) {
+			case TokenType::KeywordCast:
+				return { Parser::Precedence::None, &Parser::parse_cast, nullptr, nullptr };
 			case TokenType::Minus:
 				return { Parser::Precedence::Additive, &Parser::parse_unary, &Parser::parse_binary, nullptr };
 			case TokenType::Plus:

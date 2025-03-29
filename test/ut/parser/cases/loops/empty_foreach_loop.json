@@ -1,1 +1,1 @@
-{"type":"module_declaration","name":"__unnamed__","statements":[{"type":"foreach_loop","variable":{"type":"variable_declaration","name":"v","type_identifier":"int","is_mutable":false,"expression":"__nullptr__"},"in_expression":{"value":"variables"},}]}
+{"type":"module_declaration","name":"__unnamed__","statements":[{"type":"foreach_loop","variable":{"type":"variable_declaration","name":"v","type_identifier":"i32","is_mutable":false,"expression":"__nullptr__"},"in_expression":{"value":"variables"},}]}
