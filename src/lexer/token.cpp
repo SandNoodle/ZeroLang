@@ -74,22 +74,11 @@ namespace soul
 		return k_types.at(type);
 	}
 
-	Token::Token(TokenType type, ValueType value) : _type(type), _value(std::move(value)) {}
+	Token::Token(TokenType type, Value value) : _type(type), value(std::move(value)) {}
 
 	Token::operator std::string() const
 	{
-		const auto& value_string = std::visit(
-			[](const auto& value) -> std::string {
-				if constexpr (std::is_same_v<std::remove_cvref_t<decltype(value)>, std::monostate>) {
-					return std::string("[no_value]");
-				} else if constexpr (std::is_same_v<std::remove_cvref_t<decltype(value)>, std::string>) {
-					return value;
-				} else {
-					return std::to_string(value);
-				}
-			},
-			_value);
-		return std::string(std::format("[type: {}, value: {}]", to_string(_type), value_string));
+		return std::string(std::format("[type: {}, value: {}]", to_string(_type), std::string(value)));
 	}
 
 	[[nodiscard]] TokenType Token::type() const { return _type; }

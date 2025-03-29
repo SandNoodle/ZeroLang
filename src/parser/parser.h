@@ -9,7 +9,7 @@
 #include <optional>
 #include <span>
 
-namespace soul
+namespace soul::parser
 {
 	/**
 	 * @brief Class implementing parser for Soul language.
@@ -28,48 +28,33 @@ namespace soul
 		 * @param tokens tokens to be parsed.
 		 * @return AST if the parsing was a success, nullptr otherwise.
 		 */
-		ASTNode::Dependency parse(std::span<const Token> tokens);
+		ast::ASTNode::Dependency parse(std::span<const Token> tokens);
 
 		private:
-		ASTNode::Dependency parse_expression(Context& context);
-		ASTNode::Dependency parse_expression_statement(Context& context);
-		ASTNode::Dependency parse_expression_with_precedence(Context& context, Precedence precedence);
-		ASTNode::Dependency parse_statement(Context& context);
+		ast::ASTNode::Dependency parse_expression(Context& context);
+		ast::ASTNode::Dependency parse_expression_statement(Context& context);
+		ast::ASTNode::Dependency parse_expression_with_precedence(Context& context, Precedence precedence);
+		ast::ASTNode::Dependency parse_statement(Context& context);
 
-		ASTNode::Dependency parse_assign(Context& context);
-		ASTNode::Dependency parse_binary(Context& context, ASTNode::Dependency lhs);
-		ASTNode::Dependency parse_for_loop(Context& context);
-		ASTNode::Dependency parse_foreach_loop(Context& context);
-		ASTNode::Dependency parse_function_declaration(Context& context);
-		ASTNode::Dependency parse_if(Context& context);
-		ASTNode::Dependency parse_literal(Context& context);
-		ASTNode::Dependency parse_struct_declaration(Context& context);
-		ASTNode::Dependency parse_suffix(Context& context);
-		ASTNode::Dependency parse_unary(Context& context);
-		ASTNode::Dependency parse_variable_declaration(Context& context,
-		                                               bool     require_keyword    = true,
-		                                               bool     require_expression = true,
-		                                               bool     require_semicolon  = true);
-		ASTNode::Dependency parse_while_loop(Context& context);
+		ast::ASTNode::Dependency parse_assign(Context& context);
+		ast::ASTNode::Dependency parse_binary(Context& context, ast::ASTNode::Dependency lhs);
+		ast::ASTNode::Dependency parse_for_loop(Context& context);
+		ast::ASTNode::Dependency parse_foreach_loop(Context& context);
+		ast::ASTNode::Dependency parse_function_declaration(Context& context);
+		ast::ASTNode::Dependency parse_if(Context& context);
+		ast::ASTNode::Dependency parse_literal(Context& context);
+		ast::ASTNode::Dependency parse_struct_declaration(Context& context);
+		ast::ASTNode::Dependency parse_suffix(Context& context);
+		ast::ASTNode::Dependency parse_unary(Context& context);
+		ast::ASTNode::Dependency parse_variable_declaration(Context& context,
+		                                                    bool     require_keyword    = true,
+		                                                    bool     require_expression = true,
+		                                                    bool     require_semicolon  = true);
+		ast::ASTNode::Dependency parse_while_loop(Context& context);
 
-		ASTNode::Dependencies parse_block_statement(Context& context);
+		ast::ASTNode::Dependencies parse_block_statement(Context& context);
 
 		PrecedenceRule get_precedence_rule(TokenType type) const noexcept;
-	};
-
-	enum class Parser::Precedence : u8
-	{
-		None,
-		Assign,          // =
-		Or,              // ||
-		And,             // &&
-		Equal,           // == !=
-		Compare,         // < > <= =>
-		Additive,        // + -
-		Multiplicative,  // * /
-		Unary,           // ! -
-		Call,
-		Primary,
 	};
 
 	class Parser::Context
@@ -112,4 +97,4 @@ namespace soul
 		const Token* current_token() const noexcept;
 		const Token* next_token() const noexcept;
 	};
-}  // namespace soul
+}  // namespace soul::parser

@@ -12,8 +12,10 @@
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
 
-namespace soul
+namespace soul::ast::visitors
 {
+	using namespace soul::ast::nodes;
+
 	// TODO: Prettify the JSON?
 
 	static constexpr auto k_unnamed = "__unnamed__";
@@ -191,4 +193,4 @@ namespace soul
 
 #undef PRINT_TYPE
 
-}  // namespace soul
+}  // namespace soul::ast::visitors

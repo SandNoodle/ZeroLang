@@ -2,7 +2,7 @@
 
 #include "ast/ast.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents a 'Function Declaration' statement
@@ -41,4 +41,4 @@ namespace soul
 		                         Dependencies parameters,
 		                         Dependencies statements);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

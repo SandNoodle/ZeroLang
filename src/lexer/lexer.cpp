@@ -38,9 +38,9 @@
 		return Token(single_match);                                                              \
 	}
 
-namespace soul
+namespace soul::lexer
 {
-	[[nodiscard]] std::vector<Token> Lexer::tokenize(std::string_view script)
+	std::vector<Token> Lexer::tokenize(std::string_view script)
 	{
 		_current_offset = 0;
 		_start_index    = 0;
@@ -121,7 +121,7 @@ namespace soul
 				break;
 		}
 
-		diagnostic(DiagnosticCode::ErrorLexerUnrecognizedToken);
+		diagnostic(DiagnosticType::Error, DiagnosticCode::LexerUnrecognizedToken);
 		return std::nullopt;
 	}
 
@@ -150,11 +150,13 @@ namespace soul
             { "while",    TokenType::KeywordWhile    },
 		};
 
-		const auto current_token = this->current_token();
-		if (k_keywords.contains(current_token)) return Token(k_keywords.at(current_token));
+		auto current_token = this->current_token();
+		if (k_keywords.contains(current_token)) {
+			return Token(k_keywords.at(current_token));
+		}
 
 		// Identifier
-		return Token(TokenType::LiteralIdentifier, std::string(current_token));
+		return Token(TokenType::LiteralIdentifier, Value(std::string(current_token)));
 	}
 
 	// TODO(sand_noodles):
@@ -175,16 +177,16 @@ namespace soul
 			const auto [_, error_code] = std::from_chars(token.data(), token.data() + token.size(), value);
 
 			if (error_code == std::errc{}) [[likely]] {
-				return Token(type, value);  // No error.
+				return Token(type, Value(value));  // No error.
 			} else if (error_code == std::errc::invalid_argument) {
-				diagnostic(DiagnosticCode::ErrorLexerValueIsNotANumber);
+				diagnostic(DiagnosticType::Error, DiagnosticCode::LexerValueIsNotANumber);
 				return std::nullopt;
 			} else if (error_code == std::errc::result_out_of_range) {
-				diagnostic(DiagnosticCode::ErrorLexerValueOutOfRange);
+				diagnostic(DiagnosticType::Error, DiagnosticCode::LexerValueOutOfRange);
 				return std::nullopt;
 			}
 
-			diagnostic(DiagnosticCode::ErrorLexerUnrecognizedToken);
+			diagnostic(DiagnosticType::Error, DiagnosticCode::LexerUnrecognizedToken);
 			return std::nullopt;
 		};
 
@@ -203,13 +205,13 @@ namespace soul
 		}
 
 		if (is_eof(current_char)) {
-			diagnostic(DiagnosticCode::ErrorLexerUnterminatedString);
+			diagnostic(DiagnosticType::Error, DiagnosticCode::LexerUnterminatedString);
 			return std::nullopt;
 		}
 
 		std::ignore              = advance();  // Skip over the quotation.
 		const auto current_token = _script.substr(_start_index + 1, _current_offset - _start_index - 2);  // Exclude '"'
-		return Token(TokenType::LiteralString, std::string(current_token));
+		return Token(TokenType::LiteralString, Value(std::string(current_token)));
 	}
 
 	std::string_view Lexer::current_token() const
@@ -262,4 +264,4 @@ namespace soul
 	bool Lexer::is_digit(Lexer::Char c) { return c >= '0' && c <= '9'; }
 	bool Lexer::is_hex_digit(Lexer::Char c) { return is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); }
 	bool Lexer::is_quote(Lexer::Char c) { return c == '"' || c == '\''; }
-}  // namespace soul
+}  // namespace soul::lexer

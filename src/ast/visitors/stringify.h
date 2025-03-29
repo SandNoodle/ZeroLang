@@ -6,13 +6,12 @@
 #include <cstddef>
 #include <sstream>
 
-namespace soul
+namespace soul::ast::visitors
 {
 	class StringifyVisitor final : public DefaultTraverseVisitor
 	{
 		private:
 		std::stringstream _ss;
-		std::size_t       _indent = 0;
 
 		public:
 		StringifyVisitor();
@@ -21,16 +20,16 @@ namespace soul
 
 		using DefaultTraverseVisitor::visit;
 		void accept(const ASTNode::Reference node) override;
-		void visit(const AssignNode&) override;
-		void visit(const BinaryNode&) override;
-		void visit(const ForLoopNode&) override;
-		void visit(const ForeachLoopNode&) override;
-		void visit(const FunctionDeclarationNode&) override;
-		void visit(const IfNode&) override;
-		void visit(const LiteralNode&) override;
-		void visit(const ModuleNode&) override;
-		void visit(const StructDeclarationNode&) override;
-		void visit(const UnaryNode&) override;
-		void visit(const VariableDeclarationNode&) override;
+		void visit(const nodes::AssignNode&) override;
+		void visit(const nodes::BinaryNode&) override;
+		void visit(const nodes::ForLoopNode&) override;
+		void visit(const nodes::ForeachLoopNode&) override;
+		void visit(const nodes::FunctionDeclarationNode&) override;
+		void visit(const nodes::IfNode&) override;
+		void visit(const nodes::LiteralNode&) override;
+		void visit(const nodes::ModuleNode&) override;
+		void visit(const nodes::StructDeclarationNode&) override;
+		void visit(const nodes::UnaryNode&) override;
+		void visit(const nodes::VariableDeclarationNode&) override;
 	};
 }  // namespace soul

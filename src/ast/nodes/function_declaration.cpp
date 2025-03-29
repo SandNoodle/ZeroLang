@@ -1,6 +1,6 @@
 #include "ast/nodes/function_declaration.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	FunctionDeclarationNode::FunctionDeclarationNode(Identifier   identifier,
 	                                                 Identifier   return_type_identifier,
@@ -21,4 +21,4 @@ namespace soul
 		return std::make_unique<FunctionDeclarationNode>(
 			std::move(name), std::move(return_type), std::move(parameters), std::move(statements));
 	}
-}  // namespace soul
+}  // namespace soul::ast::nodes

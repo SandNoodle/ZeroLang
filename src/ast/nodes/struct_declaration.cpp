@@ -1,6 +1,6 @@
 #include "ast/nodes/struct_declaration.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	StructDeclarationNode::StructDeclarationNode(Identifier name, Dependencies parameters)
 		: name(std::move(name)), parameters(std::move(parameters))
@@ -11,4 +11,4 @@ namespace soul
 	{
 		return std::make_unique<StructDeclarationNode>(std::move(name), std::move(parameters));
 	}
-}  // namespace soul
+}  // namespace soul::ast::nodes

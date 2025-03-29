@@ -9,20 +9,20 @@
 
 namespace soul
 {
-	/**
-	 * @brief Diagnostic code emitted by the Lexer, Parser, Compiler etc. in the language.
-	 * @detail Created in the following format <type>_<object>_<diagnostic>, where:
-	 * - <type> is either hint, warning or error.
-	 * - <object> is either lexer, parser, compiler or type_checker.
-	 * - <diagnostic> is an unique diagnostic value.
-	 */
+	enum class DiagnosticType : u8
+	{
+		Hint,
+		Warning,
+		Error,
+	};
+
 	enum class DiagnosticCode : u8
 	{
-		ErrorLexerUnrecognizedToken,
-		ErrorLexerValueIsNotANumber,
-		ErrorLexerValueOutOfRange,
-		ErrorLexerUnterminatedString,
-		ErrorParserOutOfRange,
+		LexerUnrecognizedToken,
+		LexerValueIsNotANumber,
+		LexerValueOutOfRange,
+		LexerUnterminatedString,
+		ParserOutOfRange,
 	};
 
 	/** * @brief Returns the base, un-formatted diagnostic message. */
@@ -32,6 +32,7 @@ namespace soul
 	{
 		public:
 		private:
+		DiagnosticType _type;
 		DiagnosticCode _code;
 		std::string    _message;
 
@@ -41,7 +42,7 @@ namespace soul
 		Diagnostic(Diagnostic&&) noexcept      = default;
 
 		template <typename... Args>
-		explicit Diagnostic(DiagnosticCode code, Args&&... args);
+		explicit Diagnostic(DiagnosticType type, DiagnosticCode code, Args&&... args);
 
 		Diagnostic& operator=(const Diagnostic&) noexcept = default;
 		Diagnostic& operator=(Diagnostic&&) noexcept      = default;
@@ -57,10 +58,11 @@ namespace soul
 	};
 
 	template <typename... Args>
-	Diagnostic::Diagnostic(DiagnosticCode code, Args&&... args) : _code(code)
+	Diagnostic::Diagnostic(DiagnosticType type, DiagnosticCode code, Args&&... args)
+		: _type(type),
+		  _code(code),
+		  _message(std::vformat(get_base_diagnostic_message(code), std::make_format_args(std::forward<Args>(args)...)))
 	{
-		std::string_view message = get_base_diagnostic_message(code);
-		this->_message           = std::vformat(message, std::make_format_args(std::forward<Args>(args)...));
 	}
 
 	using Diagnostics = std::vector<Diagnostic>;

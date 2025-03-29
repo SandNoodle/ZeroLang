@@ -6,7 +6,7 @@
 
 #include <functional>
 
-namespace soul
+namespace soul::ast::visitors
 {
 	/**
 	 * @brief @TODO
@@ -18,28 +18,28 @@ namespace soul
 
 		virtual void accept(const ASTNode::Reference node);
 
-		virtual void visit(AssignNode&);
-		virtual void visit(BinaryNode&);
-		virtual void visit(ForLoopNode&);
-		virtual void visit(ForeachLoopNode&);
-		virtual void visit(FunctionDeclarationNode&);
-		virtual void visit(IfNode&);
-		virtual void visit(LiteralNode&);
-		virtual void visit(ModuleNode&);
-		virtual void visit(StructDeclarationNode&);
-		virtual void visit(UnaryNode&);
-		virtual void visit(VariableDeclarationNode&);
+		virtual void visit(nodes::AssignNode&);
+		virtual void visit(nodes::BinaryNode&);
+		virtual void visit(nodes::ForLoopNode&);
+		virtual void visit(nodes::ForeachLoopNode&);
+		virtual void visit(nodes::FunctionDeclarationNode&);
+		virtual void visit(nodes::IfNode&);
+		virtual void visit(nodes::LiteralNode&);
+		virtual void visit(nodes::ModuleNode&);
+		virtual void visit(nodes::StructDeclarationNode&);
+		virtual void visit(nodes::UnaryNode&);
+		virtual void visit(nodes::VariableDeclarationNode&);
 
-		virtual void visit(const AssignNode&);
-		virtual void visit(const BinaryNode&);
-		virtual void visit(const ForLoopNode&);
-		virtual void visit(const ForeachLoopNode&);
-		virtual void visit(const FunctionDeclarationNode&);
-		virtual void visit(const IfNode&);
-		virtual void visit(const LiteralNode&);
-		virtual void visit(const ModuleNode&);
-		virtual void visit(const StructDeclarationNode&);
-		virtual void visit(const UnaryNode&);
-		virtual void visit(const VariableDeclarationNode&);
+		virtual void visit(const nodes::AssignNode&);
+		virtual void visit(const nodes::BinaryNode&);
+		virtual void visit(const nodes::ForLoopNode&);
+		virtual void visit(const nodes::ForeachLoopNode&);
+		virtual void visit(const nodes::FunctionDeclarationNode&);
+		virtual void visit(const nodes::IfNode&);
+		virtual void visit(const nodes::LiteralNode&);
+		virtual void visit(const nodes::ModuleNode&);
+		virtual void visit(const nodes::StructDeclarationNode&);
+		virtual void visit(const nodes::UnaryNode&);
+		virtual void visit(const nodes::VariableDeclarationNode&);
 	};
 }  // namespace soul

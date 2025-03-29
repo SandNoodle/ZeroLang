@@ -14,8 +14,10 @@
 
 #include <utility>
 
-namespace soul
+namespace soul::ast::visitors
 {
+	using namespace soul::ast::nodes;
+
 	void DefaultTraverseVisitor::accept(const ASTNode::Reference node)
 	{
 		if (!node) {
@@ -108,4 +110,4 @@ namespace soul
 	void DefaultTraverseVisitor::visit(const UnaryNode& node) { accept(node.expr.get()); }
 
 	void DefaultTraverseVisitor::visit(const VariableDeclarationNode& node) { accept(node.expr.get()); }
-}  // namespace soul
+}  // namespace soul::ast::visitors

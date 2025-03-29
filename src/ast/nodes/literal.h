@@ -2,12 +2,9 @@
 
 #include "ast/ast.h"
 #include "core/types.h"
+#include "common/value.h"
 
-#include <string>
-#include <type_traits>
-#include <variant>
-
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents a 'Literal' expression in the Abstract Syntax Tree (AST).
@@ -15,13 +12,10 @@ namespace soul
 	class LiteralNode : public VisitorAcceptor<LiteralNode>
 	{
 		public:
-		using ValueType = std::variant<std::monostate, i64, f64, std::string>;
+		Value value = {};
 
 		public:
-		ValueType value = std::monostate{};
-
-		public:
-		LiteralNode(ValueType value);
+		LiteralNode(Value value);
 		~LiteralNode() override = default;
 		operator std::string() const noexcept;
 
@@ -31,6 +25,6 @@ namespace soul
 		 * @param value
 		 * @return
 		 */
-		static Dependency create(ValueType value);
+		static Dependency create(Value value);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

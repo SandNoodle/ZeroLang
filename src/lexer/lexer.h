@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace soul
+namespace soul::lexer
 {
 	/**
 	 * @brief Class used performing a lexical analysis on the given input text.
@@ -50,9 +50,9 @@ namespace soul
 		 * @param args Arguments to format the diagnostic string with.
 		 */
 		template <typename... Args>
-		void diagnostic(DiagnosticCode code, Args&&... args) const
+		void diagnostic(DiagnosticType type, DiagnosticCode code, Args&&... args) const
 		{
-			_diagnostics.emplace_back(code, std::forward<Args>(args)...);
+			_diagnostics.emplace_back(type, code, std::forward<Args>(args)...);
 		}
 
 		void             skip_whitespace();
@@ -66,4 +66,4 @@ namespace soul
 		bool             is_hex_digit(Lexer::Char c);
 		bool             is_quote(Lexer::Char c);
 	};
-}  // namespace soul
+}  // namespace soul::lexer

@@ -2,7 +2,7 @@
 
 #include "ast/ast.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents a 'Variable Declaration' statement
@@ -34,4 +34,4 @@ namespace soul
 		 */
 		static Dependency create(Identifier name, Identifier type, Dependency expr, bool is_mutable);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

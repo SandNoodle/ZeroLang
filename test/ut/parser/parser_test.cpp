@@ -13,8 +13,11 @@
 #include <optional>
 #include <unordered_set>
 
-namespace soul::ut
+namespace soul::parser::ut
 {
+	using namespace ast::visitors;
+	using namespace parser;
+
 	struct Case
 	{
 		std::string           name;
@@ -25,8 +28,8 @@ namespace soul::ut
 	class ParserTest : public ::testing::TestWithParam<Case>
 	{
 		protected:
-		soul::Lexer  _lexer;
-		soul::Parser _parser;
+		soul::lexer::Lexer   _lexer;
+		soul::parser::Parser _parser;
 
 		std::optional<std::string> read_file(const std::filesystem::path& path)
 		try {
@@ -113,4 +116,4 @@ namespace soul::ut
 		ASSERT_TRUE(expected_output.has_value()) << "failed to read: " << param.expected_output_path;
 		ASSERT_EQ(stringify.string(), *expected_output);
 	}
-}  // namespace soul::ut
+}  // namespace soul::parser::ut

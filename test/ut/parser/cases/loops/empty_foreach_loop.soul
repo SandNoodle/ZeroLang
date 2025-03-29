@@ -1,0 +1,1 @@
+foreach (v:int in variables) {}

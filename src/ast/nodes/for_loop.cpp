@@ -1,6 +1,6 @@
 #include "ast/nodes/for_loop.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	ForLoopNode::ForLoopNode(Dependency   initialization,
 	                         Dependency   condition,
@@ -22,4 +22,4 @@ namespace soul
 			std::move(initialization), std::move(condition), std::move(update), std::move(statements));
 	}
 
-}  // namespace soul
+}  // namespace soul::ast::nodes

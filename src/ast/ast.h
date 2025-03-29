@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/types/type.h"
 #include "ast/visitors/visitor.h"
 
 #include <memory>
@@ -7,15 +8,15 @@
 #include <type_traits>
 #include <vector>
 
-namespace soul
+namespace soul::ast
 {
 	class IVisitable
 	{
 		public:
-		virtual void accept(IVisitor& visitor)       = 0;
-		virtual void accept(IVisitor& visitor) const = 0;
+		virtual void accept(visitors::IVisitor& visitor)       = 0;
+		virtual void accept(visitors::IVisitor& visitor) const = 0;
 
-		friend IVisitor;
+		friend visitors::IVisitor;
 	};
 
 	/**
@@ -31,6 +32,9 @@ namespace soul
 		using Identifier   = std::string;
 
 		public:
+		types::Type type = {};
+
+		public:
 		virtual ~ASTNode() = default;
 	};
 
@@ -42,7 +46,7 @@ namespace soul
 	class VisitorAcceptor : public ASTNode
 	{
 		private:
-		void accept(IVisitor& visitor) override { visitor.visit(static_cast<DerivedT&>(*this)); }
-		void accept(IVisitor& visitor) const override { visitor.visit(static_cast<const DerivedT&>(*this)); }
+		void accept(visitors::IVisitor& visitor) override { visitor.visit(static_cast<DerivedT&>(*this)); }
+		void accept(visitors::IVisitor& visitor) const override { visitor.visit(static_cast<const DerivedT&>(*this)); }
 	};
-}  // namespace soul
+}  // namespace soul::ast

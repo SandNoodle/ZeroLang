@@ -1,6 +1,6 @@
 #pragma once
 
-namespace soul
+namespace soul::ast::nodes
 {
 	class AssignNode;
 	class BinaryNode;
@@ -13,4 +13,4 @@ namespace soul
 	class StructDeclarationNode;
 	class UnaryNode;
 	class VariableDeclarationNode;
-}  // namespace soul
+}  // namespace soul::ast::nodes

@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents a 'Struct Declaration' statement
@@ -33,4 +33,4 @@ namespace soul
 		 */
 		static Dependency create(Identifier name, Dependencies statements);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

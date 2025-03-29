@@ -1,6 +1,6 @@
 #include "ast/ast.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents a 'root' node containing all the statements of a given script
@@ -30,4 +30,4 @@ namespace soul
 		static Dependency create(Identifier module_name, Dependencies statements);
 	};
 
-}  // namespace soul
+}  // namespace soul::ast::nodes

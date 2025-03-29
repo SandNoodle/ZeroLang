@@ -15,15 +15,32 @@
 
 #include <utility>
 
-namespace soul
+namespace soul::parser
 {
+	using namespace soul::ast;
+	using namespace soul::ast::nodes;
+
+	enum class Parser::Precedence : u8
+	{
+		None,
+		Assign,          // =
+		Or,              // ||
+		And,             // &&
+		Equal,           // == !=
+		Compare,         // < > <= =>
+		Additive,        // + -
+		Multiplicative,  // * /
+		Unary,           // ! -
+		Call,
+		Primary,
+	};
 
 	struct Parser::PrecedenceRule
 	{
 		public:
-		typedef ASTNode::Dependency (Parser::*PrefixFn)(Parser::Context&);
-		typedef ASTNode::Dependency (Parser::*InfixFn)(Parser::Context&, ASTNode::Dependency);
-		typedef ASTNode::Dependency (Parser::*SuffixFn)(Parser::Context&);
+		typedef ast::ASTNode::Dependency (Parser::*PrefixFn)(Parser::Context&);
+		typedef ast::ASTNode::Dependency (Parser::*InfixFn)(Parser::Context&, ASTNode::Dependency);
+		typedef ast::ASTNode::Dependency (Parser::*SuffixFn)(Parser::Context&);
 
 		public:
 		Precedence precedence = Precedence::None;
@@ -357,8 +374,8 @@ namespace soul
 		// <block_statement>
 		auto statements = parse_block_statement(context);
 
-		return FunctionDeclarationNode::create(name_identifier->get<std::string>(),
-		                                       type_identifier->get<std::string>(),
+		return FunctionDeclarationNode::create(name_identifier->value.get<std::string>(),
+		                                       type_identifier->value.get<std::string>(),
 		                                       std::move(parameters),
 		                                       std::move(statements));
 	}
@@ -372,9 +389,9 @@ namespace soul
 			return nullptr;
 		}
 		if (value_token->type() == TokenType::KeywordTrue || value_token->type() == TokenType::KeywordFalse) {
-			return LiteralNode::create(static_cast<i64>(value_token->type() == TokenType::KeywordTrue));
+			return LiteralNode::create(Value{ static_cast<bool>(value_token->type() == TokenType::KeywordTrue) });
 		}
-		return LiteralNode::create(std::move(value_token->value()));
+		return LiteralNode::create(std::move(value_token->value));
 	}
 
 	ASTNode::Dependency Parser::parse_if(Context& context)
@@ -460,7 +477,7 @@ namespace soul
 			return nullptr;
 		}
 
-		return StructDeclarationNode::create(name_identifier->get<std::string>(), std::move(statements));
+		return StructDeclarationNode::create(name_identifier->value.get<std::string>(), std::move(statements));
 	}
 
 	ASTNode::Dependency Parser::parse_variable_declaration(Context& context,
@@ -516,8 +533,8 @@ namespace soul
 			}
 		}
 
-		return VariableDeclarationNode::create(name_identifier->get<std::string>(),
-		                                       type_identifier->get<std::string>(),
+		return VariableDeclarationNode::create(name_identifier->value.get<std::string>(),
+		                                       type_identifier->value.get<std::string>(),
 		                                       std::move(expression),
 		                                       is_mutable);
 	}
@@ -560,7 +577,7 @@ namespace soul
 			}
 		} else {
 			// While loops without parentheses have implicit `true` condition.
-			condition = LiteralNode::create(static_cast<bool>(true));
+			condition = LiteralNode::create(Value(true));
 		}
 
 		// <block_statement>
@@ -689,4 +706,4 @@ namespace soul
 	const Token* Parser::Context::current_token() const noexcept { return &_tokens[_current_index]; }
 
 	const Token* Parser::Context::next_token() const noexcept { return &_tokens[_current_index + 1]; }
-}  // namespace soul
+}  // namespace soul::parser

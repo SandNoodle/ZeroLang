@@ -1,0 +1,1 @@
+for (foo : int = 33; foo < some_size; some_expression_here + 2) { }

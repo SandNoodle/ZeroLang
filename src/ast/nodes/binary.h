@@ -3,7 +3,7 @@
 #include "ast/ast.h"
 #include "ast/ast_operator.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents a 'Binary' expression in the Abstract Syntax Tree (AST).
@@ -32,4 +32,4 @@ namespace soul
 		 */
 		static Dependency create(Dependency lhs, Dependency rhs, ASTNodeOperator op);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

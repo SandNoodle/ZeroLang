@@ -1,6 +1,6 @@
 #include "ast/nodes/if.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 
 	IfNode::IfNode(Dependency condition, Dependencies if_statements, Dependencies else_statements) noexcept
@@ -15,4 +15,4 @@ namespace soul
 		return std::make_unique<IfNode>(std::move(condition), std::move(if_statements), std::move(else_statements));
 	}
 
-}  // namespace soul
+}  // namespace soul::ast::nodes

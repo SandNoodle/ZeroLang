@@ -1,6 +1,6 @@
 #include "ast/nodes/module.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	ModuleNode::ModuleNode(Identifier module_name, Dependencies statements) noexcept
 		: name(std::move(module_name)), statements(std::move(statements))
@@ -12,4 +12,4 @@ namespace soul
 		return std::make_unique<ModuleNode>(std::move(module_name), std::move(statements));
 	}
 
-}  // namespace soul
+}  // namespace soul::ast::nodes

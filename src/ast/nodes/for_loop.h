@@ -2,7 +2,7 @@
 
 #include "ast/ast.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 
 	/**
@@ -40,4 +40,4 @@ namespace soul
 		                         Dependency   update,
 		                         Dependencies statements);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

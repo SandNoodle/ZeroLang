@@ -3,7 +3,7 @@
 #include "ast/ast.h"
 #include "ast/ast_operator.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents an 'Unary' expression in the Abstract Syntax Tree (AST).
@@ -30,4 +30,4 @@ namespace soul
 		 */
 		static Dependency create(Dependency expr, ASTNodeOperator op);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

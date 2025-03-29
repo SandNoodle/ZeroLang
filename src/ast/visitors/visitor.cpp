@@ -2,8 +2,10 @@
 
 #include <utility>
 
-namespace soul
+namespace soul::ast::visitors
 {
+	using namespace ast::nodes;
+
 	void IVisitor::visit(AssignNode& node) { visit(std::as_const(node)); }
 	void IVisitor::visit(BinaryNode& node) { visit(std::as_const(node)); }
 	void IVisitor::visit(ForLoopNode& node) { visit(std::as_const(node)); }
@@ -28,4 +30,4 @@ namespace soul
 	void IVisitor::visit(const UnaryNode&) { /* Does nothing. */ }
 	void IVisitor::visit(const VariableDeclarationNode&) { /* Does nothing. */ }
 
-}  // namespace soul
+}  // namespace soul::ast::visitors

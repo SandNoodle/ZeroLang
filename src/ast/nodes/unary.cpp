@@ -1,6 +1,6 @@
 #include "ast/nodes/unary.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	UnaryNode::UnaryNode(Dependency expr, ASTNodeOperator op) : expr(std::move(expr)), op(op) {}
 
@@ -8,4 +8,4 @@ namespace soul
 	{
 		return std::make_unique<UnaryNode>(std::move(expr), op);
 	}
-}  // namespace soul
+}  // namespace soul::ast::nodes

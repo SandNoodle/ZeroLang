@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/value.h"
 #include "core/types.h"
 
 #include <string>
@@ -74,28 +75,20 @@ namespace soul
 		return stream;
 	}
 
-	template <typename T>
-	concept ValueKind = std::same_as<T, i64>             //
-	                 || std::same_as<T, f64>             //
-	                 || std::same_as<T, std::string>     //
-	                 || std::same_as<T, std::monostate>  //
-		;
-
 	/**
 	 * @brief Class representing a single lexical token.
 	 * Otherwise known as a 'Lexeme'.
 	 */
 	class Token
 	{
-		public:
-		using ValueType = std::variant<std::monostate, i64, f64, std::string>;
-
 		private:
-		TokenType _type  = TokenType::Unknown;
-		ValueType _value = std::monostate{};
+		TokenType _type = TokenType::Unknown;
 
 		public:
-		explicit Token(TokenType type, ValueType value = std::monostate{});
+		Value value = {};
+
+		public:
+		explicit Token(TokenType type, Value value = {});
 
 		bool     operator==(const Token&) const noexcept  = default;
 		auto     operator<=>(const Token&) const noexcept = default;
@@ -111,46 +104,10 @@ namespace soul
 		}
 
 		/**
-		 * @brief Verifies if the token is of a specific value type.
-		 * @tparam T Type of value to verify.
-		 * @return true if it is, false otherwise.
-		 */
-		template <ValueKind T>
-		[[nodiscard]] constexpr bool has() const
-		{
-			return std::holds_alternative<T>(_value);
-		}
-
-		/**
 		 * @brief Verifies that token holds no value.
 		 * @return true if token does not contain a value, false otherwise.
 		 */
-		[[nodiscard]] constexpr bool no_value() const { return std::holds_alternative<std::monostate>(_value); }
-
-		/**
-		 * @brief Returns the value that token holds.
-		 * @tparam T Type of value to return.
-		 * @return Value held in a token of type T.
-		 */
-		template <ValueKind T>
-		[[nodiscard]] constexpr const T& get() const
-		{
-			return std::get<T>(_value);
-		}
-
-		/**
-		 * @brief Returns the value that token holds.
-		 * @tparam T Type of value to return.
-		 * @return Value held in a token of type T.
-		 */
-		template <ValueKind T>
-		[[nodiscard]] constexpr T& get()
-		{
-			return std::get<T>(_value);
-		}
-
-		[[nodiscard]] constexpr const ValueType& value() const noexcept { return _value; }
-		[[nodiscard]] constexpr ValueType&       value() noexcept { return _value; }
+		[[nodiscard]] constexpr bool no_value() const { return value.is<Value::UnknownValue>(); }
 	};
 
 	template <typename T>
@@ -159,5 +116,4 @@ namespace soul
 		stream << static_cast<std::string>(token);
 		return stream;
 	}
-
 }  // namespace soul

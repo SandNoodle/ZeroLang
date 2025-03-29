@@ -2,7 +2,7 @@
 
 #include "ast/ast.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 	/**
 	 * @brief Represents a 'Assign' expression in the Abstract Syntax Tree (AST).
@@ -29,4 +29,4 @@ namespace soul
 		 */
 		static Dependency create(Dependency lhs, Dependency rhs);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes

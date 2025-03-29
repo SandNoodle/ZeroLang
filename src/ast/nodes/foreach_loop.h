@@ -2,7 +2,7 @@
 
 #include "ast/ast.h"
 
-namespace soul
+namespace soul::ast::nodes
 {
 
 	/**
@@ -32,4 +32,4 @@ namespace soul
 		 */
 		static Dependency create(Dependency variable, Dependency in_expression, Dependencies statements);
 	};
-}  // namespace soul
+}  // namespace soul::ast::nodes
