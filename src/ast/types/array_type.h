@@ -22,13 +22,13 @@ namespace soul::ast::types
 		ArrayType(const ArrayType&) noexcept;
 		ArrayType(ArrayType&&) noexcept;
 
-		ArrayType& operator=(const ArrayType&) noexcept;
-		ArrayType& operator=(ArrayType&&) noexcept;
-		bool       operator==(const ArrayType&) const noexcept = default;
+		ArrayType&         operator=(const ArrayType&) noexcept;
+		ArrayType&         operator=(ArrayType&&) noexcept;
+		bool               operator==(const ArrayType&) const noexcept = default;
 		std::weak_ordering operator<=>(const ArrayType&) const noexcept;
 
-		const Type& type() const noexcept;
-		Type&       type() noexcept;
+		const Type& data_type() const noexcept;
+		Type&       data_type() noexcept;
 	};
 
 }  // namespace soul::ast::types

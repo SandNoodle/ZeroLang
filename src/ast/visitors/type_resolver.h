@@ -10,14 +10,23 @@
 
 namespace soul::ast::visitors
 {
+
 	class TypeResolverVisitor : public DefaultTraverseVisitor
 	{
+		public:
+		enum ResolveFlags : u8
+		{
+			None             = 1 << 0,
+			ForceStrictCasts = 1 << 1,
+		};
+
 		private:
+		ResolveFlags                                 _flags;
 		std::unordered_map<std::string, types::Type> _registered_types;
 		mutable Diagnostics                          _diagnostics;
 
 		public:
-		TypeResolverVisitor();
+		TypeResolverVisitor(ResolveFlags flags = ResolveFlags::None);
 		TypeResolverVisitor(const TypeResolverVisitor&)     = delete;
 		TypeResolverVisitor(TypeResolverVisitor&&) noexcept = default;
 		~TypeResolverVisitor()                              = default;

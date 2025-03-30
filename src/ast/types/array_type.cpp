@@ -30,7 +30,7 @@ namespace soul::ast::types
 
 	std::weak_ordering ArrayType::operator<=>(const ArrayType& other) const noexcept { return *_type <=> *other._type; }
 
-	const Type& ArrayType::type() const noexcept { return *_type; }
+	const Type& ArrayType::data_type() const noexcept { return *_type; }
 
-	Type& ArrayType::type() noexcept { return *_type; }
+	Type& ArrayType::data_type() noexcept { return *_type; }
 }  // namespace soul::ast::types

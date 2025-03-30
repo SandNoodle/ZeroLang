@@ -21,7 +21,132 @@ namespace soul::ast::visitors
 	using namespace soul::ast::nodes;
 	using namespace soul::ast::types;
 
-	TypeResolverVisitor::TypeResolverVisitor() { register_basic_types(); }
+	TypeResolverVisitor::TypeResolverVisitor(ResolveFlags flags) : _flags(flags) { register_basic_types(); }
+
+	// TODO MOVE OUT.
+	enum class CastType : u8
+	{
+		Implicit,
+		Explicit,
+		Impossible,
+	};
+
+	static const std::unordered_map<PrimitiveType::Kind, std::unordered_map<PrimitiveType::Kind, CastType>> k_cast_type
+		= {
+			  {
+               PrimitiveType::Kind::Boolean,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Implicit },
+					  { PrimitiveType::Kind::Char, CastType::Impossible },
+					  { PrimitiveType::Kind::Float32, CastType::Impossible },
+					  { PrimitiveType::Kind::Float64, CastType::Impossible },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Char,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
+					  { PrimitiveType::Kind::Char, CastType::Implicit },
+					  { PrimitiveType::Kind::Float32, CastType::Impossible },
+					  { PrimitiveType::Kind::Float64, CastType::Impossible },
+					  { PrimitiveType::Kind::Int32, CastType::Impossible },
+					  { PrimitiveType::Kind::Int64, CastType::Impossible },
+					  { PrimitiveType::Kind::String, CastType::Implicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Float32,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
+					  { PrimitiveType::Kind::Char, CastType::Impossible },
+					  { PrimitiveType::Kind::Float32, CastType::Implicit },
+					  { PrimitiveType::Kind::Float64, CastType::Implicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Float64,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
+					  { PrimitiveType::Kind::Char, CastType::Impossible },
+					  { PrimitiveType::Kind::Float32, CastType::Explicit },
+					  { PrimitiveType::Kind::Float64, CastType::Implicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Int32,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Explicit },
+					  { PrimitiveType::Kind::Char, CastType::Impossible },
+					  { PrimitiveType::Kind::Float32, CastType::Explicit },
+					  { PrimitiveType::Kind::Float64, CastType::Explicit },
+					  { PrimitiveType::Kind::Int32, CastType::Implicit },
+					  { PrimitiveType::Kind::Int64, CastType::Implicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Int64,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
+					  { PrimitiveType::Kind::Char, CastType::Impossible },
+					  { PrimitiveType::Kind::Float32, CastType::Explicit },
+					  { PrimitiveType::Kind::Float64, CastType::Explicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Implicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::String,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
+					  { PrimitiveType::Kind::Char, CastType::Impossible },
+					  { PrimitiveType::Kind::Float32, CastType::Explicit },
+					  { PrimitiveType::Kind::Float64, CastType::Explicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Implicit },
+				  }  //
+			  },
+    };
+
+	CastType cast_type(const Type& from_type, const Type& to_type)
+	{
+		if (from_type.is<PrimitiveType>() && to_type.is<PrimitiveType>()) {
+			const auto from = from_type.as<PrimitiveType>().type;
+			const auto to   = to_type.as<PrimitiveType>().type;
+			// Generally we'd like to avoid casts we did not define...
+			if (!k_cast_type.contains(from)) {
+				return CastType::Impossible;
+			}
+			const auto& possible_casts = k_cast_type.at(from);
+			// ...same here.
+			if (!possible_casts.contains(to)) {
+				return CastType::Impossible;
+			}
+			return possible_casts.at(to);
+		}
+
+		if (from_type.is<StructType>() || to_type.is<StructType>()) {
+			// Casting from/to Struct types is not supported; maybe in the future.
+			return CastType::Impossible;
+		}
+		if (from_type.is<ArrayType>() && to_type.is<ArrayType>()) {
+			return cast_type(from_type.as<ArrayType>().data_type(), to_type.as<ArrayType>().data_type());
+		}
+
+		return CastType::Impossible;
+	}
+	// TODO: END MOVE OUT.
 
 	void TypeResolverVisitor::visit(AssignNode& node)
 	{
@@ -35,8 +160,22 @@ namespace soul::ast::visitors
 		accept(node.lhs.get());
 		accept(node.rhs.get());
 
-		// TODO What should be the type of the binary node? Common type to both expressions?
-		//      Does it need further resolving?
+		if (node.lhs->type == node.rhs->type) {
+			node.type = node.lhs->type;
+			return;
+		}
+
+		if (_flags & ResolveFlags::ForceStrictCasts) {
+			if (node.lhs->type != node.rhs->type) {
+				// TODO: diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolver);
+			}
+			node.type = PrimitiveType::Kind::Unknown;
+			return;
+		}
+
+		if (cast_type(node.lhs->type, node.rhs->type) == CastType::Implicit) {
+			// TODO: cast to common type and set node.type to that type.
+		}
 	}
 
 	void TypeResolverVisitor::visit(nodes::CastNode& node)
@@ -76,7 +215,7 @@ namespace soul::ast::visitors
 		if (_registered_types.contains(node.return_type)) {
 			node.type = _registered_types[node.return_type];
 		} else {
-			// TODO: Should this be an Error diagnostic, but don't prevent further type resolving?
+			diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolverTypeUnknown, node.return_type);
 		}
 
 		for (auto& parameter : node.parameters) {
@@ -104,7 +243,6 @@ namespace soul::ast::visitors
 	{
 		if (node.value.is<Value::UnknownValue>()) {
 			using namespace std::string_view_literals;
-			// TODO Error - we cannot infer the value type of Value::UnknownValue.
 			diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolverCannotInferUnknownType);
 			return;
 		}

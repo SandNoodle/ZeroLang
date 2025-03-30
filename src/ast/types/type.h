@@ -55,6 +55,12 @@ namespace soul::ast::types
 			return std::holds_alternative<T>(_type);
 		}
 
+		template <TypeKind T>
+		[[nodiscard]] constexpr const T& as() const noexcept
+		{
+			return std::get<T>(_type);
+		}
+
 		friend std::weak_ordering operator<=>(const Type&, const Type&) noexcept;
 	};
 }  // namespace soul::ast::types
