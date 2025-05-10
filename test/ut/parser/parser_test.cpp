@@ -17,6 +17,7 @@ namespace soul::parser::ut
 {
 	using namespace ast::visitors;
 	using namespace parser;
+	using namespace lexer;
 
 	struct Case
 	{
@@ -28,9 +29,6 @@ namespace soul::parser::ut
 	class ParserTest : public ::testing::TestWithParam<Case>
 	{
 		protected:
-		soul::lexer::Lexer   _lexer;
-		soul::parser::Parser _parser;
-
 		std::optional<std::string> read_file(const std::filesystem::path& path)
 		try {
 			static constexpr auto k_read_size = std::size_t{ 4096 };
@@ -68,6 +66,7 @@ namespace soul::parser::ut
 			}
 
 			std::vector<Case> cases;
+			cases.reserve(unique_files.size());
 			for (const auto& entry : unique_files) {
 				cases.emplace_back(Case{
 					.name                 = entry.stem().string(),
@@ -95,13 +94,13 @@ namespace soul::parser::ut
 		const auto input = read_file(param.script_path);
 		ASSERT_TRUE(input.has_value()) << "failed to read: " << param.script_path;
 
-		const auto tokens      = _lexer.tokenize(*input);
-		const auto result_tree = _parser.parse(tokens);
+		const auto tokens      = Lexer::tokenize(*input);
+		const auto result_tree = Parser::parse(tokens);
 
 		StringifyVisitor stringify;
 		stringify.accept(result_tree.get());
 
-		constexpr bool k_regenerate_cases = false;
+		static constexpr bool k_regenerate_cases = false;
 		if constexpr (k_regenerate_cases) try {
 				std::filesystem::remove(param.expected_output_path);
 				std::ofstream file(param.expected_output_path);

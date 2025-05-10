@@ -7,7 +7,9 @@ namespace soul::lexer::ut
 	class LexerTest : public ::testing::Test
 	{
 		protected:
-		soul::lexer::Lexer _lexer;
+		Diagnostics _diagnostics;
+
+		void TearDown() override { _diagnostics.clear(); }
 
 		static bool has_eof_token(const std::vector<Token>& tokens)
 		{
@@ -22,11 +24,11 @@ namespace soul::lexer::ut
 	TEST_F(LexerTest, EmptyString)
 	{
 		const std::string_view empty_string  = "\0";
-		const auto             result_tokens = _lexer.tokenize(empty_string);
+		const auto             result_tokens = Lexer::tokenize(empty_string, &this->_diagnostics);
 		ASSERT_EQ(result_tokens.size(), 1);
 		ASSERT_EQ(result_tokens[0].type(), TokenType::EndOfFile);
 		ASSERT_TRUE(result_tokens[0].no_value());
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Identifiers)
@@ -37,7 +39,7 @@ namespace soul::lexer::ut
 			"invalid_variable",
 			"this_should_work",
 		};
-		const auto result_tokens = _lexer.tokenize(string);
+		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index) {
@@ -48,7 +50,7 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Keywords)
@@ -63,7 +65,7 @@ namespace soul::lexer::ut
 			Token(TokenType::KeywordReturn), Token(TokenType::KeywordFn),       Token(TokenType::KeywordStruct),
 			Token(TokenType::KeywordTrue),   Token(TokenType::KeywordFalse),
 		};
-		const auto result_tokens = _lexer.tokenize(string);
+		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_tokens.size(); ++index) {
@@ -74,7 +76,7 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, SpecialCharacters)
@@ -122,7 +124,7 @@ namespace soul::lexer::ut
 			TokenType::Pipe,
 			TokenType::DoublePipe,
 		};
-		const auto result_tokens = _lexer.tokenize(string);
+		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_types.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_types.size(); ++index) {
@@ -134,7 +136,7 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_Integers)
@@ -143,7 +145,7 @@ namespace soul::lexer::ut
 		const std::vector<i64> expected_values = {
 			0, 54, 1024, 4098, -8192, 1000000000000,
 		};
-		const auto result_tokens = _lexer.tokenize(string);
+		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index) {
@@ -156,27 +158,26 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_Integers_OutOfRange)
 	{
 		const std::string_view string        = "100000000000000000000";  // Number sufficient to be Out of Range.
-		const auto             result_tokens = _lexer.tokenize(string);
+		const auto             result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(result_tokens.size(), 1);
 		ASSERT_TRUE(has_eof_token(result_tokens));
 
-		const auto& diagnostics = _lexer.diagnostics();
-		ASSERT_EQ(diagnostics.size(), 1);
-		ASSERT_EQ(diagnostics[0].code(), DiagnosticCode::LexerValueOutOfRange);
+		ASSERT_EQ(this->_diagnostics.size(), 1);
+		ASSERT_EQ(this->_diagnostics[0].code(), DiagnosticCode::LexerValueOutOfRange);
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_FloatingPoint)
 	{
 		const std::string_view string          = "0.0 -0.01 5.47 7.52 4098.0 -8192.32 1000000000000.0";
 		const std::vector<f64> expected_values = { 0.0, -0.01, 5.47, 7.52, 4098.0, -8192.32, 1000000000000.0 };
-		const auto             result_tokens   = _lexer.tokenize(string);
+		const auto             result_tokens   = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index) {
@@ -189,7 +190,7 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Numbers_Mixed)
@@ -206,7 +207,7 @@ namespace soul::lexer::ut
             Token(TokenType::LiteralFloat, Value(static_cast<f64>(-1024.0))),
             Token(TokenType::LiteralFloat, Value(static_cast<f64>(0.02))),
 		};
-		const auto result_tokens = _lexer.tokenize(string);
+		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_tokens.size(); ++index) {
@@ -223,14 +224,14 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Strings)
 	{
 		const std::string_view         string          = R"("my_value""no space after previous" "520")";
 		const std::vector<std::string> expected_values = { "my_value", "no space after previous", "520" };
-		const auto                     result_tokens   = _lexer.tokenize(string);
+		const auto                     result_tokens   = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_values.size(); ++index) {
@@ -243,20 +244,19 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Strings_UnterminatedString)
 	{
 		const std::string_view string        = "\"this is an unterminated string, how sad :c";
-		const auto             result_tokens = _lexer.tokenize(string);
+		const auto             result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(result_tokens.size(), 1);
 		ASSERT_TRUE(has_eof_token(result_tokens));
 
-		const auto& diagnostics = _lexer.diagnostics();
-		ASSERT_EQ(diagnostics.size(), 1);
-		ASSERT_EQ(diagnostics[0].code(), DiagnosticCode::LexerUnterminatedString);
+		ASSERT_EQ(this->_diagnostics.size(), 1);
+		ASSERT_EQ(this->_diagnostics[0].code(), DiagnosticCode::LexerUnterminatedString);
 	}
 
 	TEST_F(LexerTest, Compressed)
@@ -268,7 +268,7 @@ namespace soul::lexer::ut
             Token(TokenType::Equal),      Token(TokenType::LiteralInteger, Value(static_cast<i64>(320))),
             Token(TokenType::Semicolon),
 		};
-		const auto result_tokens = _lexer.tokenize(string);
+		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_tokens.size(); ++index) {
@@ -278,7 +278,7 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, All)
@@ -313,7 +313,7 @@ namespace soul::lexer::ut
             Token(TokenType::Semicolon),
             Token(TokenType::BraceRight),
 		};
-		const auto result_tokens = _lexer.tokenize(string);
+		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
 		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
 		for (size_t index = 0; index < expected_tokens.size(); ++index) {
@@ -323,6 +323,6 @@ namespace soul::lexer::ut
 		}
 
 		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(_lexer.diagnostics().empty());
+		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 }  // namespace soul::lexer::ut

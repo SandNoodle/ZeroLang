@@ -3,6 +3,7 @@
 #include "common/diagnostic.h"
 #include "lexer/token.h"
 
+#include <functional>
 #include <optional>
 #include <string_view>
 #include <vector>
@@ -18,27 +19,25 @@ namespace soul::lexer
 		using Char = char;
 
 		private:
-		std::string_view    _script;
-		size_t              _start_index    = 0;
-		size_t              _current_offset = 0;
-		mutable Diagnostics _diagnostics;
+		std::string_view _script         = {};
+		size_t           _start_index    = 0;
+		size_t           _current_offset = 0;
+		Diagnostics*     _diagnostics    = nullptr;
 
 		public:
 		/**
 		 * @brief Converts the input script into a linear sequence of tokens
 		 * in a process known as a 'tokenization'.
 		 * @param script Script that will be parsed / tokenized.
+		 * @param Diagnostic
 		 * @return Tokenized sequence of a given script.
 		 */
-		[[nodiscard]] std::vector<Token> tokenize(std::string_view script);
-
-		/**
-		 * @brief Returns all diagnostic messages collected during lexing.
-		 * @detail If not diagnostic messages were collected, the vector is empty.
-		 */
-		[[nodiscard]] const Diagnostics& diagnostics() const noexcept { return _diagnostics; }
+		[[nodiscard]] static std::vector<Token> tokenize(std::string_view script, Diagnostics* diagnostics = nullptr);
 
 		private:
+		Lexer(std::string_view script, Diagnostics* diagnostics = nullptr);
+
+		std::vector<Token>   tokenize();
 		std::optional<Token> scan_token();
 		Token                create_identifier_token();
 		std::optional<Token> create_numeric_token();
@@ -52,7 +51,10 @@ namespace soul::lexer
 		template <typename... Args>
 		void diagnostic(DiagnosticType type, DiagnosticCode code, Args&&... args) const
 		{
-			_diagnostics.emplace_back(type, code, std::forward<Args>(args)...);
+			if (!_diagnostics) {
+				return;
+			}
+			_diagnostics->emplace_back(type, code, std::forward<Args>(args)...);
 		}
 
 		void             skip_whitespace();

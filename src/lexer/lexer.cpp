@@ -40,14 +40,19 @@
 
 namespace soul::lexer
 {
-	std::vector<Token> Lexer::tokenize(std::string_view script)
+	Lexer::Lexer(std::string_view script, Diagnostics* diagnostics)
+		: _script(script), _start_index(0), _current_offset(0), _diagnostics(diagnostics)
 	{
-		_current_offset = 0;
-		_start_index    = 0;
-		_script         = script;
-		_diagnostics.clear();
+	}
 
-		if (script.empty()) {
+	std::vector<Token> Lexer::tokenize(std::string_view script, Diagnostics* diagnostics)
+	{
+		return Lexer{ script, diagnostics }.tokenize();
+	}
+
+	std::vector<Token> Lexer::tokenize()
+	{
+		if (_script.empty()) {
 			return { Token(TokenType::EndOfFile) };
 		}
 
