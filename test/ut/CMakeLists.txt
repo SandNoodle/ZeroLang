@@ -17,7 +17,7 @@ enable_testing()
 
 add_executable(
         ${PROJECT_NAME}
-        backend/wasm/compiler_test.cpp
+        backend/codegen/wasm/compiler_test.cpp
         lexer/lexer_test.cpp
         parser/parser_test.cpp
 )

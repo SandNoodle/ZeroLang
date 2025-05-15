@@ -2,13 +2,13 @@
 
 #include "ast/ast.h"
 #include "ast/visitors/default_traverse.h"
-#include "backend/wasm/opcode.h"
+#include "backend/codegen/wasm/opcode.h"
 #include "core/types.h"
 
 #include <span>
 #include <vector>
 
-namespace soul::backend::wasm
+namespace soul::backend::codegen::wasm
 {
 	namespace internal
 	{
@@ -62,5 +62,5 @@ namespace soul::backend::wasm
 		template <typename T>
 		constexpr void patch(Bytecode& code, Address address, T value);
 	};
-}  // namespace soul::backend::wasm
-#include "backend/wasm/compiler.inl"
+}  // namespace soul::backend::codegen::wasm
+#include "backend/codegen/wasm/compiler.inl"

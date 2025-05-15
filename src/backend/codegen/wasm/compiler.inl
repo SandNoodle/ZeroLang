@@ -3,7 +3,7 @@
 #include <cstring>
 #include <type_traits>
 
-namespace soul::backend::wasm
+namespace soul::backend::codegen::wasm
 {
 	template <typename T>
 	constexpr auto WASMCompiler::emit(Bytecode& code, T value) -> Address
@@ -32,4 +32,4 @@ namespace soul::backend::wasm
 	constexpr auto WASMCompiler::patch(Bytecode& code, Address address, T value) -> void
 	{
 	}
-}  // namespace soul::backend::wasm
+}  // namespace soul::backend::codegen::wasm

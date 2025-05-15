@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "backend/wasm/compiler.h"
+#include "backend/codegen/wasm/compiler.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 
-namespace soul::backend::wasm::ut
+namespace soul::backend::codegen::wasm::ut
 {
 	using namespace parser;
 	using namespace lexer;
@@ -25,4 +25,4 @@ namespace soul::backend::wasm::ut
 		// TODO: Decode headers, etc.
 	}
 
-}  // namespace soul::backend::wasm::ut
+}  // namespace soul::backend::codegen::wasm::ut

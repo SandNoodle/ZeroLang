@@ -1,4 +1,4 @@
-#include "backend/wasm/compiler.h"
+#include "backend/codegen/wasm/compiler.h"
 
 #include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
@@ -13,7 +13,7 @@
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
 
-namespace soul::backend::wasm
+namespace soul::backend::codegen::wasm
 {
 	using namespace ast::nodes;
 	using namespace ast::visitors;
@@ -228,4 +228,4 @@ namespace soul::backend::wasm
 
 		return code;
 	}
-}  // namespace soul::backend::wasm
+}  // namespace soul::backend::codegen::wasm

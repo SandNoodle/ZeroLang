@@ -2,7 +2,7 @@
 
 #include "core/types.h"
 
-namespace soul::backend::wasm
+namespace soul::backend::codegen::wasm
 {
 	/**
 	 * @brief
@@ -21,4 +21,4 @@ namespace soul::backend::wasm
 		Return       = 0x0F,
 		Call         = 0x10,
 	};
-}  // namespace soul::backend::wasm
+}  // namespace soul::backend::codegen::wasm
