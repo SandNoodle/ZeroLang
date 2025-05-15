@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <source_location>
 #include <unordered_set>
 
 namespace soul::parser::ut
@@ -56,7 +57,8 @@ namespace soul::parser::ut
 		public:
 		static std::vector<Case> generate_cases()
 		{
-			static const auto k_base_directory = std::filesystem::path{ __FILE__ }.parent_path() / "cases";
+			static const auto k_base_directory
+				= std::filesystem::path{ std::source_location::current().file_name() }.parent_path() / "cases";
 			std::unordered_set<std::filesystem::path> unique_files;
 			for (const auto& entry : std::filesystem::recursive_directory_iterator(k_base_directory)) {
 				if (entry.is_directory()) {
