@@ -12,14 +12,14 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
-#include "ast/types/type.h"
+#include "common/types/type.h"
 
 #include <unordered_set>
 
 namespace soul::ast::visitors
 {
 	using namespace soul::ast::nodes;
-	using namespace soul::ast::types;
+	using namespace soul::types;
 
 	TypeResolverVisitor::TypeResolverVisitor(ResolveFlags flags) : _flags(flags) { register_basic_types(); }
 
@@ -160,21 +160,23 @@ namespace soul::ast::visitors
 		accept(node.lhs.get());
 		accept(node.rhs.get());
 
+		// Both nodes have the same type - great!
 		if (node.lhs->type == node.rhs->type) {
 			node.type = node.lhs->type;
 			return;
 		}
 
-		if (_flags & ResolveFlags::ForceStrictCasts) {
-			if (node.lhs->type != node.rhs->type) {
-				// TODO: diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolver);
-			}
+		// If strict casting is enabled then all casts should be explicit.
+		const bool should_force_strict_casts = _flags & ResolveFlags::ForceStrictCasts;
+		if (should_force_strict_casts && node.lhs->type != node.rhs->type) {
+//			diagnostic(DiagnosticType::Error,
+//			           DiagnosticCode::TypeResolverForceStrictCasts,
+//			           std::string(node.lhs->type),
+//			           std::string(node.rhs->type));
+
+			// We don't know what the destination type should be, nor we should care at this point.
 			node.type = PrimitiveType::Kind::Unknown;
 			return;
-		}
-
-		if (cast_type(node.lhs->type, node.rhs->type) == CastType::Implicit) {
-			// TODO: cast to common type and set node.type to that type.
 		}
 	}
 

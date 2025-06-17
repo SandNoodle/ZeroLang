@@ -26,6 +26,7 @@ namespace soul
 		TypeResolverTypeUnknown,
 		TypeResolverTypeRedefined,
 		TypeResolverCannotInferUnknownType,
+		TypeResolverForceStrictCasts,
 	};
 
 	/** * @brief Returns the base, un-formatted diagnostic message. */
@@ -64,8 +65,7 @@ namespace soul
 	Diagnostic::Diagnostic(DiagnosticType type, DiagnosticCode code, Args&&... args) : _type(type), _code(code)
 
 	{
-		this->_message =
-			std::vformat(get_base_diagnostic_message(code), std::make_format_args(std::forward<Args>(args)...));
+		_message = std::vformat(get_base_diagnostic_message(code), std::make_format_args(std::forward<Args>(args)...));
 	}
 
 	using Diagnostics = std::vector<Diagnostic>;

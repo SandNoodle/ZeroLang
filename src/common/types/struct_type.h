@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace soul::ast::types
+namespace soul::types
 {
 	class Type;
 
@@ -21,6 +21,7 @@ namespace soul::ast::types
 		StructType(ContainedTypes types);
 
 		bool               operator==(const StructType&) const noexcept = default;
-		std::weak_ordering operator<=>(const StructType&) const noexcept;
+		std::weak_ordering operator<=>(const StructType&) const;
+		explicit operator std::string() const;
 	};
-}  // namespace soul::ast::types
+}  // namespace soul::types

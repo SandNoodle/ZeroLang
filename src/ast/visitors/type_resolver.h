@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast/nodes/nodes_fwd.h"
-#include "ast/types/types_fwd.h"
+#include "common/types/types_fwd.h"
 #include "ast/visitors/default_traverse.h"
 #include "common/diagnostic.h"
 

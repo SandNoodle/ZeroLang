@@ -8,6 +8,10 @@
 
 namespace soul::ast::visitors
 {
+#define SOUL_VISIT_NODE_OVERRIDE_DEFINE(node_name) \
+	virtual void visit(node_name&) override;       \
+	virtual void visit(const node_name&) override;
+
 	/**
 	 * @brief @TODO
 	 */
@@ -18,30 +22,17 @@ namespace soul::ast::visitors
 
 		virtual void accept(const ASTNode::Reference node);
 
-		virtual void visit(nodes::AssignNode&);
-		virtual void visit(nodes::BinaryNode&);
-		virtual void visit(nodes::CastNode&);
-		virtual void visit(nodes::ForLoopNode&);
-		virtual void visit(nodes::ForeachLoopNode&);
-		virtual void visit(nodes::FunctionDeclarationNode&);
-		virtual void visit(nodes::IfNode&);
-		virtual void visit(nodes::LiteralNode&);
-		virtual void visit(nodes::ModuleNode&);
-		virtual void visit(nodes::StructDeclarationNode&);
-		virtual void visit(nodes::UnaryNode&);
-		virtual void visit(nodes::VariableDeclarationNode&);
-
-		virtual void visit(const nodes::AssignNode&);
-		virtual void visit(const nodes::BinaryNode&);
-		virtual void visit(const nodes::CastNode&);
-		virtual void visit(const nodes::ForLoopNode&);
-		virtual void visit(const nodes::ForeachLoopNode&);
-		virtual void visit(const nodes::FunctionDeclarationNode&);
-		virtual void visit(const nodes::IfNode&);
-		virtual void visit(const nodes::LiteralNode&);
-		virtual void visit(const nodes::ModuleNode&);
-		virtual void visit(const nodes::StructDeclarationNode&);
-		virtual void visit(const nodes::UnaryNode&);
-		virtual void visit(const nodes::VariableDeclarationNode&);
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::AssignNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::BinaryNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::CastNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::ForLoopNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::ForeachLoopNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::FunctionDeclarationNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::IfNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::LiteralNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::ModuleNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::StructDeclarationNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::UnaryNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::VariableDeclarationNode)
 	};
-}  // namespace soul
+}  // namespace soul::ast::visitors

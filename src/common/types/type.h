@@ -1,14 +1,15 @@
 #pragma once
 
-#include "ast/types/array_type.h"
-#include "ast/types/primitive_type.h"
-#include "ast/types/struct_type.h"
+#include "common/types/array_type.h"
+#include "common/types/primitive_type.h"
+#include "common/types/struct_type.h"
 
 #include <concepts>
 #include <type_traits>
 #include <variant>
+#include <string>
 
-namespace soul::ast::types
+namespace soul::types
 {
 	/**
 	 * @brief Concept defining all the possible Type System's builtin types.
@@ -19,7 +20,7 @@ namespace soul::ast::types
 	                || std::same_as<T, StructType>     //
 		;
 
-	std::weak_ordering operator<=>(const Type& lhs, const Type& rhs) noexcept;
+	std::weak_ordering operator<=>(const Type& lhs, const Type& rhs);
 
 	/**
 	 * @brief Backbone of the Soul's Type System.
@@ -43,6 +44,7 @@ namespace soul::ast::types
 		Type& operator=(const Type&) noexcept        = default;
 		Type& operator=(Type&&) noexcept             = default;
 		bool  operator==(const Type&) const noexcept = default;
+		explicit operator std::string() const;
 
 		/**
 		 * @brief
@@ -61,6 +63,6 @@ namespace soul::ast::types
 			return std::get<T>(_type);
 		}
 
-		friend std::weak_ordering operator<=>(const Type&, const Type&) noexcept;
+		friend std::weak_ordering operator<=>(const Type&, const Type&);
 	};
-}  // namespace soul::ast::types
+}  // namespace soul::types

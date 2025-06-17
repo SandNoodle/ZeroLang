@@ -5,17 +5,37 @@
 
 namespace soul
 {
+	std::optional<std::string_view> get_hint(DiagnosticCode code)
+	{
+		static const std::unordered_map<DiagnosticCode, std::string_view> k_hints = {
+			{ DiagnosticCode::LexerValueIsNotANumber,             "" },
+			{ DiagnosticCode::LexerValueOutOfRange,               "" },
+			{ DiagnosticCode::LexerUnterminatedString,            "" },
+			{ DiagnosticCode::ParserOutOfRange,                   "" },
+			{ DiagnosticCode::TypeResolverTypeUnknown,            "" },
+			{ DiagnosticCode::TypeResolverTypeRedefined,          "" },
+			{ DiagnosticCode::TypeResolverCannotInferUnknownType, "" },
+			{ DiagnosticCode::TypeResolverForceStrictCasts,       "" }
+		};
+		if (!k_hints.contains(code)) {
+			return std::nullopt;
+		}
+		return k_hints.at(code);
+	}
+
 	std::string_view get_base_diagnostic_message(DiagnosticCode code)
 	{
 		static const std::unordered_map<DiagnosticCode, std::string_view> k_messages = {
-			{ DiagnosticCode::LexerUnrecognizedToken,    "unrecognized token"                       },
-			{ DiagnosticCode::LexerValueIsNotANumber,    "value is not a number"                    },
-			{ DiagnosticCode::LexerValueOutOfRange,      "value is out of range"                    },
-			{ DiagnosticCode::LexerUnterminatedString,   "unterminated string"                      },
-			{ DiagnosticCode::ParserOutOfRange,          "cannot peek the next token: out of range" },
-			{ DiagnosticCode::TypeResolverTypeUnknown,   "unknown type '{}'"                        },
-			{ DiagnosticCode::TypeResolverTypeRedefined, "redefinition of type '{}'"                },
-			{ DiagnosticCode::TypeResolverTypeRedefined, "cannot infer the unknown type"            },
+			{ DiagnosticCode::LexerUnrecognizedToken,             "unrecognized token"                          },
+			{ DiagnosticCode::LexerValueIsNotANumber,             "value is not a number"                       },
+			{ DiagnosticCode::LexerValueOutOfRange,               "value is out of range"                       },
+			{ DiagnosticCode::LexerUnterminatedString,            "unterminated string"                         },
+			{ DiagnosticCode::ParserOutOfRange,                   "cannot peek the next token: out of range"    },
+			{ DiagnosticCode::TypeResolverTypeUnknown,            "unknown type '{}'"                           },
+			{ DiagnosticCode::TypeResolverTypeRedefined,          "redefinition of type '{}'"                   },
+			{ DiagnosticCode::TypeResolverCannotInferUnknownType, "cannot infer an unknown type"                },
+			{ DiagnosticCode::TypeResolverForceStrictCasts,
+             "cannot perform an implicit cast from '{}' to '{}', because force explicit casts mode was enabled" }
 		};
 		return k_messages.at(code);
 	}

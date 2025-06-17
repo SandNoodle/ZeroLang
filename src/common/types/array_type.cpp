@@ -1,8 +1,8 @@
-#include "ast/types/array_type.h"
+#include "common/types/array_type.h"
 
-#include "ast/types/type.h"
+#include "common/types/type.h"
 
-namespace soul::ast::types
+namespace soul::types
 {
 	ArrayType::ArrayType(const Type& contained_type) : _type(std::make_unique<Type>(contained_type)) {}
 
@@ -33,4 +33,4 @@ namespace soul::ast::types
 	const Type& ArrayType::data_type() const noexcept { return *_type; }
 
 	Type& ArrayType::data_type() noexcept { return *_type; }
-}  // namespace soul::ast::types
+}  // namespace soul::types

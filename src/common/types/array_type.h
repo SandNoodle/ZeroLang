@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace soul::ast::types
+namespace soul::types
 {
 	class Type;
 
@@ -25,10 +25,11 @@ namespace soul::ast::types
 		ArrayType&         operator=(const ArrayType&) noexcept;
 		ArrayType&         operator=(ArrayType&&) noexcept;
 		bool               operator==(const ArrayType&) const noexcept = default;
-		std::weak_ordering operator<=>(const ArrayType&) const noexcept;
+		std::weak_ordering operator<=>(const ArrayType&) const;
+		explicit operator std::string() const;
 
 		const Type& data_type() const noexcept;
 		Type&       data_type() noexcept;
 	};
 
-}  // namespace soul::ast::types
+}  // namespace soul::types

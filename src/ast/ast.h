@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast/types/type.h"
+#include "common/types/type.h"
 #include "ast/visitors/visitor.h"
 
 #include <memory>

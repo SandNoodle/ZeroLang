@@ -1,10 +1,10 @@
-#include "ast/types/struct_type.h"
+#include "common/types/struct_type.h"
 
-#include "ast/types/type.h"
+#include "common/types/type.h"
 
 #include <algorithm>
 
-namespace soul::ast::types
+namespace soul::types
 {
 	StructType::StructType(ContainedTypes types) : types(std::move(types)) {}
 
@@ -17,4 +17,4 @@ namespace soul::ast::types
 		                                              [](const auto& lhs, const auto& rhs) { return lhs <=> rhs; });
 	}
 
-}  // namespace soul::ast::types
+}  // namespace soul::types

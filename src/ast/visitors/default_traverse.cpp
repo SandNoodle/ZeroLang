@@ -17,6 +17,9 @@
 
 namespace soul::ast::visitors
 {
+#define SOUL_VISIT_NODE_AS_CONST_IMPL(node_name) \
+	void DefaultTraverseVisitor::visit(node_name& node) { visit(std::as_const(node)); }
+
 	using namespace soul::ast::nodes;
 
 	void DefaultTraverseVisitor::accept(const ASTNode::Reference node)
@@ -27,18 +30,18 @@ namespace soul::ast::visitors
 		node->accept(*this);
 	}
 
-	void DefaultTraverseVisitor::visit(AssignNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(BinaryNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(CastNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(ForLoopNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(ForeachLoopNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(FunctionDeclarationNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(IfNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(LiteralNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(ModuleNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(StructDeclarationNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(UnaryNode& node) { visit(std::as_const(node)); }
-	void DefaultTraverseVisitor::visit(VariableDeclarationNode& node) { visit(std::as_const(node)); }
+	SOUL_VISIT_NODE_AS_CONST_IMPL(AssignNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(BinaryNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(CastNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(ForLoopNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(ForeachLoopNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(FunctionDeclarationNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(IfNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(LiteralNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(ModuleNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(StructDeclarationNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(UnaryNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(VariableDeclarationNode)
 
 	void DefaultTraverseVisitor::visit(const AssignNode& node)
 	{
@@ -114,4 +117,6 @@ namespace soul::ast::visitors
 	void DefaultTraverseVisitor::visit(const UnaryNode& node) { accept(node.expr.get()); }
 
 	void DefaultTraverseVisitor::visit(const VariableDeclarationNode& node) { accept(node.expr.get()); }
+
+#undef SOUL_VISIT_NODE_AS_CONST_IMPL
 }  // namespace soul::ast::visitors
