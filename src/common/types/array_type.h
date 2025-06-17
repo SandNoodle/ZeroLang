@@ -3,6 +3,7 @@
 #include "core/types.h"
 
 #include <memory>
+#include <string>
 
 namespace soul::types
 {
@@ -26,7 +27,7 @@ namespace soul::types
 		ArrayType&         operator=(ArrayType&&) noexcept;
 		bool               operator==(const ArrayType&) const noexcept = default;
 		std::weak_ordering operator<=>(const ArrayType&) const;
-		explicit operator std::string() const;
+		explicit           operator std::string() const;
 
 		const Type& data_type() const noexcept;
 		Type&       data_type() noexcept;

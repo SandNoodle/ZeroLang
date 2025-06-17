@@ -2,10 +2,7 @@
 
 #include "core/types.h"
 
-#include <concepts>
 #include <string>
-#include <type_traits>
-#include <variant>
 
 namespace soul::types
 {
@@ -34,8 +31,8 @@ namespace soul::types
 		public:
 		PrimitiveType(Kind type = Kind::Unknown) : type(type) {}
 
-		bool               operator==(const PrimitiveType&) const noexcept  = default;
-		std::weak_ordering operator<=>(const PrimitiveType&) const = default;
-		explicit operator std::string() const;
+		bool               operator==(const PrimitiveType&) const noexcept = default;
+		std::weak_ordering operator<=>(const PrimitiveType&) const         = default;
+		explicit           operator std::string() const;
 	};
 }  // namespace soul::types

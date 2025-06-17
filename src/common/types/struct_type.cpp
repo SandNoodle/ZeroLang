@@ -3,12 +3,13 @@
 #include "common/types/type.h"
 
 #include <algorithm>
+#include <sstream>
 
 namespace soul::types
 {
 	StructType::StructType(ContainedTypes types) : types(std::move(types)) {}
 
-	std::weak_ordering StructType::operator<=>(const StructType& other) const noexcept
+	std::weak_ordering StructType::operator<=>(const StructType& other) const
 	{
 		return std::lexicographical_compare_three_way(std::begin(types),
 		                                              std::end(types),
@@ -17,4 +18,17 @@ namespace soul::types
 		                                              [](const auto& lhs, const auto& rhs) { return lhs <=> rhs; });
 	}
 
+	StructType::operator std::string() const
+	{
+		std::stringstream ss;
+		ss << '(';
+		for (size_t index = 0; index < types.size(); ++index) {
+			ss << std::string(types[index]);
+			if (index + 1 != types.size()) {
+				ss << ", ";
+			}
+		}
+		ss << ')';
+		return ss.str();
+	}
 }  // namespace soul::types

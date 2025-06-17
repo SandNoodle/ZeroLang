@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 namespace soul::types
@@ -22,6 +23,6 @@ namespace soul::types
 
 		bool               operator==(const StructType&) const noexcept = default;
 		std::weak_ordering operator<=>(const StructType&) const;
-		explicit operator std::string() const;
+		explicit           operator std::string() const;
 	};
 }  // namespace soul::types

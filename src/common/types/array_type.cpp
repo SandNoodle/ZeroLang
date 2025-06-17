@@ -28,7 +28,9 @@ namespace soul::types
 		return *this;
 	}
 
-	std::weak_ordering ArrayType::operator<=>(const ArrayType& other) const noexcept { return *_type <=> *other._type; }
+	std::weak_ordering ArrayType::operator<=>(const ArrayType& other) const { return *_type <=> *other._type; }
+
+	ArrayType::operator std::string() const { return std::string(*_type) + "[]"; }
 
 	const Type& ArrayType::data_type() const noexcept { return *_type; }
 
