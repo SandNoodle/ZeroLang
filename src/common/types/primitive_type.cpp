@@ -25,4 +25,6 @@ namespace soul::types
 		}
 		return std::string(k_types.at(type));
 	}
+
+	std::ostream& operator<<(std::ostream& os, const PrimitiveType& type) { return os << std::string(type); }
 }  // namespace soul::types

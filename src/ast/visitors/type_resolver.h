@@ -1,16 +1,29 @@
 #pragma once
 
 #include "ast/nodes/nodes_fwd.h"
-#include "common/types/types_fwd.h"
 #include "ast/visitors/default_traverse.h"
+#include "ast/visitors/type_discoverer.h"
 #include "common/diagnostic.h"
+#include "common/types/types_fwd.h"
 
-#include <string>
+#include <optional>
+#include <ranges>
+#include <string_view>
 #include <unordered_map>
 
 namespace soul::ast::visitors
 {
+	/** @brief */
+	enum class CastType : u8
+	{
+		Implicit,
+		Explicit,
+		Impossible,
+	};
 
+	/**
+	 * @brief
+	 */
 	class TypeResolverVisitor : public DefaultTraverseVisitor
 	{
 		public:
@@ -20,13 +33,14 @@ namespace soul::ast::visitors
 			ForceStrictCasts = 1 << 1,
 		};
 
+		using TypeMap = TypeDiscovererVisitor::TypeMap;
+
 		private:
-		ResolveFlags                                 _flags;
-		std::unordered_map<std::string, types::Type> _registered_types;
-		mutable Diagnostics                          _diagnostics;
+		TypeMap      _registered_types;
+		ResolveFlags _flags;
 
 		public:
-		TypeResolverVisitor(ResolveFlags flags = ResolveFlags::None);
+		TypeResolverVisitor(TypeMap type_map, ResolveFlags flags = ResolveFlags::None);
 		TypeResolverVisitor(const TypeResolverVisitor&)     = delete;
 		TypeResolverVisitor(TypeResolverVisitor&&) noexcept = default;
 		~TypeResolverVisitor()                              = default;
@@ -36,7 +50,6 @@ namespace soul::ast::visitors
 
 		using DefaultTraverseVisitor::accept;
 		using DefaultTraverseVisitor::visit;
-		void visit(nodes::AssignNode&) override;
 		void visit(nodes::BinaryNode&) override;
 		void visit(nodes::CastNode&) override;
 		void visit(nodes::ForLoopNode&) override;
@@ -50,18 +63,9 @@ namespace soul::ast::visitors
 		void visit(nodes::VariableDeclarationNode&) override;
 
 		private:
-		bool register_type(const std::string& name, types::Type&& type);
-		void register_basic_types();
+		static CastType get_cast_type(const types::Type& from, const types::Type& to);
 
-		/**
-		 * @brief Creates diagnostic message.
-		 * @param code Diagnostic code - determines the message.
-		 * @param args Arguments to format the diagnostic string with.
-		 */
-		template <typename... Args>
-		void diagnostic(DiagnosticType type, DiagnosticCode code, Args&&... args) const
-		{
-			_diagnostics.emplace_back(type, code, std::forward<Args>(args)...);
-		}
+		types::Type get_type_from_identifier(std::string_view type_identifier) const noexcept;
 	};
 }  // namespace soul::ast::visitors
+#include "ast/visitors/type_resolver.inl"

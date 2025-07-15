@@ -1,6 +1,5 @@
 #include "ast/visitors/default_traverse.h"
 
-#include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
@@ -30,7 +29,6 @@ namespace soul::ast::visitors
 		node->accept(*this);
 	}
 
-	SOUL_VISIT_NODE_AS_CONST_IMPL(AssignNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(BinaryNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(CastNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(ForLoopNode)
@@ -42,12 +40,6 @@ namespace soul::ast::visitors
 	SOUL_VISIT_NODE_AS_CONST_IMPL(StructDeclarationNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(UnaryNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(VariableDeclarationNode)
-
-	void DefaultTraverseVisitor::visit(const AssignNode& node)
-	{
-		accept(node.lhs.get());
-		accept(node.rhs.get());
-	}
 
 	void DefaultTraverseVisitor::visit(const BinaryNode& node)
 	{

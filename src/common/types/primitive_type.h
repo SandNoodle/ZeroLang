@@ -34,5 +34,7 @@ namespace soul::types
 		bool               operator==(const PrimitiveType&) const noexcept = default;
 		std::weak_ordering operator<=>(const PrimitiveType&) const         = default;
 		explicit           operator std::string() const;
+
+		friend std::ostream& operator<<(std::ostream& os, const PrimitiveType&);
 	};
 }  // namespace soul::types

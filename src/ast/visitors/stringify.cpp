@@ -1,6 +1,5 @@
 #include "ast/visitors/stringify.h"
 
-#include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
@@ -34,16 +33,6 @@ namespace soul::ast::visitors
 		_ss << '{';
 		node->accept(*this);
 		_ss << '}';
-	}
-
-	void StringifyVisitor::visit(const AssignNode& node)
-	{
-		_ss << "\"type\":\"assign\",";
-		_ss << "\"lhs\":";
-		accept(node.lhs.get());
-		_ss << ',';
-		_ss << "\"rhs\":";
-		accept(node.rhs.get());
 	}
 
 	void StringifyVisitor::visit(const BinaryNode& node)

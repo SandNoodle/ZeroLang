@@ -31,6 +31,8 @@ namespace soul::types
 
 		const Type& data_type() const noexcept;
 		Type&       data_type() noexcept;
+
+		friend std::ostream& operator<<(std::ostream& os, const ArrayType&);
 	};
 
 }  // namespace soul::types

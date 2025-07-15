@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
@@ -24,67 +23,16 @@ namespace soul::ast::visitors::ut
 
 	class TypeResolverTest : public ::testing::Test
 	{
+		protected:
+		void resolve(ASTNode::Reference root)
+		{
+			TypeDiscovererVisitor type_discoverer_visitor{};
+			type_discoverer_visitor.accept(root);
+
+			TypeResolverVisitor type_resolver_visitor{ type_discoverer_visitor.get() };
+			type_resolver_visitor.accept(root);
+		}
 	};
-
-	TEST_F(TypeResolverTest, Assign_IncompatibleTypes)
-	{
-		auto       lhs  = LiteralNode::create(Value(true));
-		auto       rhs  = LiteralNode::create(Value("my_string"));
-		const auto root = AssignNode::create(std::move(lhs), std::move(rhs));
-
-		{
-			const auto* as_assign = dynamic_cast<AssignNode*>(root.get());
-			ASSERT_TRUE(as_assign);
-			ASSERT_TRUE(as_assign->lhs->type.is<PrimitiveType>());
-			ASSERT_TRUE(as_assign->rhs->type.is<PrimitiveType>());
-			EXPECT_EQ(as_assign->lhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
-			EXPECT_EQ(as_assign->rhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
-			EXPECT_EQ(as_assign->type, PrimitiveType::Kind::Unknown);
-		}
-
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(root.get());
-
-		{
-			const auto* as_assign = dynamic_cast<AssignNode*>(root.get());
-			ASSERT_TRUE(as_assign);
-			ASSERT_TRUE(as_assign->lhs->type.is<PrimitiveType>());
-			ASSERT_TRUE(as_assign->rhs->type.is<PrimitiveType>());
-			EXPECT_EQ(as_assign->lhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::Boolean);
-			EXPECT_EQ(as_assign->rhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::String);
-			EXPECT_EQ(as_assign->type, PrimitiveType::Kind::Unknown);
-		}
-	}
-
-	TEST_F(TypeResolverTest, Assign_CompatibleTypes)
-	{
-		auto       lhs  = LiteralNode::create(Value(1.2f));
-		auto       rhs  = LiteralNode::create(Value(64));
-		const auto root = AssignNode::create(std::move(lhs), std::move(rhs));
-
-		{
-			const auto* as_assign = dynamic_cast<AssignNode*>(root.get());
-			ASSERT_TRUE(as_assign);
-			ASSERT_TRUE(as_assign->lhs->type.is<PrimitiveType>());
-			ASSERT_TRUE(as_assign->rhs->type.is<PrimitiveType>());
-			EXPECT_EQ(as_assign->lhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
-			EXPECT_EQ(as_assign->rhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
-			EXPECT_EQ(as_assign->type, PrimitiveType::Kind::Unknown);
-		}
-
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(root.get());
-
-		{
-			const auto* as_assign = dynamic_cast<AssignNode*>(root.get());
-			ASSERT_TRUE(as_assign);
-			ASSERT_TRUE(as_assign->lhs->type.is<PrimitiveType>());
-			ASSERT_TRUE(as_assign->rhs->type.is<PrimitiveType>());
-			EXPECT_EQ(as_assign->lhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::Float32);
-			EXPECT_EQ(as_assign->rhs->type.as<PrimitiveType>().type, PrimitiveType::Kind::Float32);
-			EXPECT_EQ(as_assign->type, PrimitiveType::Kind::Float32);
-		}
-	}
 
 	TEST_F(TypeResolverTest, Binary_CompatibleTypes)
 	{
@@ -102,8 +50,7 @@ namespace soul::ast::visitors::ut
 			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Unknown);
 		}
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(root.get());
+		resolve(root.get());
 
 		{
 			const auto* as_binary = dynamic_cast<BinaryNode*>(root.get());
@@ -132,8 +79,7 @@ namespace soul::ast::visitors::ut
 			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Unknown);
 		}
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(root.get());
+		resolve(root.get());
 
 		{
 			const auto* as_binary = dynamic_cast<BinaryNode*>(root.get());
@@ -162,8 +108,7 @@ namespace soul::ast::visitors::ut
 			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Unknown);
 		}
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(root.get());
+		resolve(root.get());
 
 		{
 			const auto* as_binary = dynamic_cast<BinaryNode*>(root.get());
@@ -182,12 +127,11 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(expr->type.is<PrimitiveType>());
 		EXPECT_EQ(expr->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		auto cast = CastNode::create(std::move(expr), "i3264");
+		auto cast = CastNode::create(std::move(expr), "i64");
 		ASSERT_TRUE(cast->type.is<PrimitiveType>());
 		EXPECT_EQ(cast->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(cast.get());
+		resolve(cast.get());
 
 		{
 			const auto* as_cast = dynamic_cast<CastNode*>(cast.get());
@@ -198,7 +142,7 @@ namespace soul::ast::visitors::ut
 			const auto* as_expr = dynamic_cast<LiteralNode*>(as_cast->expression.get());
 			ASSERT_TRUE(as_expr);
 			ASSERT_TRUE(as_expr->type.is<PrimitiveType>());
-			EXPECT_EQ(as_expr->type.as<PrimitiveType>().type, PrimitiveType::Kind::Int64);
+			EXPECT_EQ(as_expr->type.as<PrimitiveType>().type, PrimitiveType::Kind::Float64);
 		}
 	}
 
@@ -256,8 +200,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(for_loop->type.is<PrimitiveType>());
 		EXPECT_EQ(for_loop->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(for_loop.get());
+		resolve(for_loop.get());
 
 		{
 			const auto* as_for_loop = dynamic_cast<ForLoopNode*>(for_loop.get());
@@ -329,8 +272,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(foreach->type.is<PrimitiveType>());
 		EXPECT_EQ(foreach->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(foreach.get());
+		resolve(foreach.get());
 
 		{
 			const auto* as_foreach = dynamic_cast<ForeachLoopNode*>(foreach.get());
@@ -384,8 +326,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(function_declaration->type.is<PrimitiveType>());
 		EXPECT_EQ(function_declaration->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(function_declaration.get());
+		resolve(function_declaration.get());
 
 		{
 			const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(function_declaration.get());
@@ -441,8 +382,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(if_node->type.is<PrimitiveType>());
 		EXPECT_EQ(if_node->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(if_node.get());
+		resolve(if_node.get());
 
 		{
 			const auto* as_if_node = dynamic_cast<IfNode*>(if_node.get());
@@ -493,8 +433,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(literal->type.is<PrimitiveType>());
 			EXPECT_EQ(literal->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-			TypeResolverVisitor type_resolver_visitor{};
-			type_resolver_visitor.accept(literal.get());
+			resolve(literal.get());
 
 			ASSERT_TRUE(literal->type.is<PrimitiveType>());
 			EXPECT_EQ(literal->type.as<PrimitiveType>().type, k_expected_types[index]);
@@ -515,8 +454,7 @@ namespace soul::ast::visitors::ut
 
 		auto module = ModuleNode::create("my_module", std::move(statements));
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(module.get());
+		resolve(module.get());
 
 		{
 			const auto* as_module = dynamic_cast<ModuleNode*>(module.get());
@@ -556,8 +494,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(struct_declaration->type.is<PrimitiveType>());
 		EXPECT_EQ(struct_declaration->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(struct_declaration.get());
+		resolve(struct_declaration.get());
 
 		static const auto k_expected_type = StructType{
 			{
@@ -582,8 +519,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(unary_node->type.is<PrimitiveType>());
 		EXPECT_EQ(unary_node->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(unary_node.get());
+		resolve(unary_node.get());
 
 		ASSERT_TRUE(unary_node->type.is<PrimitiveType>());
 		EXPECT_EQ(unary_node->type.as<PrimitiveType>().type, PrimitiveType::Kind::Int64);
@@ -608,8 +544,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(variable_declaration->type.is<PrimitiveType>());
 		EXPECT_EQ(variable_declaration->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
-		TypeResolverVisitor type_resolver_visitor{};
-		type_resolver_visitor.accept(variable_declaration.get());
+		resolve(variable_declaration.get());
 
 		{
 			const auto* as_variable_declaration = dynamic_cast<VariableDeclarationNode*>(variable_declaration.get());

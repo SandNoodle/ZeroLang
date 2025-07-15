@@ -2,13 +2,13 @@
 
 namespace soul::ast::nodes
 {
-	CastNode::CastNode(Identifier type_identifier, Dependency expression)
-		: type_identifier(std::move(type_identifier)), expression(std::move(expression))
+	CastNode::CastNode(Dependency expression, Identifier type_identifier)
+		: expression(std::move(expression)), type_identifier(std::move(type_identifier))
 	{
 	}
 
-	CastNode::Dependency CastNode::create(Identifier type_identifier, Dependency expression)
+	CastNode::Dependency CastNode::create(Dependency expression, Identifier type_identifier)
 	{
-		return std::make_unique<CastNode>(std::move(type_identifier), std::move(expression));
+		return std::make_unique<CastNode>(std::move(expression), std::move(type_identifier));
 	}
 }  // namespace soul::ast::nodes

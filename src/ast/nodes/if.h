@@ -20,7 +20,7 @@ namespace soul::ast::nodes
 		Dependencies else_statements;
 
 		public:
-		explicit IfNode(Dependency condition, Dependencies if_statements, Dependencies else_statements) noexcept;
+		explicit IfNode(Dependency condition, Dependencies if_statements, Dependencies else_statements = {}) noexcept;
 		~IfNode() override = default;
 
 		/**
@@ -29,7 +29,7 @@ namespace soul::ast::nodes
 		 * @param if_statements
 		 * @param else_statements [Optional]
 		 */
-		static Dependency create(Dependency condition, Dependencies if_statements, Dependencies else_statements);
+		static Dependency create(Dependency condition, Dependencies if_statements, Dependencies else_statements = {});
 	};
 
 }  // namespace soul::ast::nodes

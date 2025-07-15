@@ -22,7 +22,6 @@ namespace soul::ast::visitors
 
 		virtual void accept(const ASTNode::Reference node);
 
-		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::AssignNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::BinaryNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::CastNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::ForLoopNode)

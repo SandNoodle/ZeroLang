@@ -35,4 +35,6 @@ namespace soul::types
 	const Type& ArrayType::data_type() const noexcept { return *_type; }
 
 	Type& ArrayType::data_type() noexcept { return *_type; }
+
+	std::ostream& operator<<(std::ostream& os, const ArrayType& type) { return os << std::string(type); }
 }  // namespace soul::types

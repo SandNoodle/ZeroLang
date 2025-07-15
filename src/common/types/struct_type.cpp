@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <expected>
 
 namespace soul::types
 {
@@ -31,4 +32,6 @@ namespace soul::types
 		ss << ')';
 		return ss.str();
 	}
+
+	std::ostream& operator<<(std::ostream& os, const StructType& type) { return os << std::string(type); }
 }  // namespace soul::types

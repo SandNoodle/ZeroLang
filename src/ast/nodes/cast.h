@@ -14,19 +14,19 @@ namespace soul::ast::nodes
 		using Dependency = ASTNode::Dependency;
 
 		public:
+		Dependency expression      = nullptr;
 		Identifier type_identifier = {};
-		Dependency expression;
 
 		public:
-		explicit CastNode(Identifier type_identifier, Dependency expression);
+		explicit CastNode(Dependency expression, Identifier type_identifier);
 		~CastNode() override = default;
 
 		/**
 		 * @brief Constructs new Cast expression node.
+		 * @param expr Expression to cast.
 		 * @param type_identifier Type to cast to.
-		 * @param rhs Expression to cast from.
 		 * @return New 'Cast' expression node.
 		 */
-		static Dependency create(Identifier type_identifier, Dependency expression);
+		static Dependency create(Dependency expr, Identifier type_identifier);
 	};
 }  // namespace soul::ast::nodes

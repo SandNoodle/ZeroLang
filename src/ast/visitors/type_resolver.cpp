@@ -1,6 +1,5 @@
 #include "ast/visitors/type_resolver.h"
 
-#include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
@@ -14,145 +13,14 @@
 #include "ast/nodes/variable_declaration.h"
 #include "common/types/type.h"
 
-#include <unordered_set>
-
 namespace soul::ast::visitors
 {
 	using namespace soul::ast::nodes;
 	using namespace soul::types;
 
-	TypeResolverVisitor::TypeResolverVisitor(ResolveFlags flags) : _flags(flags) { register_basic_types(); }
-
-	// TODO MOVE OUT.
-	enum class CastType : u8
+	TypeResolverVisitor::TypeResolverVisitor(TypeMap type_map, ResolveFlags flags)
+		: _registered_types(std::move(type_map)), _flags(flags)
 	{
-		Implicit,
-		Explicit,
-		Impossible,
-	};
-
-	static const std::unordered_map<PrimitiveType::Kind, std::unordered_map<PrimitiveType::Kind, CastType>> k_cast_type
-		= {
-			  {
-               PrimitiveType::Kind::Boolean,
-               {
-					  { PrimitiveType::Kind::Boolean, CastType::Implicit },
-					  { PrimitiveType::Kind::Char, CastType::Impossible },
-					  { PrimitiveType::Kind::Float32, CastType::Impossible },
-					  { PrimitiveType::Kind::Float64, CastType::Impossible },
-					  { PrimitiveType::Kind::Int32, CastType::Explicit },
-					  { PrimitiveType::Kind::Int64, CastType::Explicit },
-					  { PrimitiveType::Kind::String, CastType::Explicit },
-				  }  //
-			  },
-			  {
-               PrimitiveType::Kind::Char,
-               {
-					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
-					  { PrimitiveType::Kind::Char, CastType::Implicit },
-					  { PrimitiveType::Kind::Float32, CastType::Impossible },
-					  { PrimitiveType::Kind::Float64, CastType::Impossible },
-					  { PrimitiveType::Kind::Int32, CastType::Impossible },
-					  { PrimitiveType::Kind::Int64, CastType::Impossible },
-					  { PrimitiveType::Kind::String, CastType::Implicit },
-				  }  //
-			  },
-			  {
-               PrimitiveType::Kind::Float32,
-               {
-					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
-					  { PrimitiveType::Kind::Char, CastType::Impossible },
-					  { PrimitiveType::Kind::Float32, CastType::Implicit },
-					  { PrimitiveType::Kind::Float64, CastType::Implicit },
-					  { PrimitiveType::Kind::Int32, CastType::Explicit },
-					  { PrimitiveType::Kind::Int64, CastType::Explicit },
-					  { PrimitiveType::Kind::String, CastType::Explicit },
-				  }  //
-			  },
-			  {
-               PrimitiveType::Kind::Float64,
-               {
-					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
-					  { PrimitiveType::Kind::Char, CastType::Impossible },
-					  { PrimitiveType::Kind::Float32, CastType::Explicit },
-					  { PrimitiveType::Kind::Float64, CastType::Implicit },
-					  { PrimitiveType::Kind::Int32, CastType::Explicit },
-					  { PrimitiveType::Kind::Int64, CastType::Explicit },
-					  { PrimitiveType::Kind::String, CastType::Explicit },
-				  }  //
-			  },
-			  {
-               PrimitiveType::Kind::Int32,
-               {
-					  { PrimitiveType::Kind::Boolean, CastType::Explicit },
-					  { PrimitiveType::Kind::Char, CastType::Impossible },
-					  { PrimitiveType::Kind::Float32, CastType::Explicit },
-					  { PrimitiveType::Kind::Float64, CastType::Explicit },
-					  { PrimitiveType::Kind::Int32, CastType::Implicit },
-					  { PrimitiveType::Kind::Int64, CastType::Implicit },
-					  { PrimitiveType::Kind::String, CastType::Explicit },
-				  }  //
-			  },
-			  {
-               PrimitiveType::Kind::Int64,
-               {
-					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
-					  { PrimitiveType::Kind::Char, CastType::Impossible },
-					  { PrimitiveType::Kind::Float32, CastType::Explicit },
-					  { PrimitiveType::Kind::Float64, CastType::Explicit },
-					  { PrimitiveType::Kind::Int32, CastType::Explicit },
-					  { PrimitiveType::Kind::Int64, CastType::Implicit },
-					  { PrimitiveType::Kind::String, CastType::Explicit },
-				  }  //
-			  },
-			  {
-               PrimitiveType::Kind::String,
-               {
-					  { PrimitiveType::Kind::Boolean, CastType::Impossible },
-					  { PrimitiveType::Kind::Char, CastType::Impossible },
-					  { PrimitiveType::Kind::Float32, CastType::Explicit },
-					  { PrimitiveType::Kind::Float64, CastType::Explicit },
-					  { PrimitiveType::Kind::Int32, CastType::Explicit },
-					  { PrimitiveType::Kind::Int64, CastType::Explicit },
-					  { PrimitiveType::Kind::String, CastType::Implicit },
-				  }  //
-			  },
-    };
-
-	CastType cast_type(const Type& from_type, const Type& to_type)
-	{
-		if (from_type.is<PrimitiveType>() && to_type.is<PrimitiveType>()) {
-			const auto from = from_type.as<PrimitiveType>().type;
-			const auto to   = to_type.as<PrimitiveType>().type;
-			// Generally we'd like to avoid casts we did not define...
-			if (!k_cast_type.contains(from)) {
-				return CastType::Impossible;
-			}
-			const auto& possible_casts = k_cast_type.at(from);
-			// ...same here.
-			if (!possible_casts.contains(to)) {
-				return CastType::Impossible;
-			}
-			return possible_casts.at(to);
-		}
-
-		if (from_type.is<StructType>() || to_type.is<StructType>()) {
-			// Casting from/to Struct types is not supported; maybe in the future.
-			return CastType::Impossible;
-		}
-		if (from_type.is<ArrayType>() && to_type.is<ArrayType>()) {
-			return cast_type(from_type.as<ArrayType>().data_type(), to_type.as<ArrayType>().data_type());
-		}
-
-		return CastType::Impossible;
-	}
-	// TODO: END MOVE OUT.
-
-	void TypeResolverVisitor::visit(AssignNode& node)
-	{
-		accept(node.lhs.get());
-		accept(node.rhs.get());
-		node.type = node.lhs->type;
 	}
 
 	void TypeResolverVisitor::visit(BinaryNode& node)
@@ -160,35 +28,26 @@ namespace soul::ast::visitors
 		accept(node.lhs.get());
 		accept(node.rhs.get());
 
-		// Both nodes have the same type - great!
-		if (node.lhs->type == node.rhs->type) {
-			node.type = node.lhs->type;
-			return;
-		}
-
-		// If strict casting is enabled then all casts should be explicit.
-		const bool should_force_strict_casts = _flags & ResolveFlags::ForceStrictCasts;
-		if (should_force_strict_casts && node.lhs->type != node.rhs->type) {
-//			diagnostic(DiagnosticType::Error,
-//			           DiagnosticCode::TypeResolverForceStrictCasts,
-//			           std::string(node.lhs->type),
-//			           std::string(node.rhs->type));
-
-			// We don't know what the destination type should be, nor we should care at this point.
+		if (get_cast_type(node.lhs->type, node.rhs->type) == CastType::Impossible) {
 			node.type = PrimitiveType::Kind::Unknown;
 			return;
 		}
+
+		// TODO: Resolved type depends on the operand too!
+		node.type = PrimitiveType::Kind::Unknown;  // TODO: FIX
 	}
 
 	void TypeResolverVisitor::visit(nodes::CastNode& node)
 	{
 		accept(node.expression.get());
-		if (!_registered_types.contains(node.type_identifier)) {
-			diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolverTypeUnknown, node.type_identifier);
+
+		auto to_type = get_type_from_identifier(node.type_identifier);
+		if (get_cast_type(node.expression->type, to_type) == CastType::Impossible) {
+			node.type = PrimitiveType::Kind::Unknown;
 			return;
 		}
 
-		node.type = _registered_types[node.type_identifier];
+		node.type = std::move(to_type);
 	}
 
 	void TypeResolverVisitor::visit(ForLoopNode& node)
@@ -199,7 +58,7 @@ namespace soul::ast::visitors
 		for (auto& statement : node.statements) {
 			accept(statement.get());
 		}
-		node.type = PrimitiveType::Kind::Unknown;
+		node.type = PrimitiveType::Kind::Void;
 	}
 
 	void TypeResolverVisitor::visit(ForeachLoopNode& node)
@@ -209,24 +68,18 @@ namespace soul::ast::visitors
 		for (auto& statement : node.statements) {
 			accept(statement.get());
 		}
-		node.type = PrimitiveType::Kind::Unknown;
+		node.type = PrimitiveType::Kind::Void;
 	}
 
 	void TypeResolverVisitor::visit(FunctionDeclarationNode& node)
 	{
-		if (_registered_types.contains(node.return_type)) {
-			node.type = _registered_types[node.return_type];
-		} else {
-			diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolverTypeUnknown, node.return_type);
+		for (auto& parameters : node.parameters) {
+			accept(parameters.get());
 		}
-
-		for (auto& parameter : node.parameters) {
-			accept(parameter.get());
-		}
-
 		for (auto& statement : node.statements) {
 			accept(statement.get());
 		}
+		node.type = get_type_from_identifier(node.return_type);
 	}
 
 	void TypeResolverVisitor::visit(IfNode& node)
@@ -238,14 +91,13 @@ namespace soul::ast::visitors
 		for (auto& statement : node.else_statements) {
 			accept(statement.get());
 		}
-		node.type = PrimitiveType::Kind::Unknown;
+		node.type = PrimitiveType::Kind::Void;
 	}
 
 	void TypeResolverVisitor::visit(LiteralNode& node)
 	{
 		if (node.value.is<Value::UnknownValue>()) {
-			using namespace std::string_view_literals;
-			diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolverCannotInferUnknownType);
+			node.type = PrimitiveType::Kind::Unknown;
 			return;
 		}
 
@@ -284,13 +136,17 @@ namespace soul::ast::visitors
 			return;
 		}
 
-		// TODO: Debug Error - could not infer value to type. Did you forget to update this here?
+		node.type = PrimitiveType::Kind::Unknown;
 	}
 
 	void TypeResolverVisitor::visit(ModuleNode& node)
 	{
-		// NOTE: Modules are typeless by default.
-		node.type = PrimitiveType::Kind::Unknown;
+		for (auto& statement : node.statements) {
+			accept(statement.get());
+		}
+
+		// NOTE: Modules are a collection of type declarations and functions, thus don't have their own type.
+		node.type = PrimitiveType::Kind::Void;
 	}
 
 	void TypeResolverVisitor::visit(StructDeclarationNode& node)
@@ -299,47 +155,136 @@ namespace soul::ast::visitors
 			accept(parameter.get());
 		}
 
-		if (_registered_types.contains(node.name)) {
-			diagnostic(DiagnosticType::Error, DiagnosticCode::TypeResolverTypeRedefined, node.name);
-			return;
-		}
-
-		StructType::ContainedTypes sub_types;
-		for (const auto& subtype : node.parameters) {
-			sub_types.push_back(subtype->type);
-		}
-		register_type(node.name, Type(StructType(std::move(sub_types))));
+		node.type = get_type_from_identifier(node.name);
 	}
 
-	void TypeResolverVisitor::visit(UnaryNode& node) { node.type = node.expr->type; }
+	void TypeResolverVisitor::visit(UnaryNode& node)
+	{
+		accept(node.expr.get());
+
+		// TODO: Resolved type depends on the operand too!
+		node.type = PrimitiveType::Kind::Unknown;  // TODO: FIX
+	}
 
 	void TypeResolverVisitor::visit(VariableDeclarationNode& node)
 	{
-		if (_registered_types.contains(node.type_identifier)) {
-			node.type = _registered_types[node.type_identifier];
-		}
-
 		accept(node.expr.get());
+		node.type = get_type_from_identifier(node.type_identifier);
 	}
+	static const std::unordered_map<PrimitiveType::Kind, std::unordered_map<PrimitiveType::Kind, CastType>> k_cast_type
+		= {
+			  {
+               PrimitiveType::Kind::Boolean,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Implicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Char,
+               {
+					  { PrimitiveType::Kind::Char, CastType::Implicit },
+					  { PrimitiveType::Kind::String, CastType::Implicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Float32,
+               {
+					  { PrimitiveType::Kind::Float32, CastType::Implicit },
+					  { PrimitiveType::Kind::Float64, CastType::Implicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Float64,
+               {
+					  { PrimitiveType::Kind::Float32, CastType::Explicit },
+					  { PrimitiveType::Kind::Float64, CastType::Implicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Int32,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Explicit },
+					  { PrimitiveType::Kind::Float32, CastType::Implicit },
+					  { PrimitiveType::Kind::Float64, CastType::Implicit },
+					  { PrimitiveType::Kind::Int32, CastType::Implicit },
+					  { PrimitiveType::Kind::Int64, CastType::Implicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::Int64,
+               {
+					  { PrimitiveType::Kind::Boolean, CastType::Explicit },
+					  { PrimitiveType::Kind::Float32, CastType::Implicit },
+					  { PrimitiveType::Kind::Float64, CastType::Implicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Implicit },
+					  { PrimitiveType::Kind::String, CastType::Explicit },
+				  }  //
+			  },
+			  {
+               PrimitiveType::Kind::String,
+               {
+					  { PrimitiveType::Kind::Float32, CastType::Explicit },
+					  { PrimitiveType::Kind::Float64, CastType::Explicit },
+					  { PrimitiveType::Kind::Int32, CastType::Explicit },
+					  { PrimitiveType::Kind::Int64, CastType::Explicit },
+					  { PrimitiveType::Kind::String, CastType::Implicit },
+				  }  //
+			  },
+    };
 
-	bool TypeResolverVisitor::register_type(const std::string& name, Type&& type)
+	CastType TypeResolverVisitor::get_cast_type(const Type& from_type, const Type& to_type)
 	{
-		if (_registered_types.contains(name)) {
-			return false;
+		// NOTE: If the types are equivalent, no casts should take place.
+		if (from_type == to_type) {
+			return CastType::Implicit;
 		}
-		_registered_types[name] = std::move(type);
-		return true;
+
+		if (from_type.is<PrimitiveType>() && to_type.is<PrimitiveType>()) {
+			const auto from = from_type.as<PrimitiveType>().type;
+			const auto to   = to_type.as<PrimitiveType>().type;
+			// NOTE: For unresolved types casts are impossible - to 'what' should we cast from/to?
+			if (from == PrimitiveType::Kind::Unknown || to == PrimitiveType::Kind::Unknown) {
+				return CastType::Impossible;
+			}
+
+			if (k_cast_type.contains(from) && k_cast_type.at(from).contains(to)) {
+				return k_cast_type.at(from).at(to);
+			}
+
+			// NOTE: Assume that undefined casts are impossible.
+			return CastType::Impossible;
+		}
+
+		if (from_type.is<ArrayType>() && to_type.is<ArrayType>()) {
+			// Arrays can be cast only if their data types are castable.
+			return get_cast_type(from_type.as<ArrayType>().data_type(), to_type.as<ArrayType>().data_type());
+		}
+
+		if (from_type.is<StructType>() || to_type.is<StructType>()) {
+			// Casting from/to Struct types is not supported; maybe in the future.
+			return CastType::Impossible;
+		}
+
+		// NOTE: There was a missmatch between the types.
+		return CastType::Impossible;
 	}
 
-	void TypeResolverVisitor::register_basic_types()
+	types::Type TypeResolverVisitor::get_type_from_identifier(std::string_view type_identifier) const noexcept
 	{
-		std::ignore = register_type("bool", Type{ PrimitiveType::Kind::Boolean });
-		std::ignore = register_type("chr", Type{ PrimitiveType::Kind::Char });
-		std::ignore = register_type("f32", Type{ PrimitiveType::Kind::Float32 });
-		std::ignore = register_type("f64", Type{ PrimitiveType::Kind::Float64 });
-		std::ignore = register_type("i32", Type{ PrimitiveType::Kind::Int32 });
-		std::ignore = register_type("i64", Type{ PrimitiveType::Kind::Int64 });
-		std::ignore = register_type("str", Type{ PrimitiveType::Kind::String });
-		std::ignore = register_type("void", Type{ PrimitiveType::Kind::Void });
+		if (_registered_types.contains(type_identifier)) {
+			return _registered_types.at(type_identifier);
+		}
+		return types::Type{};
 	}
 }  // namespace soul::ast::visitors

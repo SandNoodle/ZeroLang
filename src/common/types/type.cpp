@@ -14,4 +14,6 @@ namespace soul::types
 	{
 		return std::visit([](const auto& arg) -> std::string { return std::string(arg); }, _type);
 	}
+
+	std::ostream& operator<<(std::ostream& os, const Type& type) { return os << std::string(type); }
 }  // namespace soul::types

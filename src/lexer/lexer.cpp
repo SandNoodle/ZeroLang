@@ -14,7 +14,7 @@
 #define MATCH_TWO_CHARACTERS(first_character, second_character, single_match, both_match) \
 	case first_character:                                                                 \
 	{                                                                                     \
-		if (peek() == second_character) {                                                 \
+		if (peek() == (second_character)) {                                               \
 			std::ignore = advance();                                                      \
 			return Token(TokenType(both_match));                                          \
 		}                                                                                 \
@@ -163,6 +163,7 @@ namespace soul::lexer
 			{ "str",      TokenType::LiteralIdentifier },
 			{ "chr",      TokenType::LiteralIdentifier },
 			{ "bool",     TokenType::LiteralIdentifier },
+			{ "void",     TokenType::LiteralIdentifier },
 		};
 
 		auto current_token = this->current_token();

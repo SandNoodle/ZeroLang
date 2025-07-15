@@ -1,7 +1,6 @@
 #include "parser/parser.h"
 
 #include "ast/ast_operator.h"
-#include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
@@ -181,7 +180,8 @@ namespace soul::parser
 			return nullptr;
 		}
 
-		return AssignNode::create(std::move(lhs), std::move(rhs));
+		// NOTE: Assignment operation is just a special case of a binary node.
+		return BinaryNode::create(std::move(lhs), std::move(rhs), ASTNodeOperator::Equal);
 	}
 
 	ast::ASTNode::Dependency Parser::parse_cast()
@@ -231,7 +231,7 @@ namespace soul::parser
 			return nullptr;
 		}
 
-		return CastNode::create(std::move(type_identifier->value.get<std::string>()), std::move(expression));
+		return CastNode::create(std::move(expression), std::move(type_identifier->value.get<std::string>()));
 	}
 
 	ASTNode::Dependency Parser::parse_binary(ASTNode::Dependency lhs)
@@ -401,7 +401,8 @@ namespace soul::parser
 						return nullptr;
 					}
 
-					auto parameter = parse_variable_declaration(false, false, false);
+					auto parameter = parse_variable_declaration(
+						false /* require_keyword */, false /* require_expression */, false /* require_semicolon */);
 					if (!parameter) {
 						// Something went wrong - stop parsing the parentheses.
 						_had_error = true;

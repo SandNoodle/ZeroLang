@@ -57,12 +57,17 @@ namespace soul::types
 			return std::holds_alternative<T>(_type);
 		}
 
+		/**
+		 * @brief
+		 * @return
+		 */
 		template <TypeKind T>
 		[[nodiscard]] constexpr const T& as() const noexcept
 		{
 			return std::get<T>(_type);
 		}
 
+		friend std::ostream& operator<<(std::ostream& os, const Type& type);
 		friend std::weak_ordering operator<=>(const Type&, const Type&);
 	};
 }  // namespace soul::types
