@@ -1,284 +1,227 @@
 #include "lexer/lexer.h"
 
 #include <algorithm>
-#include <charconv>
-#include <iostream>
-#include <unordered_map>
-
-#define MATCH_SINGLE_CHARACTER(character, token_type) \
-	case character:                                   \
-	{                                                 \
-		return Token(token_type);                     \
-	}
-
-#define MATCH_TWO_CHARACTERS(first_character, second_character, single_match, both_match) \
-	case first_character:                                                                 \
-	{                                                                                     \
-		if (peek() == (second_character)) {                                               \
-			std::ignore = advance();                                                      \
-			return Token(TokenType(both_match));                                          \
-		}                                                                                 \
-		return Token(single_match);                                                       \
-	}
-
-#define MATCH_TWO_CHARACTERS_SPECIAL(                                                            \
-	first_character, second_char_a, second_char_b, single_match, double_match_a, double_match_b) \
-	case first_character:                                                                        \
-	{                                                                                            \
-		switch (peek()) {                                                                        \
-			case second_char_a:                                                                  \
-				std::ignore = advance();                                                         \
-				return Token(double_match_a);                                                    \
-			case second_char_b:                                                                  \
-				std::ignore = advance();                                                         \
-				return Token(double_match_b);                                                    \
-			default:                                                                             \
-				break;                                                                           \
-		}                                                                                        \
-		return Token(single_match);                                                              \
-	}
+#include <array>
+#include <functional>
 
 namespace soul::lexer
 {
-	Lexer::Lexer(std::string_view script, Diagnostics* diagnostics)
-		: _script(script), _start_index(0), _current_offset(0), _diagnostics(diagnostics)
+#define MATCH_ONE_CODEPOINT(codepoint, token_type)        \
+	case codepoint:                                       \
+	{                                                     \
+		return create_token(token_type, current_token()); \
+	}
+
+#define MATCH_TWO_CODEPOINTS(first_codepoint, second_codepoint, one_match_type, two_match_type) \
+	case first_codepoint:                                                                       \
+	{                                                                                           \
+		if (peek_at(0) == (second_codepoint)) {                                                 \
+			std::ignore = advance();                                                            \
+			return create_token(two_match_type, current_token());                               \
+		}                                                                                       \
+		return create_token(one_match_type, current_token());                                   \
+	}
+
+#define MATCH_TWO_CODEPOINTS_SPECIAL(                                                                            \
+	first_codepoint, second_codepoint_a, second_codepoint_b, match_one_type, match_two_type_a, match_two_type_b) \
+	case first_codepoint:                                                                                        \
+	{                                                                                                            \
+		const auto next_codepoint = peek_at(0);                                                                  \
+		if (next_codepoint == (second_codepoint_a)) {                                                            \
+			std::ignore = advance();                                                                             \
+			return create_token(match_two_type_a, current_token());                                              \
+		}                                                                                                        \
+		if (next_codepoint == (second_codepoint_b)) {                                                            \
+			std::ignore = advance();                                                                             \
+			return create_token(match_two_type_b, current_token());                                              \
+		}                                                                                                        \
+		return create_token(match_one_type, current_token());                                                    \
+	}
+
+	using namespace std::string_view_literals;
+
+	Lexer::Lexer(std::string_view script)
+		: _script(script), _offset_start(0), _offset_current(0), _current_location(1, 0)
 	{
 	}
 
-	std::vector<Token> Lexer::tokenize(std::string_view script, Diagnostics* diagnostics)
-	{
-		return Lexer{ script, diagnostics }.tokenize();
-	}
+	std::vector<Token> Lexer::tokenize(std::string_view script) { return Lexer{ script }.tokenize(); }
 
 	std::vector<Token> Lexer::tokenize()
 	{
+		std::vector<Token> result;
 		if (_script.empty()) {
-			return { Token(TokenType::EndOfFile) };
+			return result;
 		}
 
-		std::vector<Token> result;
 		for (;;) {
-			skip_whitespace();
-			auto result_token = scan_token();
-			if (!result_token) {
+			auto token = scan_token();
+			if (token.type == Token::Type::SpecialEndOfFile) {
 				break;
 			}
-			result.push_back(std::move(*result_token));
+			result.push_back(std::move(token));
 		}
-		result.emplace_back(TokenType::EndOfFile);
 		return result;
 	}
 
-	std::optional<Token> Lexer::scan_token()
+	std::string_view Lexer::current_token(std::size_t exclude_start, std::size_t exclude_end)
 	{
-		_start_index = _current_offset;
+		return _script.substr(_offset_start + exclude_start,
+		                      _offset_current - _offset_start - exclude_start - exclude_end);
+	}
 
-		auto current_char = peek(0);
+	Token Lexer::create_token(Token::Type type, std::string_view data)
+	{
+		auto location = SourceLocation{ _current_location.row,
+			                            std::min(_current_location.column,
+			                                     _current_location.column - static_cast<u32>(data.size())) };
+		return Token{ type, data, std::move(location) };
+	};
 
-		if (is_eof(current_char)) {
-			return std::nullopt;
+	Token Lexer::scan_token()
+	{
+		// Consume whitespace and comments.
+		{
+			auto keep_consuming = false;
+			do {
+				keep_consuming = false;
+				advance_while(CodePoint::is_whitespace);
+
+				// Skip comments.
+				if (peek_at(0) == '#') {
+					advance_while(std::not_fn(CodePoint::is_newline));
+					keep_consuming = true;
+				}
+			} while (peek_at(0) != CodePoint::k_eof && keep_consuming);
+		};
+
+		_offset_start = _offset_current;
+
+		auto current_codepoint = peek_at(0);
+		if (current_codepoint == CodePoint::k_eof) {
+			return create_token(Token::Type::SpecialEndOfFile, current_token());
 		}
 
-		if (is_alpha(current_char)) {
-			return create_identifier_token();
+		// Keywords & Literals
+		if (advance_if(CodePoint::is_identifier)) {
+			static constexpr std::array k_keywords = {
+				// Keywords
+				std::make_pair("break"sv, Token::Type::KeywordBreak),
+				std::make_pair("cast"sv, Token::Type::KeywordCast),
+				std::make_pair("continue"sv, Token::Type::KeywordContinue),
+				std::make_pair("else"sv, Token::Type::KeywordElse),
+				std::make_pair("false"sv, Token::Type::KeywordFalse),
+				std::make_pair("fn"sv, Token::Type::KeywordFn),
+				std::make_pair("for"sv, Token::Type::KeywordFor),
+				std::make_pair("if"sv, Token::Type::KeywordIf),
+				std::make_pair("let"sv, Token::Type::KeywordLet),
+				std::make_pair("mut"sv, Token::Type::KeywordMut),
+				std::make_pair("native"sv, Token::Type::KeywordNative),
+				std::make_pair("return"sv, Token::Type::KeywordReturn),
+				std::make_pair("struct"sv, Token::Type::KeywordStruct),
+				std::make_pair("true"sv, Token::Type::KeywordTrue),
+				std::make_pair("while"sv, Token::Type::KeywordWhile),
+
+				// (Explicit) primitive types
+				std::make_pair("bool"sv, Token::Type::LiteralIdentifier),
+				std::make_pair("chr"sv, Token::Type::LiteralIdentifier),
+				std::make_pair("f32"sv, Token::Type::LiteralIdentifier),
+				std::make_pair("f64"sv, Token::Type::LiteralIdentifier),
+				std::make_pair("i32"sv, Token::Type::LiteralIdentifier),
+				std::make_pair("i64"sv, Token::Type::LiteralIdentifier),
+				std::make_pair("str"sv, Token::Type::LiteralIdentifier),
+				std::make_pair("void"sv, Token::Type::LiteralIdentifier),
+			};
+			const auto lexeme = current_token();
+			const auto it     = std::ranges::find(k_keywords, lexeme, &decltype(k_keywords)::value_type::first);
+			return create_token(it != std::end(k_keywords) ? it->second : Token::Type::LiteralIdentifier, lexeme);
 		}
 
-		if (is_digit(current_char) || current_char == '-' && is_digit(peek(1))) {
-			return create_numeric_token();
+		// Numeric
+		const bool has_sign = current_codepoint == CodePoint::k_hyphen || current_codepoint == CodePoint::k_plus_sign;
+		if (CodePoint::is_digit(peek_at(has_sign ? 1 : 0))) {
+			advance_while([](const auto c) -> bool {
+				return CodePoint::is_digit(c) || c == CodePoint::k_full_stop || c == CodePoint::k_plus_sign
+				    || c == CodePoint::k_hyphen;
+			});
+			const auto lexeme = current_token();
+			const bool has_decimal_point
+				= std::ranges::any_of(lexeme, [](const auto c) -> bool { return c == CodePoint::k_full_stop; });
+			return create_token(has_decimal_point ? Token::Type::LiteralFloat : Token::Type::LiteralInteger, lexeme);
 		}
 
-		if (is_quote(current_char)) {
-			return create_string_token();
+		// Strings
+		if (current_codepoint == '"') {
+			std::ignore = advance();  // Skip '"'
+			advance_while([](const auto c) -> bool { return c != '"'; });
+			if (peek_at(0) == CodePoint::k_eof) {
+				static constexpr auto k_error_message = "unterminated string literal; did you forget '\"'?"sv;
+				return create_token(Token::Type::SpecialError, k_error_message);
+			}
+			std::ignore = advance();  // Skip '"'
+			return create_token(Token::Type::LiteralString, current_token(1, 1));
 		}
 
-		// Special characters
+		// Symbols
 		std::ignore = advance();
-		switch (current_char) {
-			// Simple cases, where there are no other characters to consider afterward.
-			MATCH_SINGLE_CHARACTER(';', TokenType::Semicolon)
-			MATCH_SINGLE_CHARACTER('?', TokenType::QuestionMark)
-			MATCH_SINGLE_CHARACTER('%', TokenType::Percent)
-			MATCH_SINGLE_CHARACTER('^', TokenType::Caret)
-			MATCH_SINGLE_CHARACTER('.', TokenType::Dot)
-			MATCH_SINGLE_CHARACTER(',', TokenType::Comma)
-			MATCH_SINGLE_CHARACTER('(', TokenType::ParenLeft)
-			MATCH_SINGLE_CHARACTER(')', TokenType::ParenRight)
-			MATCH_SINGLE_CHARACTER('{', TokenType::BraceLeft)
-			MATCH_SINGLE_CHARACTER('}', TokenType::BraceRight)
-			MATCH_SINGLE_CHARACTER('[', TokenType::BracketLeft)
-			MATCH_SINGLE_CHARACTER(']', TokenType::BracketRight)
+		switch (current_codepoint) {
+			// Simple cases, where there are no other characters in the sequence.
+			MATCH_ONE_CODEPOINT('%', Token::Type::SymbolPercent)
+			MATCH_ONE_CODEPOINT('(', Token::Type::SymbolParenLeft)
+			MATCH_ONE_CODEPOINT(')', Token::Type::SymbolParenRight)
+			MATCH_ONE_CODEPOINT(',', Token::Type::SymbolComma)
+			MATCH_ONE_CODEPOINT('.', Token::Type::SymbolDot)
+			MATCH_ONE_CODEPOINT(';', Token::Type::SymbolSemicolon)
+			MATCH_ONE_CODEPOINT('?', Token::Type::SymbolQuestionMark)
+			MATCH_ONE_CODEPOINT('[', Token::Type::SymbolBracketLeft)
+			MATCH_ONE_CODEPOINT(']', Token::Type::SymbolBracketRight)
+			MATCH_ONE_CODEPOINT('^', Token::Type::SymbolCaret)
+			MATCH_ONE_CODEPOINT('{', Token::Type::SymbolBraceLeft)
+			MATCH_ONE_CODEPOINT('}', Token::Type::SymbolBraceRight)
 
-			// Two character tokens.
-			MATCH_TWO_CHARACTERS(':', ':', TokenType::Colon, TokenType::DoubleColon)
-			MATCH_TWO_CHARACTERS('=', '=', TokenType::Equal, TokenType::DoubleEqual)
-			MATCH_TWO_CHARACTERS('!', '=', TokenType::Bang, TokenType::BangEqual)
-			MATCH_TWO_CHARACTERS('>', '=', TokenType::Greater, TokenType::GreaterEqual)
-			MATCH_TWO_CHARACTERS('<', '=', TokenType::Less, TokenType::LessEqual)
-			MATCH_TWO_CHARACTERS('*', '=', TokenType::Star, TokenType::StarEqual)
-			MATCH_TWO_CHARACTERS('/', '=', TokenType::Slash, TokenType::SlashEqual)
-			MATCH_TWO_CHARACTERS('&', '&', TokenType::Ampersand, TokenType::DoubleAmpersand)
-			MATCH_TWO_CHARACTERS('|', '|', TokenType::Pipe, TokenType::DoublePipe)
+			// Tokens which might have one other character in the sequence.
+			MATCH_TWO_CODEPOINTS('!', '=', Token::Type::SymbolBang, Token::Type::SymbolBangEqual)
+			MATCH_TWO_CODEPOINTS('&', '&', Token::Type::SymbolAmpersand, Token::Type::SymbolAmpersandAmpersand)
+			MATCH_TWO_CODEPOINTS('*', '=', Token::Type::SymbolStar, Token::Type::SymbolStarEqual)
+			MATCH_TWO_CODEPOINTS('/', '=', Token::Type::SymbolSlash, Token::Type::SymbolSlashEqual)
+			MATCH_TWO_CODEPOINTS(':', ':', Token::Type::SymbolColon, Token::Type::SymbolColonColon)
+			MATCH_TWO_CODEPOINTS('<', '=', Token::Type::SymbolLess, Token::Type::SymbolLessEqual)
+			MATCH_TWO_CODEPOINTS('=', '=', Token::Type::SymbolEqual, Token::Type::SymbolEqualEqual)
+			MATCH_TWO_CODEPOINTS('>', '=', Token::Type::SymbolGreater, Token::Type::SymbolGreaterEqual)
+			MATCH_TWO_CODEPOINTS('|', '|', Token::Type::SymbolPipe, Token::Type::SymbolPipePipe)
 
-			// Special cases - second character might vary.
-			MATCH_TWO_CHARACTERS_SPECIAL('+', '+', '=', TokenType::Plus, TokenType::DoublePlus, TokenType::PlusEqual)
-			MATCH_TWO_CHARACTERS_SPECIAL('-', '-', '=', TokenType::Minus, TokenType::DoubleMinus, TokenType::MinusEqual)
+			// Special cases, where the second character might be either present or vary.
+			MATCH_TWO_CODEPOINTS_SPECIAL(
+				'+', '+', '=', Token::Type::SymbolPlus, Token::Type::SymbolPlusPlus, Token::Type::SymbolPlusEqual)
+			MATCH_TWO_CODEPOINTS_SPECIAL(
+				'-', '-', '=', Token::Type::SymbolMinus, Token::Type::SymbolMinusMinus, Token::Type::SymbolMinusEqual)
 			default:
 				break;
 		}
 
-		diagnostic(DiagnosticType::Error, DiagnosticCode::LexerUnrecognizedToken);
-		return std::nullopt;
+		static constexpr auto k_error_message = "unrecognized token"sv;
+		return create_token(Token::Type::SpecialError, k_error_message);
 	}
 
-	Token Lexer::create_identifier_token()
+	CodePoint::ValueType Lexer::peek_at(std::size_t n)
 	{
-		while (is_alpha(peek()) || is_digit(peek())) advance();
-
-		// Keywords
-		static const std::unordered_map<std::string_view, TokenType> k_keywords = {
-			// Keywords
-			{ "break",    TokenType::KeywordBreak      },
-			{ "cast",     TokenType::KeywordCast       },
-			{ "continue", TokenType::KeywordContinue   },
-			{ "else",     TokenType::KeywordElse       },
-			{ "false",    TokenType::KeywordFalse      },
-			{ "fn",       TokenType::KeywordFn         },
-			{ "for",      TokenType::KeywordFor        },
-			{ "foreach",  TokenType::KeywordForeach    },
-			{ "in",       TokenType::KeywordIn         },
-			{ "if",       TokenType::KeywordIf         },
-			{ "let",      TokenType::KeywordLet        },
-			{ "mut",      TokenType::KeywordMut        },
-			{ "native",   TokenType::KeywordNative     },
-			{ "return",   TokenType::KeywordReturn     },
-			{ "struct",   TokenType::KeywordStruct     },
-			{ "true",     TokenType::KeywordTrue       },
-			{ "while",    TokenType::KeywordWhile      },
-
-			// (Explicit) Primitive types
-			{ "i32",      TokenType::LiteralIdentifier },
-			{ "i64",      TokenType::LiteralIdentifier },
-			{ "f32",      TokenType::LiteralIdentifier },
-			{ "f64",      TokenType::LiteralIdentifier },
-			{ "str",      TokenType::LiteralIdentifier },
-			{ "chr",      TokenType::LiteralIdentifier },
-			{ "bool",     TokenType::LiteralIdentifier },
-			{ "void",     TokenType::LiteralIdentifier },
-		};
-
-		auto current_token = this->current_token();
-		if (k_keywords.contains(current_token)) {
-			const auto type = k_keywords.at(current_token);
-			return Token(type, type == TokenType::LiteralIdentifier ? Value{ std::string(current_token) } : Value{});
+		if (_offset_current + n >= _script.size()) {
+			return CodePoint::k_eof;
 		}
-
-		// Identifier
-		return Token(TokenType::LiteralIdentifier, Value(std::string(current_token)));
+		return _script[_offset_current + n];
 	}
 
-	// TODO(sand_noodles):
-	//   This method handles only Integers and Floats.
-	//   Add support for scanning:
-	//   - binary (ex. 0x0111b)
-	//   - hex (ex. 0xFF)
-	std::optional<Token> Lexer::create_numeric_token()
+	CodePoint::ValueType Lexer::advance()
 	{
-		// Create (potentially) numeric token.
-		auto c = peek();
-		while (!is_eof(c) && is_hex_digit(c) || c == '-' || c == '.' || c == 'x') {
-			c = advance();
+		if (_offset_current >= _script.size()) {
+			return CodePoint::k_eof;
 		}
-
-		const auto create_token = [this]<ValueKind T>(std::string_view token, TokenType type) -> std::optional<Token> {
-			T value                    = 0;
-			const auto [_, error_code] = std::from_chars(token.data(), token.data() + token.size(), value);
-
-			if (error_code == std::errc{}) [[likely]] {
-				return Token(type, Value(value));  // No error.
-			} else if (error_code == std::errc::invalid_argument) {
-				diagnostic(DiagnosticType::Error, DiagnosticCode::LexerValueIsNotANumber);
-				return std::nullopt;
-			} else if (error_code == std::errc::result_out_of_range) {
-				diagnostic(DiagnosticType::Error, DiagnosticCode::LexerValueOutOfRange);
-				return std::nullopt;
-			}
-
-			diagnostic(DiagnosticType::Error, DiagnosticCode::LexerUnrecognizedToken);
-			return std::nullopt;
-		};
-
-		const auto current_token = this->current_token();
-		return current_token.find('.') != std::string_view::npos
-		         ? create_token.operator()<f64>(current_token, TokenType::LiteralFloat)
-		         : create_token.operator()<i64>(current_token, TokenType::LiteralInteger);
-	}
-
-	std::optional<Token> Lexer::create_string_token()
-	{
-		std::ignore       = advance();  // Skip over the quotation.
-		auto current_char = peek();
-		while (!(is_quote(current_char) || is_eof(current_char))) {
-			current_char = advance();
+		if (CodePoint::is_newline(_script[_offset_current])) {
+			_current_location.row++;
+			_current_location.column = 0;
+		} else {
+			_current_location.column++;
 		}
-
-		if (is_eof(current_char)) {
-			diagnostic(DiagnosticType::Error, DiagnosticCode::LexerUnterminatedString);
-			return std::nullopt;
-		}
-
-		std::ignore              = advance();  // Skip over the quotation.
-		const auto current_token = _script.substr(_start_index + 1, _current_offset - _start_index - 2);  // Exclude '"'
-		return Token(TokenType::LiteralString, Value(std::string(current_token)));
+		return _script[++_offset_current];
 	}
-
-	std::string_view Lexer::current_token() const
-	{
-		return _script.substr(_start_index, _current_offset - _start_index);
-	}
-
-	void Lexer::skip_whitespace()
-	{
-		for (;;) {
-			auto current_char = peek();
-			switch (current_char) {
-				case ' ':
-				case '\r':
-				case '\t':
-				case '\n':
-					std::ignore = advance();
-					break;
-				case '#':
-					std::ignore  = advance();  // Skip the '#'
-					current_char = peek();
-					while (!is_eof(current_char) && (current_char != '\n' || current_char != '\r')) {
-						std::ignore  = advance();  // Skip the '#'
-						current_char = peek();
-					}
-					break;
-				default:
-					return;
-			}
-		}
-	}
-
-	Lexer::Char Lexer::peek(size_t count) const
-	{
-		if (_current_offset + count >= _script.size()) {
-			return '\0';
-		}
-		return _script[_current_offset + count];
-	}
-
-	Lexer::Char Lexer::advance()
-	{
-		_current_offset++;
-		return peek();
-	}
-
-	bool Lexer::is_eof(Lexer::Char c) { return c == '\0'; }
-	bool Lexer::is_whitespace(Lexer::Char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
-	bool Lexer::is_alpha(Lexer::Char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'; }
-	bool Lexer::is_digit(Lexer::Char c) { return c >= '0' && c <= '9'; }
-	bool Lexer::is_hex_digit(Lexer::Char c) { return is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); }
-	bool Lexer::is_quote(Lexer::Char c) { return c == '"' || c == '\''; }
-}  // namespace soul::lexer
+};  // namespace soul::lexer

@@ -1,93 +1,71 @@
 #include "lexer/token.h"
 
-#include <format>
 #include <unordered_map>
-#include <utility>
 
 namespace soul
 {
-	std::string_view to_string(TokenType type)
+	std::string_view Token::name(Token::Type type) noexcept
 	{
-		static const std::unordered_map<TokenType, std::string_view> k_types = {
-			{ TokenType::Unknown,           "token_unknown"            },
-			{ TokenType::Semicolon,         "token_semicolon"          },
-			{ TokenType::QuestionMark,      "token_question_mark"      },
-			{ TokenType::Percent,           "token_percent"            },
-			{ TokenType::Caret,             "token_caret"              },
-			{ TokenType::Dot,               "token_dot"                },
-			{ TokenType::Comma,             "token_comma"              },
-			{ TokenType::ParenLeft,         "token_paren_left"         },
-			{ TokenType::ParenRight,        "token_paren_right"        },
-			{ TokenType::BraceLeft,         "token_brace_left"         },
-			{ TokenType::BraceRight,        "token_brace_right"        },
-			{ TokenType::BracketLeft,       "token_bracket_left"       },
-			{ TokenType::BracketRight,      "token_bracket_right"      },
-			{ TokenType::Colon,             "token_colon"              },
-			{ TokenType::DoubleColon,       "token_double_colon"       },
-			{ TokenType::Equal,             "token_equal"              },
-			{ TokenType::DoubleEqual,       "token_double_equal"       },
-			{ TokenType::Bang,              "token_bang"               },
-			{ TokenType::BangEqual,         "token_bang_equal"         },
-			{ TokenType::Greater,           "token_greater"            },
-			{ TokenType::GreaterEqual,      "token_greater_equal"      },
-			{ TokenType::Less,              "token_less"               },
-			{ TokenType::LessEqual,         "token_less_equal"         },
-			{ TokenType::Plus,              "token_plus"               },
-			{ TokenType::PlusEqual,         "token_plus_equal"         },
-			{ TokenType::DoublePlus,        "token_double_plus"        },
-			{ TokenType::Minus,             "token_minus"              },
-			{ TokenType::MinusEqual,        "token_minus_equal"        },
-			{ TokenType::DoubleMinus,       "token_double_minus"       },
-			{ TokenType::Star,              "token_star"               },
-			{ TokenType::StarEqual,         "token_star_equal"         },
-			{ TokenType::Slash,             "token_slash"              },
-			{ TokenType::SlashEqual,        "token_slash_equal"        },
-			{ TokenType::Ampersand,         "token_ampersand"          },
-			{ TokenType::DoubleAmpersand,   "token_double_ampersand"   },
-			{ TokenType::Pipe,              "token_pipe"               },
-			{ TokenType::DoublePipe,        "token_double_pipe"        },
-			{ TokenType::LiteralInteger,    "token_literal_integer"    },
-			{ TokenType::LiteralFloat,      "token_literal_float"      },
-			{ TokenType::LiteralString,     "token_literal_string"     },
-			{ TokenType::LiteralIdentifier, "token_literal_identifier" },
-			{ TokenType::KeywordNative,     "token_native"             },
-			{ TokenType::KeywordLet,        "token_let"                },
-			{ TokenType::KeywordMut,        "token_mut"                },
-			{ TokenType::KeywordIn,         "token_in"                 },
-			{ TokenType::KeywordIf,         "token_if"                 },
-			{ TokenType::KeywordElse,       "token_else"               },
-			{ TokenType::KeywordFor,        "token_for"                },
-			{ TokenType::KeywordForeach,    "token_foreach"            },
-			{ TokenType::KeywordWhile,      "token_while"              },
-			{ TokenType::KeywordCast,       "token_cast"               },
-			{ TokenType::KeywordContinue,   "token_continue"           },
-			{ TokenType::KeywordBreak,      "token_break"              },
-			{ TokenType::KeywordReturn,     "token_return"             },
-			{ TokenType::KeywordFn,         "token_function"           },
-			{ TokenType::KeywordStruct,     "token_struct"             },
-			{ TokenType::KeywordTrue,       "token_true"               },
-			{ TokenType::KeywordFalse,      "token_false"              },
-			{ TokenType::EndOfFile,         "[EOF]"                    },
+		using namespace std::string_view_literals;
+		static const std::unordered_map<Token::Type, std::string_view> k_token_name = {
+			{ Token::Type::KeywordBreak,             "keyword_break"sv              },
+			{ Token::Type::KeywordCast,              "keyword_cast"sv               },
+			{ Token::Type::KeywordContinue,          "keyword_continue"sv           },
+			{ Token::Type::KeywordElse,              "keyword_else"sv               },
+			{ Token::Type::KeywordFalse,             "keyword_false"sv              },
+			{ Token::Type::KeywordFn,                "keyword_fn"sv                 },
+			{ Token::Type::KeywordFor,               "keyword_for"sv                },
+			{ Token::Type::KeywordIf,                "keyword_if"sv                 },
+			{ Token::Type::KeywordLet,               "keyword_let"sv                },
+			{ Token::Type::KeywordMut,               "keyword_mut"sv                },
+			{ Token::Type::KeywordNative,            "keyword_native"sv             },
+			{ Token::Type::KeywordReturn,            "keyword_return"sv             },
+			{ Token::Type::KeywordStruct,            "keyword_struct"sv             },
+			{ Token::Type::KeywordTrue,              "keyword_true"sv               },
+			{ Token::Type::KeywordWhile,             "keyword_while"sv              },
+			{ Token::Type::LiteralFloat,             "literal_float"sv              },
+			{ Token::Type::LiteralIdentifier,        "literal_identifier"sv         },
+			{ Token::Type::LiteralInteger,           "literal_integer"sv            },
+			{ Token::Type::LiteralString,            "literal_string"sv             },
+			{ Token::Type::SymbolAmpersand,          "symbol_ampersand"sv           },
+			{ Token::Type::SymbolAmpersandAmpersand, "symbol_ampersand_ampersand"sv },
+			{ Token::Type::SymbolCaret,              "symbol_caret"sv               },
+			{ Token::Type::SymbolComma,              "symbol_comma"sv               },
+			{ Token::Type::SymbolDot,                "symbol_dot"sv                 },
+			{ Token::Type::SymbolGreater,            "symbol_greater"sv             },
+			{ Token::Type::SymbolGreaterEqual,       "symbol_greater_equal"sv       },
+			{ Token::Type::SymbolLess,               "symbol_less"sv                },
+			{ Token::Type::SymbolLessEqual,          "symbol_less_equal"sv          },
+			{ Token::Type::SymbolMinus,              "symbol_minus"sv               },
+			{ Token::Type::SymbolMinusEqual,         "symbol_minus_equal"sv         },
+			{ Token::Type::SymbolMinusMinus,         "symbol_minus_minus"sv         },
+			{ Token::Type::SymbolPercent,             "symbol_percent"sv              },
+			{ Token::Type::SymbolPipe,               "symbol_pipe"sv                },
+			{ Token::Type::SymbolPipePipe,           "symbol_pipe_pipe"sv           },
+			{ Token::Type::SymbolPlus,               "symbol_plus"sv                },
+			{ Token::Type::SymbolPlusEqual,          "symbol_plus_equal"sv          },
+			{ Token::Type::SymbolPlusPlus,           "symbol_plus_plus"sv           },
+			{ Token::Type::SymbolQuestionMark,       "symbol_question_mark"sv       },
+			{ Token::Type::SymbolSlash,              "symbol_slash"sv               },
+			{ Token::Type::SymbolSlashEqual,         "symbol_slash_equal"sv         },
+			{ Token::Type::SymbolStar,               "symbol_star"sv                },
+			{ Token::Type::SymbolStarEqual,          "symbol_star_equal"sv          },
+			{ Token::Type::SymbolBang,               "symbol_bang"sv                },
+			{ Token::Type::SymbolBangEqual,          "symbol_bang_equal"sv          },
+			{ Token::Type::SymbolBraceLeft,          "symbol_brace_left"sv          },
+			{ Token::Type::SymbolBraceRight,         "symbol_brace_right"sv         },
+			{ Token::Type::SymbolBracketLeft,        "symbol_bracket_left"sv        },
+			{ Token::Type::SymbolBracketRight,       "symbol_bracket_right"sv       },
+			{ Token::Type::SymbolColon,              "symbol_colon"sv               },
+			{ Token::Type::SymbolColonColon,         "symbol_colon_colon"sv         },
+			{ Token::Type::SymbolEqual,              "symbol_equal"sv               },
+			{ Token::Type::SymbolEqualEqual,         "symbol_equal_equal"sv         },
+			{ Token::Type::SymbolParenLeft,          "symbol_paren_left"sv          },
+			{ Token::Type::SymbolParenRight,         "symbol_paren_right"sv         },
+			{ Token::Type::SymbolSemicolon,          "symbol_semicolon"sv           },
+			{ Token::Type::SpecialError,             "special_error"sv              },
+			{ Token::Type::SpecialEndOfFile,         "special_eof"sv                },
 		};
-		if (!k_types.contains(type)) [[unlikely]] {
-			return k_types.at(TokenType::Unknown);
-		}
-		return k_types.at(type);
-	}
-
-	Token::Token(TokenType type, Value value) : _type(type), value(std::move(value)) {}
-
-	Token::operator std::string() const
-	{
-		return std::string(std::format("[type: {}, value: {}]", to_string(_type), std::string(value)));
-	}
-
-	[[nodiscard]] TokenType Token::type() const { return _type; }
-
-	[[nodiscard]] bool Token::is_type(const TokenType type) const noexcept { return _type == type; }
-
-	[[nodiscard]] bool Token::is_one_of_type(const TokenType t1, const TokenType t2) const noexcept
-	{
-		return _type == t1 || _type == t2;
+		return k_token_name.at(type);
 	}
 }  // namespace soul

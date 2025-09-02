@@ -2,327 +2,266 @@
 
 #include "lexer/lexer.h"
 
+#include <array>
+#include <string_view>
+
 namespace soul::lexer::ut
 {
+	using namespace std::string_view_literals;
+
 	class LexerTest : public ::testing::Test
 	{
-		protected:
-		Diagnostics _diagnostics;
-
-		void TearDown() override { _diagnostics.clear(); }
-
-		static bool has_eof_token(const std::vector<Token>& tokens)
-		{
-			if (tokens.empty()) return false;
-
-			const auto& expected_token = Token(TokenType::EndOfFile);
-			const auto& actual_token   = tokens.back();
-			return expected_token == actual_token;
-		}
 	};
 
 	TEST_F(LexerTest, EmptyString)
 	{
-		const std::string_view empty_string  = "\0";
-		const auto             result_tokens = Lexer::tokenize(empty_string, &this->_diagnostics);
-		ASSERT_EQ(result_tokens.size(), 1);
-		ASSERT_EQ(result_tokens[0].type(), TokenType::EndOfFile);
-		ASSERT_TRUE(result_tokens[0].no_value());
-		ASSERT_TRUE(this->_diagnostics.empty());
+		const auto result_tokens = Lexer::tokenize(""sv);
+		ASSERT_TRUE(result_tokens.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Identifiers)
 	{
-		const std::string              string          = "my_identifier invalid_variable this_should_work";
-		const std::vector<std::string> expected_values = {
-			"my_identifier",
-			"invalid_variable",
-			"this_should_work",
+		static constexpr auto k_input_string = "my_identifier invalid_variable this_should_work"sv;
+		const auto            result_tokens  = Lexer::tokenize(k_input_string);
+
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::LiteralIdentifier, "my_identifier"sv, SourceLocation{ 1, 0 }),
+			Token(Token::Type::LiteralIdentifier, "invalid_variable"sv, SourceLocation{ 1, 14 }),
+			Token(Token::Type::LiteralIdentifier, "this_should_work"sv, SourceLocation{ 1, 32 }),
 		};
-		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
-		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_values.size(); ++index) {
-			const auto& expected_token = Token(TokenType::LiteralIdentifier, Value(expected_values[index]));
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
-			ASSERT_TRUE(result_token.value.is<std::string>());
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, k_expected_tokens[index].location);
 		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Keywords)
 	{
-		const std::string_view string
-			= "native let mut in if else for foreach while cast continue break return fn struct true false";
-		const std::vector expected_tokens = {
-			Token(TokenType::KeywordNative), Token(TokenType::KeywordLet),      Token(TokenType::KeywordMut),
-			Token(TokenType::KeywordIn),     Token(TokenType::KeywordIf),       Token(TokenType::KeywordElse),
-			Token(TokenType::KeywordFor),    Token(TokenType::KeywordForeach),  Token(TokenType::KeywordWhile),
-			Token(TokenType::KeywordCast),   Token(TokenType::KeywordContinue), Token(TokenType::KeywordBreak),
-			Token(TokenType::KeywordReturn), Token(TokenType::KeywordFn),       Token(TokenType::KeywordStruct),
-			Token(TokenType::KeywordTrue),   Token(TokenType::KeywordFalse),
+		static constexpr auto k_input_string
+			= "break cast continue else false fn for if let mut native return struct true while"sv;
+		const auto result_tokens = Lexer::tokenize(k_input_string);
+
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::KeywordBreak, "break"sv, SourceLocation{ 1, 0 }),
+			Token(Token::Type::KeywordCast, "cast"sv, SourceLocation{ 1, 6 }),
+			Token(Token::Type::KeywordContinue, "continue"sv, SourceLocation{ 1, 11 }),
+			Token(Token::Type::KeywordElse, "else"sv, SourceLocation{ 1, 20 }),
+			Token(Token::Type::KeywordFalse, "false"sv, SourceLocation{ 1, 25 }),
+			Token(Token::Type::KeywordFn, "fn"sv, SourceLocation{ 1, 31 }),
+			Token(Token::Type::KeywordFor, "for"sv, SourceLocation{ 1, 34 }),
+			Token(Token::Type::KeywordIf, "if"sv, SourceLocation{ 1, 38 }),
+			Token(Token::Type::KeywordLet, "let"sv, SourceLocation{ 1, 41 }),
+			Token(Token::Type::KeywordMut, "mut"sv, SourceLocation{ 1, 45 }),
+			Token(Token::Type::KeywordNative, "native"sv, SourceLocation{ 1, 49 }),
+			Token(Token::Type::KeywordReturn, "return"sv, SourceLocation{ 1, 56 }),
+			Token(Token::Type::KeywordStruct, "struct"sv, SourceLocation{ 1, 63 }),
+			Token(Token::Type::KeywordTrue, "true"sv, SourceLocation{ 1, 70 }),
+			Token(Token::Type::KeywordWhile, "while"sv, SourceLocation{ 1, 75 }),
 		};
-		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
-		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_tokens.size(); ++index) {
-			const auto& expected_token = expected_tokens[index];
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
-			EXPECT_TRUE(result_token.no_value()) << "Expected no value, but got: " << std::string(result_token);
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
 		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, SpecialCharacters)
 	{
-		const std::string_view string
-			= "; ? % ^ . , ( ) { } [ ] : :: = == ! != > >= < <= + += ++ - -= -- * *= / /= & && | ||";
-		const std::vector<TokenType> expected_types = {
-			// Single character tokens
-			TokenType::Semicolon,
-			TokenType::QuestionMark,
-			TokenType::Percent,
-			TokenType::Caret,
-			TokenType::Dot,
-			TokenType::Comma,
-			TokenType::ParenLeft,
-			TokenType::ParenRight,
-			TokenType::BraceLeft,
-			TokenType::BraceRight,
-			TokenType::BracketLeft,
-			TokenType::BracketRight,
+		static constexpr auto k_input_string
+			= "& && ! != { } [ ] ^ : :: , . = == > >= < <= - -= -- % ( ) | || + += ++ ? ; / /= * *="sv;
+		const auto result_tokens = Lexer::tokenize(k_input_string);
 
-			// One or two character tokens
-			TokenType::Colon,
-			TokenType::DoubleColon,
-			TokenType::Equal,
-			TokenType::DoubleEqual,
-			TokenType::Bang,
-			TokenType::BangEqual,
-			TokenType::Greater,
-			TokenType::GreaterEqual,
-			TokenType::Less,
-			TokenType::LessEqual,
-			TokenType::Plus,
-			TokenType::PlusEqual,
-			TokenType::DoublePlus,
-			TokenType::Minus,
-			TokenType::MinusEqual,
-			TokenType::DoubleMinus,
-			TokenType::Star,
-			TokenType::StarEqual,
-			TokenType::Slash,
-			TokenType::SlashEqual,
-			TokenType::Ampersand,
-			TokenType::DoubleAmpersand,
-			TokenType::Pipe,
-			TokenType::DoublePipe,
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::SymbolAmpersand, "&"sv, SourceLocation{ 1, 0 }),
+			Token(Token::Type::SymbolAmpersandAmpersand, "&&"sv, SourceLocation{ 1, 2 }),
+			Token(Token::Type::SymbolBang, "!"sv, SourceLocation{ 1, 5 }),
+			Token(Token::Type::SymbolBangEqual, "!="sv, SourceLocation{ 1, 7 }),
+			Token(Token::Type::SymbolBraceLeft, "{"sv, SourceLocation{ 1, 10 }),
+			Token(Token::Type::SymbolBraceRight, "}"sv, SourceLocation{ 1, 12 }),
+			Token(Token::Type::SymbolBracketLeft, "["sv, SourceLocation{ 1, 14 }),
+			Token(Token::Type::SymbolBracketRight, "]"sv, SourceLocation{ 1, 16 }),
+			Token(Token::Type::SymbolCaret, "^"sv, SourceLocation{ 1, 18 }),
+			Token(Token::Type::SymbolColon, ":"sv, SourceLocation{ 1, 20 }),
+			Token(Token::Type::SymbolColonColon, "::"sv, SourceLocation{ 1, 22 }),
+			Token(Token::Type::SymbolComma, ","sv, SourceLocation{ 1, 25 }),
+			Token(Token::Type::SymbolDot, "."sv, SourceLocation{ 1, 27 }),
+			Token(Token::Type::SymbolEqual, "="sv, SourceLocation{ 1, 29 }),
+			Token(Token::Type::SymbolEqualEqual, "=="sv, SourceLocation{ 1, 31 }),
+			Token(Token::Type::SymbolGreater, ">"sv, SourceLocation{ 1, 34 }),
+			Token(Token::Type::SymbolGreaterEqual, ">="sv, SourceLocation{ 1, 36 }),
+			Token(Token::Type::SymbolLess, "<"sv, SourceLocation{ 1, 39 }),
+			Token(Token::Type::SymbolLessEqual, "<="sv, SourceLocation{ 1, 41 }),
+			Token(Token::Type::SymbolMinus, "-"sv, SourceLocation{ 1, 44 }),
+			Token(Token::Type::SymbolMinusEqual, "-="sv, SourceLocation{ 1, 46 }),
+			Token(Token::Type::SymbolMinusMinus, "--"sv, SourceLocation{ 1, 49 }),
+			Token(Token::Type::SymbolPercent, "%"sv, SourceLocation{ 1, 52 }),
+			Token(Token::Type::SymbolParenLeft, "("sv, SourceLocation{ 1, 54 }),
+			Token(Token::Type::SymbolParenRight, ")"sv, SourceLocation{ 1, 56 }),
+			Token(Token::Type::SymbolPipe, "|"sv, SourceLocation{ 1, 58 }),
+			Token(Token::Type::SymbolPipePipe, "||"sv, SourceLocation{ 1, 60 }),
+			Token(Token::Type::SymbolPlus, "+"sv, SourceLocation{ 1, 63 }),
+			Token(Token::Type::SymbolPlusEqual, "+="sv, SourceLocation{ 1, 65 }),
+			Token(Token::Type::SymbolPlusPlus, "++"sv, SourceLocation{ 1, 68 }),
+			Token(Token::Type::SymbolQuestionMark, "?"sv, SourceLocation{ 1, 71 }),
+			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 1, 73 }),
+			Token(Token::Type::SymbolSlash, "/"sv, SourceLocation{ 1, 75 }),
+			Token(Token::Type::SymbolSlashEqual, "/="sv, SourceLocation{ 1, 77 }),
+			Token(Token::Type::SymbolStar, "*"sv, SourceLocation{ 1, 80 }),
+			Token(Token::Type::SymbolStarEqual, "*="sv, SourceLocation{ 1, 82 }),
 		};
-		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
-		ASSERT_EQ(expected_types.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_types.size(); ++index) {
-			const auto& expected_token = Token(expected_types[index]);
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
-			EXPECT_TRUE(result_tokens[index].no_value())
-				<< "Expected no value, but got: " << std::string(result_tokens[index]);
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
 		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
-	TEST_F(LexerTest, Literals_Numbers_Integers)
+	TEST_F(LexerTest, Literals_Numbers)
 	{
-		const std::string_view string          = "0 54 1024 4098 -8192 1000000000000";
-		const std::vector<i64> expected_values = {
-			0, 54, 1024, 4098, -8192, 1000000000000,
+		static constexpr auto k_input_string
+			= "0.0 7.52 4098 4098.0 -8192.32 1000000000000.0 0 54 1024 -0.01 5.47 -8192 1000000000000"sv;
+		const auto result_tokens = Lexer::tokenize(k_input_string);
+
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::LiteralFloat, "0.0"sv, SourceLocation{ 1, 0 }),
+			Token(Token::Type::LiteralFloat, "7.52"sv, SourceLocation{ 1, 4 }),
+			Token(Token::Type::LiteralInteger, "4098"sv, SourceLocation{ 1, 9 }),
+			Token(Token::Type::LiteralFloat, "4098.0"sv, SourceLocation{ 1, 14 }),
+			Token(Token::Type::LiteralFloat, "-8192.32"sv, SourceLocation{ 1, 21 }),
+			Token(Token::Type::LiteralFloat, "1000000000000.0"sv, SourceLocation{ 1, 30 }),
+			Token(Token::Type::LiteralInteger, "0"sv, SourceLocation{ 1, 46 }),
+			Token(Token::Type::LiteralInteger, "54"sv, SourceLocation{ 1, 48 }),
+			Token(Token::Type::LiteralInteger, "1024"sv, SourceLocation{ 1, 51 }),
+			Token(Token::Type::LiteralFloat, "-0.01"sv, SourceLocation{ 1, 56 }),
+			Token(Token::Type::LiteralFloat, "5.47"sv, SourceLocation{ 1, 62 }),
+			Token(Token::Type::LiteralInteger, "-8192"sv, SourceLocation{ 1, 67 }),
+			Token(Token::Type::LiteralInteger, "1000000000000"sv, SourceLocation{ 1, 73 }),
 		};
-		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
-		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_values.size(); ++index) {
-			const auto& expected_token = Token(TokenType::LiteralInteger, Value(expected_values[index]));
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
-			ASSERT_TRUE(result_tokens[index].value.is<i64>())
-				<< "Expected integer value, but got: " << std::string(result_tokens[index]);
-			EXPECT_EQ(expected_token.value.get<i64>(), expected_values[index]);
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
 		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
-	}
-
-	TEST_F(LexerTest, Literals_Numbers_Integers_OutOfRange)
-	{
-		const std::string_view string        = "100000000000000000000";  // Number sufficient to be Out of Range.
-		const auto             result_tokens = Lexer::tokenize(string, &this->_diagnostics);
-
-		ASSERT_EQ(result_tokens.size(), 1);
-		ASSERT_TRUE(has_eof_token(result_tokens));
-
-		ASSERT_EQ(this->_diagnostics.size(), 1);
-		ASSERT_EQ(this->_diagnostics[0].code(), DiagnosticCode::LexerValueOutOfRange);
-	}
-
-	TEST_F(LexerTest, Literals_Numbers_FloatingPoint)
-	{
-		const std::string_view string          = "0.0 -0.01 5.47 7.52 4098.0 -8192.32 1000000000000.0";
-		const std::vector<f64> expected_values = { 0.0, -0.01, 5.47, 7.52, 4098.0, -8192.32, 1000000000000.0 };
-		const auto             result_tokens   = Lexer::tokenize(string, &this->_diagnostics);
-
-		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_values.size(); ++index) {
-			const auto& expected_token = Token(TokenType::LiteralFloat, Value(expected_values[index]));
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
-			ASSERT_TRUE(result_tokens[index].value.is<f64>())
-				<< "Expected floating point value, but got: " << std::string(result_tokens[index]);
-			EXPECT_EQ(expected_token.value.get<f64>(), expected_values[index]);
-		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
-	}
-
-	TEST_F(LexerTest, Literals_Numbers_Mixed)
-	{
-		const std::string_view string          = "0 0.0 -4.14 5 8.72 20 -40 -1024.0 0.02";
-		const std::vector      expected_tokens = {
-            Token(TokenType::LiteralInteger, Value(static_cast<i64>(0))),
-            Token(TokenType::LiteralFloat, Value(static_cast<f64>(0.0))),
-            Token(TokenType::LiteralFloat, Value(static_cast<f64>(-4.14))),
-            Token(TokenType::LiteralInteger, Value(static_cast<i64>(5))),
-            Token(TokenType::LiteralFloat, Value(static_cast<f64>(8.72))),
-            Token(TokenType::LiteralInteger, Value(static_cast<i64>(20))),
-            Token(TokenType::LiteralInteger, Value(static_cast<i64>(-40))),
-            Token(TokenType::LiteralFloat, Value(static_cast<f64>(-1024.0))),
-            Token(TokenType::LiteralFloat, Value(static_cast<f64>(0.02))),
-		};
-		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
-
-		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_tokens.size(); ++index) {
-			const auto& expected_token = expected_tokens[index];
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
-			if (result_token.type() == TokenType::LiteralFloat) {
-				ASSERT_TRUE(result_token.value.is<f64>() == expected_token.value.is<f64>());
-				EXPECT_EQ(expected_token.value.get<f64>(), result_token.value.get<f64>());
-			} else {
-				ASSERT_TRUE(result_token.value.is<i64>() == expected_token.value.is<i64>());
-				EXPECT_EQ(expected_token.value.get<i64>(), result_token.value.get<i64>());
-			}
-		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Strings)
 	{
-		const std::string_view         string          = R"("my_value""no space after previous" "520")";
-		const std::vector<std::string> expected_values = { "my_value", "no space after previous", "520" };
-		const auto                     result_tokens   = Lexer::tokenize(string, &this->_diagnostics);
+		static constexpr auto k_input_string = "\"my_value\"\"no space after previous one\" \"520\""sv;
+		const auto            result_tokens  = Lexer::tokenize(k_input_string);
 
-		ASSERT_EQ(expected_values.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_values.size(); ++index) {
-			const auto  expected_token = Token(TokenType::LiteralString, Value(expected_values[index]));
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
-			ASSERT_TRUE(result_tokens[index].value.is<std::string>())
-				<< "Expected string value, but got: " << std::string(result_tokens[index]);
-			EXPECT_EQ(expected_token.value.get<std::string>(), expected_values[index]);
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::LiteralString, "my_value"sv, SourceLocation{ 1, 2 }),
+			Token(Token::Type::LiteralString, "no space after previous one"sv, SourceLocation{ 1, 12 }),
+			Token(Token::Type::LiteralString, "520"sv, SourceLocation{ 1, 42 }),
+		};
+
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
 		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
 	TEST_F(LexerTest, Literals_Strings_UnterminatedString)
 	{
 		const std::string_view string        = "\"this is an unterminated string, how sad :c";
-		const auto             result_tokens = Lexer::tokenize(string, &this->_diagnostics);
+		const auto             result_tokens = Lexer::tokenize(string);
 
 		ASSERT_EQ(result_tokens.size(), 1);
-		ASSERT_TRUE(has_eof_token(result_tokens));
-
-		ASSERT_EQ(this->_diagnostics.size(), 1);
-		ASSERT_EQ(this->_diagnostics[0].code(), DiagnosticCode::LexerUnterminatedString);
+		EXPECT_EQ(result_tokens[0],
+		          Token(Token::Type::SpecialError,
+		                "unterminated string literal; did you forget '\"'?",
+		                SourceLocation{ 1, 0 }));
 	}
 
 	TEST_F(LexerTest, Compressed)
 	{
-		const std::string_view string          = "let variable:int=320;";
-		const std::vector      expected_tokens = {
-            Token(TokenType::KeywordLet), Token(TokenType::LiteralIdentifier, Value("variable")),
-            Token(TokenType::Colon),      Token(TokenType::LiteralIdentifier, Value("int")),
-            Token(TokenType::Equal),      Token(TokenType::LiteralInteger, Value(static_cast<i64>(320))),
-            Token(TokenType::Semicolon),
+		static constexpr auto k_input_string = "let variable:int=320;";
+		const auto            result_tokens  = Lexer::tokenize(k_input_string);
+
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::KeywordLet, "let"sv, SourceLocation{ 1, 0 }),
+			Token(Token::Type::LiteralIdentifier, "variable"sv, SourceLocation{ 1, 4 }),
+			Token(Token::Type::SymbolColon, ":"sv, SourceLocation{ 1, 12 }),
+			Token(Token::Type::LiteralIdentifier, "int"sv, SourceLocation{ 1, 13 }),
+			Token(Token::Type::SymbolEqual, "="sv, SourceLocation{ 1, 16 }),
+			Token(Token::Type::LiteralInteger, "320"sv, SourceLocation{ 1, 17 }),
+			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 1, 20 }),
 		};
-		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
-		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_tokens.size(); ++index) {
-			const auto& expected_token = expected_tokens[index];
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
 		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
 	}
 
-	TEST_F(LexerTest, All)
+	TEST_F(LexerTest, Mixed)
 	{
-		const std::string_view string          = R"(
-			fn main(some_var : int) :: void
-			{
-				let my_variable : str = "my_string";
-				return 0;
-			}
-		)";
-		const std::vector      expected_tokens = {
-            Token(TokenType::KeywordFn),
-            Token(TokenType::LiteralIdentifier, Value("main")),
-            Token(TokenType::ParenLeft),
-            Token(TokenType::LiteralIdentifier, Value("some_var")),
-            Token(TokenType::Colon),
-            Token(TokenType::LiteralIdentifier, Value("int")),
-            Token(TokenType::ParenRight),
-            Token(TokenType::DoubleColon),
-            Token(TokenType::LiteralIdentifier, Value("void")),
-            Token(TokenType::BraceLeft),
-            Token(TokenType::KeywordLet),
-            Token(TokenType::LiteralIdentifier, Value("my_variable")),
-            Token(TokenType::Colon),
-            Token(TokenType::LiteralIdentifier, Value("str")),
-            Token(TokenType::Equal),
-            Token(TokenType::LiteralString, Value("my_string")),
-            Token(TokenType::Semicolon),
-            Token(TokenType::KeywordReturn),
-            Token(TokenType::LiteralInteger, Value(static_cast<i64>(0))),
-            Token(TokenType::Semicolon),
-            Token(TokenType::BraceRight),
+		static constexpr auto k_input_string
+			= "fn main(some_var : int) :: void { \n\tlet my_variable : str = \"my_string\";\n\treturn 0;\n} "sv;
+		const auto result_tokens = Lexer::tokenize(k_input_string);
+
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::KeywordFn, "fn"sv, SourceLocation{ 1, 0 }),
+			Token(Token::Type::LiteralIdentifier, "main"sv, SourceLocation{ 1, 3 }),
+			Token(Token::Type::SymbolParenLeft, "("sv, SourceLocation{ 1, 7 }),
+			Token(Token::Type::LiteralIdentifier, "some_var"sv, SourceLocation{ 1, 8 }),
+			Token(Token::Type::SymbolColon, ":"sv, SourceLocation{ 1, 17 }),
+			Token(Token::Type::LiteralIdentifier, "int"sv, SourceLocation{ 1, 19 }),
+			Token(Token::Type::SymbolParenRight, ")"sv, SourceLocation{ 1, 22 }),
+			Token(Token::Type::SymbolColonColon, "::"sv, SourceLocation{ 1, 24 }),
+			Token(Token::Type::LiteralIdentifier, "void"sv, SourceLocation{ 1, 27 }),
+			Token(Token::Type::SymbolBraceLeft, "{"sv, SourceLocation{ 1, 32 }),
+			Token(Token::Type::KeywordLet, "let"sv, SourceLocation{ 2, 1 }),
+			Token(Token::Type::LiteralIdentifier, "my_variable"sv, SourceLocation{ 2, 5 }),
+			Token(Token::Type::SymbolColon, ":"sv, SourceLocation{ 2, 17 }),
+			Token(Token::Type::LiteralIdentifier, "str"sv, SourceLocation{ 2, 19 }),
+			Token(Token::Type::SymbolEqual, "="sv, SourceLocation{ 2, 23 }),
+			Token(Token::Type::LiteralString, "my_string"sv, SourceLocation{ 2, 27 }),
+			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 2, 36 }),
+			Token(Token::Type::KeywordReturn, "return"sv, SourceLocation{ 3, 1 }),
+			Token(Token::Type::LiteralInteger, "0"sv, SourceLocation{ 3, 8 }),
+			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 3, 9 }),
+			Token(Token::Type::SymbolBraceRight, "}"sv, SourceLocation{ 4, 0 }),
 		};
-		const auto result_tokens = Lexer::tokenize(string, &this->_diagnostics);
 
-		ASSERT_EQ(expected_tokens.size(), result_tokens.size() - 1);
-		for (size_t index = 0; index < expected_tokens.size(); ++index) {
-			const auto& expected_token = expected_tokens[index];
-			const auto& result_token   = result_tokens[index];
-			ASSERT_EQ(expected_token, result_token);
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
 		}
-
-		ASSERT_TRUE(has_eof_token(result_tokens));
-		ASSERT_TRUE(this->_diagnostics.empty());
 	}
+
+	TEST_F(LexerTest, WhitespacesAndComments)
+	{
+		static constexpr auto k_input_string = "\t\n\f     # this is a comment \n #and another one"sv;
+		const auto            result_tokens  = Lexer::tokenize(k_input_string);
+		ASSERT_TRUE(result_tokens.empty());
+	}
+
+	TEST_F(LexerTest, SymbolsDelimitedByComments)
+	{
+		static constexpr auto k_input_string = "\t;\n\f+# this is a comment \n+=#and another one"sv;
+		const auto            result_tokens  = Lexer::tokenize(k_input_string);
+
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 1, 1 }),
+			Token(Token::Type::SymbolPlus, "+"sv, SourceLocation{ 3, 0 }),
+			Token(Token::Type::SymbolPlusEqual, "+="sv, SourceLocation{ 4, 0 }),
+
+		};
+
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
+		}
+	}
+
 }  // namespace soul::lexer::ut
