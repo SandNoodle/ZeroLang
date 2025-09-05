@@ -20,9 +20,8 @@ namespace soul::backend::codegen::wasm::ut
 
 	TEST_F(WASMCompilerTest, SimpleVariableDeclaration) {
 		auto tokens = Lexer::tokenize("let my_variable : u32 = 0;");
-		auto root = Parser::parse(tokens);
+		auto root = Parser::parse("wasm_module", tokens);
 		auto result = WASMCompiler::compile(root.get());
 		// TODO: Decode headers, etc.
 	}
-
 }  // namespace soul::backend::codegen::wasm::ut

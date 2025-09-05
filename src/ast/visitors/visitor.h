@@ -19,6 +19,7 @@ namespace soul::ast::visitors
 		virtual ~IVisitor() = default;
 
 		SOUL_VISIT_NODE_DEFINE(nodes::BinaryNode)
+		SOUL_VISIT_NODE_DEFINE(nodes::BlockNode)
 		SOUL_VISIT_NODE_DEFINE(nodes::CastNode)
 		SOUL_VISIT_NODE_DEFINE(nodes::ErrorNode)
 		SOUL_VISIT_NODE_DEFINE(nodes::ForLoopNode)

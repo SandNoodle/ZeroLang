@@ -1,6 +1,7 @@
 #include "ast/visitors/default_traverse.h"
 
 #include "ast/nodes/binary.h"
+#include "ast/nodes/block.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
@@ -30,6 +31,7 @@ namespace soul::ast::visitors
 	}
 
 	SOUL_VISIT_NODE_AS_CONST_IMPL(BinaryNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(BlockNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(CastNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(ErrorNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(ForLoopNode)
@@ -48,6 +50,13 @@ namespace soul::ast::visitors
 		accept(node.rhs.get());
 	}
 
+	void DefaultTraverseVisitor::visit(const BlockNode& node)
+	{
+		for (const auto& statement : node.statements) {
+			accept(statement.get());
+		}
+	}
+
 	void DefaultTraverseVisitor::visit(const CastNode& node) { accept(node.expression.get()); }
 
 	void DefaultTraverseVisitor::visit(const ErrorNode& node) { /* Can't traverse further. */ }
@@ -57,18 +66,14 @@ namespace soul::ast::visitors
 		accept(node.initialization.get());
 		accept(node.condition.get());
 		accept(node.update.get());
-		for (const auto& statements : node.statements) {
-			accept(statements.get());
-		}
+		accept(node.statements.get());
 	}
 
 	void DefaultTraverseVisitor::visit(const ForeachLoopNode& node)
 	{
 		accept(node.variable.get());
 		accept(node.in_expression.get());
-		for (const auto& statements : node.statements) {
-			accept(statements.get());
-		}
+		accept(node.statements.get());
 	}
 
 	void DefaultTraverseVisitor::visit(const FunctionDeclarationNode& node)
@@ -76,21 +81,14 @@ namespace soul::ast::visitors
 		for (auto& param : node.parameters) {
 			accept(param.get());
 		}
-
-		for (auto& statement : node.statements) {
-			accept(statement.get());
-		}
+		accept(node.statements.get());
 	}
 
 	void DefaultTraverseVisitor::visit(const IfNode& node)
 	{
 		accept(node.condition.get());
-		for (const auto& statement : node.if_statements) {
-			accept(statement.get());
-		}
-		for (const auto& statement : node.else_statements) {
-			accept(statement.get());
-		}
+		accept(node.if_statements.get());
+		accept(node.else_statements.get());
 	}
 
 	void DefaultTraverseVisitor::visit(const LiteralNode& node) { /* Can't traverse further. */ }

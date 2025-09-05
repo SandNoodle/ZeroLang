@@ -2,6 +2,7 @@
 
 #include "ast/ast_operator.h"
 #include "ast/nodes/binary.h"
+#include "ast/nodes/block.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/error.h"
 #include "ast/nodes/for_loop.h"
@@ -106,6 +107,8 @@ namespace soul::parser
 				return parse_struct_declaration();
 			case Token::Type::KeywordWhile:
 				return parse_while_loop();
+			case Token::Type::SymbolBraceLeft:
+				return parse_block_statement();
 			default:
 				break;
 		}
@@ -177,6 +180,33 @@ namespace soul::parser
 		auto rhs        = parse_expression(precedence);
 
 		return BinaryNode::create(std::move(lhs), std::move(rhs), to_node_operator(binary_operator->type));
+	}
+
+	ASTNode::ScopeBlock Parser::parse_block_statement()
+	{
+		// <block_statement> ::= '{' [ <statement> ... ] '}'
+
+		ASTNode::Dependencies statements{};
+		if (!require(Token::Type::SymbolBraceLeft)) {
+			statements.emplace_back(create_error(std::format("expected '{}', but got: '{}'",
+			                                                 Token::name(Token::Type::SymbolBraceLeft),
+			                                                 std::string(current_token_or_default().data))));
+			return BlockNode::create(std::move(statements));
+		}
+
+		while (!match(Token::Type::SymbolBraceRight)) {
+			statements.emplace_back(parse_statement());
+		}
+
+		const auto previous_token = peek(-1);
+		if (!previous_token || previous_token->type != Token::Type::SymbolBraceRight) {
+			statements.emplace_back(create_error(std::format("expected '{}', but got: '{}'",
+			                                                 Token::name(Token::Type::SymbolBraceRight),
+			                                                 std::string(current_token_or_default().data))));
+			return BlockNode::create(std::move(statements));
+		}
+
+		return BlockNode::create(std::move(statements));
 	}
 
 	ASTNode::Dependency Parser::parse_cast()
@@ -386,7 +416,7 @@ namespace soul::parser
 		auto true_statements = parse_block_statement();
 
 		// [ <keyword_else> <block_statement> ]
-		ASTNode::Dependencies false_statements{};
+		ASTNode::ScopeBlock false_statements = nullptr;
 		if (match(Token::Type::KeywordElse)) {
 			false_statements = parse_block_statement();
 		}
@@ -597,33 +627,6 @@ namespace soul::parser
 		auto statements = parse_block_statement();
 
 		return ForLoopNode::create(nullptr, std::move(condition), nullptr, std::move(statements));
-	}
-
-	ASTNode::Dependencies Parser::parse_block_statement()
-	{
-		// <block_statement> ::= '{' [ <statement> ... ] '}'
-
-		ASTNode::Dependencies statements{};
-		if (!require(Token::Type::SymbolBraceLeft)) {
-			statements.emplace_back(create_error(std::format("expected '{}', but got: '{}'",
-			                                                 Token::name(Token::Type::SymbolBraceLeft),
-			                                                 std::string(current_token_or_default().data))));
-			return statements;
-		}
-
-		while (!match(Token::Type::SymbolBraceRight)) {
-			statements.emplace_back(parse_statement());
-		}
-
-		const auto previous_token = peek(-1);
-		if (!previous_token || previous_token->type != Token::Type::SymbolBraceRight) {
-			statements.emplace_back(create_error(std::format("expected '{}', but got: '{}'",
-			                                                 Token::name(Token::Type::SymbolBraceRight),
-			                                                 std::string(current_token_or_default().data))));
-			return statements;
-		}
-
-		return statements;
 	}
 
 	ASTNode::Dependency Parser::parse_parameter_declaration()

@@ -9,11 +9,6 @@ namespace soul::ast::nodes
 	class ModuleNode : public VisitorAcceptor<ModuleNode>
 	{
 		public:
-		using Identifier   = ASTNode::Identifier;
-		using Dependency   = ASTNode::Dependency;
-		using Dependencies = ASTNode::Dependencies;
-
-		public:
 		Identifier   name;
 		Dependencies statements;
 

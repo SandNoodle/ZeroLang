@@ -10,10 +10,6 @@ namespace soul::ast::nodes
 	class CastNode : public VisitorAcceptor<CastNode>
 	{
 		public:
-		using Identifier = ASTNode::Identifier;
-		using Dependency = ASTNode::Dependency;
-
-		public:
 		Dependency expression      = nullptr;
 		Identifier type_identifier = {};
 

@@ -3,6 +3,7 @@
 namespace soul::ast::nodes
 {
 	class BinaryNode;
+	class BlockNode;
 	class CastNode;
 	class ErrorNode;
 	class ForLoopNode;

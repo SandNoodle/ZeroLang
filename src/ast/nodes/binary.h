@@ -12,9 +12,6 @@ namespace soul::ast::nodes
 	class BinaryNode final : public VisitorAcceptor<BinaryNode>
 	{
 		public:
-		using Dependency = ASTNode::Dependency;
-
-		public:
 		ASTNodeOperator op  = ASTNodeOperator::Unknown;
 		Dependency      lhs = nullptr;
 		Dependency      rhs = nullptr;

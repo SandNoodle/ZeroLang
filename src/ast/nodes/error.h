@@ -10,8 +10,7 @@ namespace soul::ast::nodes
 	class ErrorNode final : public VisitorAcceptor<ErrorNode>
 	{
 		public:
-		using Dependency = ASTNode::Dependency;
-		using Message    = std::string;
+		using Message = std::string;
 
 		public:
 		Message message;

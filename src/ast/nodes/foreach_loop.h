@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast/ast.h"
+#include "ast/nodes/block.h"
 
 namespace soul::ast::nodes
 {
@@ -11,15 +12,12 @@ namespace soul::ast::nodes
 	class ForeachLoopNode final : public VisitorAcceptor<ForeachLoopNode>
 	{
 		public:
-		using Dependency = ASTNode::Dependency;
-
-		public:
 		Dependency   variable;
 		Dependency   in_expression;
-		Dependencies statements;
+		ScopeBlock statements;
 
 		public:
-		explicit ForeachLoopNode(Dependency variable, Dependency in_expression, Dependencies statements) noexcept;
+		explicit ForeachLoopNode(Dependency variable, Dependency in_expression, ScopeBlock statements) noexcept;
 		~ForeachLoopNode() override = default;
 
 		/**
@@ -29,6 +27,6 @@ namespace soul::ast::nodes
 		 * @param statements List of statements to execute each loop.
 		 * @return New 'ForeachLoop' expression statement node.
 		 */
-		static Dependency create(Dependency variable, Dependency in_expression, Dependencies statements);
+		static Dependency create(Dependency variable, Dependency in_expression, ScopeBlock statements);
 	};
 }  // namespace soul::ast::nodes

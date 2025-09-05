@@ -13,11 +13,6 @@ namespace soul::ast::nodes
 	class StructDeclarationNode final : public VisitorAcceptor<StructDeclarationNode>
 	{
 		public:
-		using Dependency   = ASTNode::Dependency;
-		using Dependencies = std::vector<Dependency>;
-		using Identifier   = ASTNode::Identifier;
-
-		public:
 		Identifier   name;
 		Dependencies parameters;
 

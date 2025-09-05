@@ -11,10 +11,6 @@ namespace soul::ast::nodes
 	class VariableDeclarationNode final : public VisitorAcceptor<VariableDeclarationNode>
 	{
 		public:
-		using Dependency = ASTNode::Dependency;
-		using Identifier = ASTNode::Identifier;
-
-		public:
 		Identifier name            = {};
 		Identifier type_identifier = {};
 		Dependency expr            = nullptr;

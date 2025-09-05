@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast/ast.h"
+#include "ast/nodes/block.h"
 
 namespace soul::ast::nodes
 {
@@ -11,21 +12,16 @@ namespace soul::ast::nodes
 	class FunctionDeclarationNode final : public VisitorAcceptor<FunctionDeclarationNode>
 	{
 		public:
-		using Dependency   = ASTNode::Dependency;
-		using Dependencies = ASTNode::Dependencies;
-		using Identifier   = ASTNode::Identifier;
-
-		public:
 		Identifier   name;
 		Identifier   return_type;
 		Dependencies parameters;
-		Dependencies statements;
+		ScopeBlock   statements;
 
 		public:
 		explicit FunctionDeclarationNode(Identifier   identifier,
 		                                 Identifier   return_type_identifier,
 		                                 Dependencies parameters,
-		                                 Dependencies statements);
+		                                 ScopeBlock   statements);
 		~FunctionDeclarationNode() override = default;
 
 		/**
@@ -39,6 +35,6 @@ namespace soul::ast::nodes
 		static Dependency create(Identifier   name,
 		                         Identifier   return_type,
 		                         Dependencies parameters,
-		                         Dependencies statements);
+		                         ScopeBlock   statements);
 	};
 }  // namespace soul::ast::nodes

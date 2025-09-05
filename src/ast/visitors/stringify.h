@@ -21,6 +21,7 @@ namespace soul::ast::visitors
 		using DefaultTraverseVisitor::visit;
 		void accept(const ASTNode::Reference node) override;
 		void visit(const nodes::BinaryNode&) override;
+		void visit(const nodes::BlockNode&) override;
 		void visit(const nodes::CastNode&) override;
 		void visit(const nodes::ErrorNode&) override;
 		void visit(const nodes::ForLoopNode&) override;
@@ -33,4 +34,4 @@ namespace soul::ast::visitors
 		void visit(const nodes::UnaryNode&) override;
 		void visit(const nodes::VariableDeclarationNode&) override;
 	};
-}  // namespace soul
+}  // namespace soul::ast::visitors

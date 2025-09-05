@@ -1,6 +1,5 @@
 #include "backend/codegen/wasm/compiler.h"
 
-#include "ast/nodes/assign.h"
 #include "ast/nodes/binary.h"
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"

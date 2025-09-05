@@ -12,9 +12,6 @@ namespace soul::ast::nodes
 	class UnaryNode final : public VisitorAcceptor<UnaryNode>
 	{
 		public:
-		using Dependency = ASTNode::Dependency;
-
-		public:
 		ASTNodeOperator op;
 		Dependency      expr;
 

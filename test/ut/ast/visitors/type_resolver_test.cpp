@@ -195,8 +195,10 @@ namespace soul::ast::visitors::ut
 			statements.emplace_back(std::move(literal));
 		}
 
-		auto for_loop = ForLoopNode::create(
-			std::move(initialization), std::move(condition), std::move(increment), std::move(statements));
+		auto for_loop = ForLoopNode::create(std::move(initialization),
+		                                    std::move(condition),
+		                                    std::move(increment),
+		                                    BlockNode::create(std::move(statements)));
 		ASSERT_TRUE(for_loop->type.is<PrimitiveType>());
 		EXPECT_EQ(for_loop->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
@@ -238,8 +240,10 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_expr->type.is<PrimitiveType>());
 			EXPECT_EQ(as_expr->type.as<PrimitiveType>().type, PrimitiveType::Kind::String);
 
+			const auto* as_statements = dynamic_cast<BlockNode*>(as_for_loop->statements.get());
+			ASSERT_TRUE(as_statements);
 			for (std::size_t index = 0; index < k_statements_count; ++index) {
-				const auto* as_statement = dynamic_cast<LiteralNode*>(as_for_loop->statements[index].get());
+				const auto* as_statement = dynamic_cast<LiteralNode*>(as_statements->statements[index].get());
 				ASSERT_TRUE(as_statement);
 				ASSERT_TRUE(as_statement->type.is<PrimitiveType>());
 				EXPECT_EQ(as_statement->type.as<PrimitiveType>().type, PrimitiveType::Kind::Int64);
@@ -268,7 +272,8 @@ namespace soul::ast::visitors::ut
 			statements.emplace_back(std::move(literal));
 		}
 
-		auto foreach = ForeachLoopNode::create(std::move(variable), std::move(in_expression), std::move(statements));
+		auto foreach = ForeachLoopNode::create(
+			std::move(variable), std::move(in_expression), BlockNode::create(std::move(statements)));
 		ASSERT_TRUE(foreach->type.is<PrimitiveType>());
 		EXPECT_EQ(foreach->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
@@ -290,8 +295,10 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_in_expression->type.is<PrimitiveType>());
 			EXPECT_EQ(as_in_expression->type.as<PrimitiveType>().type, PrimitiveType::Kind::String);
 
+			const auto* as_statements = dynamic_cast<BlockNode*>(as_foreach->statements.get());
+			ASSERT_TRUE(as_statements);
 			for (std::size_t index = 0; index < k_statements_count; ++index) {
-				const auto* as_statement = dynamic_cast<LiteralNode*>(as_foreach->statements[index].get());
+				const auto* as_statement = dynamic_cast<LiteralNode*>(as_statements->statements[index].get());
 				ASSERT_TRUE(as_statement);
 				ASSERT_TRUE(as_statement->type.is<PrimitiveType>());
 				EXPECT_EQ(as_statement->type.as<PrimitiveType>().type, PrimitiveType::Kind::Int64);
@@ -321,8 +328,8 @@ namespace soul::ast::visitors::ut
 			statements.push_back(std::move(statement));
 		}
 
-		auto function_declaration
-			= FunctionDeclarationNode::create("my_function", "i32", std::move(parameters), std::move(statements));
+		auto function_declaration = FunctionDeclarationNode::create(
+			"my_function", "i32", std::move(parameters), BlockNode::create(std::move(statements)));
 		ASSERT_TRUE(function_declaration->type.is<PrimitiveType>());
 		EXPECT_EQ(function_declaration->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
@@ -341,9 +348,11 @@ namespace soul::ast::visitors::ut
 				EXPECT_EQ(param->type.as<PrimitiveType>().type, PrimitiveType::Kind::Float64);
 			}
 
-			ASSERT_EQ(as_function_declaration->statements.size(), k_statements_count);
-			for (const auto* statement : as_function_declaration->statements
-			                                 | std::views::transform([](const auto& arg) { return arg.get(); })) {
+			const auto* as_statements = dynamic_cast<BlockNode*>(as_function_declaration->statements.get());
+			ASSERT_TRUE(as_statements);
+			ASSERT_EQ(as_statements->statements.size(), k_statements_count);
+			for (const auto* statement :
+			     as_statements->statements | std::views::transform([](const auto& arg) { return arg.get(); })) {
 				ASSERT_TRUE(statement->type.is<PrimitiveType>());
 				EXPECT_EQ(statement->type.as<PrimitiveType>().type, PrimitiveType::Kind::Float32);
 			}
@@ -378,7 +387,9 @@ namespace soul::ast::visitors::ut
 			else_statement.push_back(std::move(statement));
 		}
 
-		auto if_node = IfNode::create(std::move(condition), std::move(if_statement), std::move(else_statement));
+		auto if_node = IfNode::create(std::move(condition),
+		                              BlockNode::create(std::move(if_statement)),
+		                              BlockNode::create(std::move(else_statement)));
 		ASSERT_TRUE(if_node->type.is<PrimitiveType>());
 		EXPECT_EQ(if_node->type.as<PrimitiveType>().type, PrimitiveType::Kind::Unknown);
 
@@ -390,16 +401,20 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_if_node->type.is<PrimitiveType>());
 			EXPECT_EQ(as_if_node->type.as<PrimitiveType>().type, PrimitiveType::Kind::Void);
 
-			ASSERT_EQ(as_if_node->if_statements.size(), k_statements_count);
+			const auto* as_if_scope_statements = dynamic_cast<BlockNode*>(as_if_node->if_statements.get());
+			ASSERT_TRUE(as_if_scope_statements);
+			ASSERT_EQ(as_if_scope_statements->statements.size(), k_statements_count);
 			for (std::size_t index = 0; index < k_statements_count; ++index) {
-				const auto& statement = as_if_node->if_statements[index];
+				const auto& statement = as_if_node->if_statements->statements[index];
 				ASSERT_TRUE(statement->type.is<PrimitiveType>());
 				EXPECT_EQ(statement->type.as<PrimitiveType>().type, PrimitiveType::Kind::Int64);
 			}
 
-			ASSERT_EQ(as_if_node->else_statements.size(), k_statements_count);
+			const auto* as_else_scope_statements = dynamic_cast<BlockNode*>(as_if_node->else_statements.get());
+			ASSERT_TRUE(as_else_scope_statements);
+			ASSERT_EQ(as_if_node->else_statements->statements.size(), k_statements_count);
 			for (std::size_t index = 0; index < k_statements_count; ++index) {
-				const auto& statement = as_if_node->else_statements[index];
+				const auto& statement = as_if_node->else_statements->statements[index];
 				ASSERT_TRUE(statement->type.is<PrimitiveType>());
 				EXPECT_EQ(statement->type.as<PrimitiveType>().type, PrimitiveType::Kind::Float32);
 			}

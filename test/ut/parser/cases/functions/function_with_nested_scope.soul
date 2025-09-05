@@ -1,0 +1,6 @@
+fn function_with_inner_scope :: void {
+    let outer_scope_variable : str = "outer_scope";
+    {
+        let inner_scope_variable : f32 = 3.14;
+    }
+}

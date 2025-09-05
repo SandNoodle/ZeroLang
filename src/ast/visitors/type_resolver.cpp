@@ -55,9 +55,7 @@ namespace soul::ast::visitors
 		accept(node.initialization.get());
 		accept(node.condition.get());
 		accept(node.update.get());
-		for (auto& statement : node.statements) {
-			accept(statement.get());
-		}
+		accept(node.statements.get());
 		node.type = PrimitiveType::Kind::Void;
 	}
 
@@ -65,9 +63,7 @@ namespace soul::ast::visitors
 	{
 		accept(node.variable.get());
 		accept(node.in_expression.get());
-		for (auto& statement : node.statements) {
-			accept(statement.get());
-		}
+		accept(node.statements.get());
 		node.type = PrimitiveType::Kind::Void;
 	}
 
@@ -76,21 +72,15 @@ namespace soul::ast::visitors
 		for (auto& parameters : node.parameters) {
 			accept(parameters.get());
 		}
-		for (auto& statement : node.statements) {
-			accept(statement.get());
-		}
+		accept(node.statements.get());
 		node.type = get_type_from_identifier(node.return_type);
 	}
 
 	void TypeResolverVisitor::visit(IfNode& node)
 	{
 		accept(node.condition.get());
-		for (auto& statement : node.if_statements) {
-			accept(statement.get());
-		}
-		for (auto& statement : node.else_statements) {
-			accept(statement.get());
-		}
+		accept(node.if_statements.get());
+		accept(node.else_statements.get());
 		node.type = PrimitiveType::Kind::Void;
 	}
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/types/type.h"
 #include "ast/visitors/visitor.h"
+#include "common/types/type.h"
 
 #include <memory>
 #include <string>
@@ -30,6 +30,7 @@ namespace soul::ast
 		using Reference    = ASTNode*;
 		using References   = std::vector<Reference>;
 		using Identifier   = std::string;
+		using ScopeBlock   = std::unique_ptr<nodes::BlockNode>;
 
 		public:
 		types::Type type = {};
