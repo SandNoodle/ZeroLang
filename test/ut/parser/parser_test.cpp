@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "ast/ast.h"
 #include "ast/nodes/literal.h"
 #include "ast/nodes/module.h"
 #include "ast/nodes/variable_declaration.h"
@@ -11,8 +10,8 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <set>
 #include <source_location>
-#include <unordered_set>
 
 namespace soul::parser::ut
 {
@@ -59,7 +58,7 @@ namespace soul::parser::ut
 		{
 			static const auto k_base_directory
 				= std::filesystem::path{ std::source_location::current().file_name() }.parent_path() / "cases";
-			std::unordered_set<std::filesystem::path> unique_files;
+			std::set<std::filesystem::path> unique_files;
 			for (const auto& entry : std::filesystem::recursive_directory_iterator(k_base_directory)) {
 				if (entry.is_directory()) {
 					continue;
@@ -81,7 +80,7 @@ namespace soul::parser::ut
 		}
 	};
 
-	INSTANTIATE_TEST_SUITE_P(AllCases,
+	INSTANTIATE_TEST_SUITE_P(ParserTest,
 	                         ParserTest,
 	                         ::testing::ValuesIn(ParserTest::generate_cases()),
 	                         [](const ::testing::TestParamInfo<Case>& info) {
@@ -97,7 +96,7 @@ namespace soul::parser::ut
 		ASSERT_TRUE(input.has_value()) << "failed to read: " << param.script_path;
 
 		const auto tokens      = Lexer::tokenize(*input);
-		const auto result_tree = Parser::parse(tokens);
+		const auto result_tree = Parser::parse("test_module", tokens);
 
 		StringifyVisitor stringify;
 		stringify.accept(result_tree.get());

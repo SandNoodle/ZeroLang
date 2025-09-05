@@ -1,0 +1,4 @@
+struct missing_comma_struct {
+    first_variable : i32
+    second_variable : f32
+}

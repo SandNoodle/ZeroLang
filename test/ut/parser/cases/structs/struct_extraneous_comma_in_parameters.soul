@@ -1,0 +1,4 @@
+struct extraneous_comma {
+    first_variable : i32,
+    this_one_has_comma_but_shouldnt : f32, # Not an error, but shouldn't really be used.
+}

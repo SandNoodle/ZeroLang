@@ -1,0 +1,5 @@
+if (true) {
+    let some_var : bool = true;
+} else {
+    let second_var : str = "my_string";
+}

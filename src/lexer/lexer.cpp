@@ -102,8 +102,33 @@ namespace soul::lexer
 			return create_token(Token::Type::SpecialEndOfFile, current_token());
 		}
 
+		// Numeric
+		const bool has_sign = current_codepoint == CodePoint::k_hyphen || current_codepoint == CodePoint::k_plus_sign;
+		if (CodePoint::is_digit(peek_at(has_sign ? 1 : 0))) {
+			advance_while([](const auto c) -> bool {
+				return CodePoint::is_digit(c) || c == CodePoint::k_full_stop || c == CodePoint::k_plus_sign
+				    || c == CodePoint::k_hyphen;
+			});
+			const auto lexeme = current_token();
+			const bool has_decimal_point
+				= std::ranges::any_of(lexeme, [](const auto c) -> bool { return c == CodePoint::k_full_stop; });
+			return create_token(has_decimal_point ? Token::Type::LiteralFloat : Token::Type::LiteralInteger, lexeme);
+		}
+
+		// Strings
+		if (current_codepoint == '"') {
+			std::ignore = advance();  // Skip '"'
+			advance_while([](const auto c) -> bool { return c != '"'; });
+			if (peek_at(0) == CodePoint::k_eof) {
+				static constexpr auto k_error_message = "unterminated string literal; did you forget '\"'?"sv;
+				return create_token(Token::Type::SpecialError, k_error_message);
+			}
+			std::ignore = advance();  // Skip '"'
+			return create_token(Token::Type::LiteralString, current_token(1, 1));
+		}
+
 		// Keywords & Literals
-		if (advance_if(CodePoint::is_identifier)) {
+		if (advance_if([](const auto c) -> bool { return CodePoint::is_identifier(c) || CodePoint::is_digit(c); })) {
 			static constexpr std::array k_keywords = {
 				// Keywords
 				std::make_pair("break"sv, Token::Type::KeywordBreak),
@@ -135,31 +160,6 @@ namespace soul::lexer
 			const auto lexeme = current_token();
 			const auto it     = std::ranges::find(k_keywords, lexeme, &decltype(k_keywords)::value_type::first);
 			return create_token(it != std::end(k_keywords) ? it->second : Token::Type::LiteralIdentifier, lexeme);
-		}
-
-		// Numeric
-		const bool has_sign = current_codepoint == CodePoint::k_hyphen || current_codepoint == CodePoint::k_plus_sign;
-		if (CodePoint::is_digit(peek_at(has_sign ? 1 : 0))) {
-			advance_while([](const auto c) -> bool {
-				return CodePoint::is_digit(c) || c == CodePoint::k_full_stop || c == CodePoint::k_plus_sign
-				    || c == CodePoint::k_hyphen;
-			});
-			const auto lexeme = current_token();
-			const bool has_decimal_point
-				= std::ranges::any_of(lexeme, [](const auto c) -> bool { return c == CodePoint::k_full_stop; });
-			return create_token(has_decimal_point ? Token::Type::LiteralFloat : Token::Type::LiteralInteger, lexeme);
-		}
-
-		// Strings
-		if (current_codepoint == '"') {
-			std::ignore = advance();  // Skip '"'
-			advance_while([](const auto c) -> bool { return c != '"'; });
-			if (peek_at(0) == CodePoint::k_eof) {
-				static constexpr auto k_error_message = "unterminated string literal; did you forget '\"'?"sv;
-				return create_token(Token::Type::SpecialError, k_error_message);
-			}
-			std::ignore = advance();  // Skip '"'
-			return create_token(Token::Type::LiteralString, current_token(1, 1));
 		}
 
 		// Symbols

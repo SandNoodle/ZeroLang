@@ -1,0 +1,3 @@
+if (true) {
+    let some_var : bool = true;
+}

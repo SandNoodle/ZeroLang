@@ -3,7 +3,6 @@
 #include "ast/nodes/nodes_fwd.h"
 #include "ast/visitors/default_traverse.h"
 #include "ast/visitors/type_discoverer.h"
-#include "common/diagnostic.h"
 #include "common/types/types_fwd.h"
 
 #include <optional>
@@ -68,4 +67,3 @@ namespace soul::ast::visitors
 		types::Type get_type_from_identifier(std::string_view type_identifier) const noexcept;
 	};
 }  // namespace soul::ast::visitors
-#include "ast/visitors/type_resolver.inl"

@@ -1,0 +1,3 @@
+struct missing_closing_brace_after_params {
+    let my_variable : f32
+

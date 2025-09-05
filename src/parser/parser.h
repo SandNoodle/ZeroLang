@@ -1,13 +1,12 @@
 #pragma once
 
-#include "ast/ast.h"
-#include "common/diagnostic.h"
+#include "ast/nodes/error.h"
+#include "ast/nodes/nodes_fwd.h"
+#include "core/types.h"
 #include "lexer/token.h"
 
-#include <format>
-#include <functional>
-#include <optional>
 #include <span>
+#include <string_view>
 
 namespace soul::parser
 {
@@ -17,77 +16,60 @@ namespace soul::parser
 	 */
 	class Parser
 	{
-		public:
+		private:
 		struct PrecedenceRule;
 		enum class Precedence : u8;
 
 		private:
-		std::span<const Token> _tokens        = {};
-		std::size_t            _current_index = 0;
-		bool                   _had_panic     = false;
-		bool                   _had_error     = false;
+		std::span<const Token>           _tokens        = {};
+		std::span<const Token>::iterator _current_token = {};
+		std::string_view                 _module_name   = {};
 
 		public:
 		/**
 		 * @brief Converts linear sequence of tokens into an Abstract Syntax Tree (AST).
-		 * @param tokens tokens to be parsed.
-		 * @return AST if the parsing was a success, nullptr otherwise.
+		 * @param module_name Name of the module.
+		 * @param tokens Tokens to be parsed.
+		 * @return Module with parsed statements.
 		 */
-		[[nodiscard]] static ast::ASTNode::Dependency parse(std::span<const Token> tokens);
+		[[nodiscard]] static ast::ASTNode::Dependency parse(std::string_view       module_name,
+		                                                    std::span<const Token> tokens);
 
 		private:
-		Parser(std::span<const Token> tokens);
-		ast::ASTNode::Dependency parse();
-		ast::ASTNode::Dependency parse_expression();
-		ast::ASTNode::Dependency parse_expression_statement();
-		ast::ASTNode::Dependency parse_expression_with_precedence(Precedence precedence);
-		ast::ASTNode::Dependency parse_statement();
+		Parser(std::string_view module_name, std::span<const Token> tokens);
 
-		ast::ASTNode::Dependency parse_assign();
-		ast::ASTNode::Dependency parse_cast();
+		ast::ASTNode::Dependency parse();
+		ast::ASTNode::Dependency parse_statement();
+		ast::ASTNode::Dependency parse_expression();
+		ast::ASTNode::Dependency parse_expression(Precedence precedence);
+
 		ast::ASTNode::Dependency parse_binary(ast::ASTNode::Dependency lhs);
+		ast::ASTNode::Dependency parse_cast();
 		ast::ASTNode::Dependency parse_for_loop();
-		ast::ASTNode::Dependency parse_foreach_loop();
 		ast::ASTNode::Dependency parse_function_declaration();
 		ast::ASTNode::Dependency parse_if();
 		ast::ASTNode::Dependency parse_literal();
 		ast::ASTNode::Dependency parse_struct_declaration();
-		ast::ASTNode::Dependency parse_suffix();
 		ast::ASTNode::Dependency parse_unary();
-		ast::ASTNode::Dependency parse_variable_declaration(bool require_keyword    = true,
-		                                                    bool require_expression = true,
-		                                                    bool require_semicolon  = true);
+		ast::ASTNode::Dependency parse_variable_declaration();
 		ast::ASTNode::Dependency parse_while_loop();
 
 		ast::ASTNode::Dependencies parse_block_statement();
-
-		PrecedenceRule get_precedence_rule(TokenType type) const noexcept;
-
-		/**
-		 * @brief Verifies that the current token is of a given type.
-		 * @return If it does match then the token is consumed and returned; false otherwise.
-		 */
-		std::optional<Token> require(TokenType type);
-		std::optional<Token> require_any(std::span<const TokenType> types);
+		ast::ASTNode::Dependency   parse_parameter_declaration();
 
 		/**
-		 * @brief Verifies that the current token is of a given type.
-		 * @return If it does match then true is returned and the token is consumed; false otherwise.
+		 * @brief Creates new Error node in the AST and resynchronizes the parser.
 		 */
-		bool try_match(TokenType type);
-		bool try_match_any(std::span<const TokenType> types);
+		ast::ASTNode::Dependency create_error(ast::nodes::ErrorNode::Message error_message);
 
-		/** @brief Advances the parser forwards and returns the (now) previous token. */
-		const Token& advance() noexcept;
+		std::optional<Token> require(Token::Type type);
+		std::optional<Token> require(std::span<const Token::Type> types);
+		std::optional<Token> peek(std::ptrdiff_t n);
+		bool                 match(Token::Type type);
 
-		/**
-		 * @brief Tries to advance the parser up until synchronization token is encountered, removing panic in the
-		 * process.
-		 */
-		void synchronize();
+		PrecedenceRule precedence_rule(Token::Type type) const noexcept;
 
-		const Token* previous_token() const noexcept;
-		const Token* current_token() const noexcept;
-		const Token* next_token() const noexcept;
+		/** @brief Returns current token or an explicit EOF one. */
+		Token current_token_or_default() const noexcept;
 	};
 }  // namespace soul::parser

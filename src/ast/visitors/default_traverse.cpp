@@ -31,6 +31,7 @@ namespace soul::ast::visitors
 
 	SOUL_VISIT_NODE_AS_CONST_IMPL(BinaryNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(CastNode)
+	SOUL_VISIT_NODE_AS_CONST_IMPL(ErrorNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(ForLoopNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(ForeachLoopNode)
 	SOUL_VISIT_NODE_AS_CONST_IMPL(FunctionDeclarationNode)
@@ -48,6 +49,8 @@ namespace soul::ast::visitors
 	}
 
 	void DefaultTraverseVisitor::visit(const CastNode& node) { accept(node.expression.get()); }
+
+	void DefaultTraverseVisitor::visit(const ErrorNode& node) { /* Can't traverse further. */ }
 
 	void DefaultTraverseVisitor::visit(const ForLoopNode& node)
 	{

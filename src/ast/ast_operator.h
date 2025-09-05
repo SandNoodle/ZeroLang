@@ -1,13 +1,12 @@
 #pragma once
 
 #include "core/types.h"
+#include "lexer/token.h"
 
 #include <string_view>
 
 namespace soul
 {
-	enum class TokenType : u8;
-
 	/** Represents operator binding nodes, ex. binary, unary, ... */
 	enum class ASTNodeOperator : u8
 	{
@@ -35,7 +34,7 @@ namespace soul
 		LogicalAnd,
 		LogicalOr,
 	};
-	ASTNodeOperator  to_node_operator(TokenType);
+	ASTNodeOperator  to_node_operator(Token::Type);
 	std::string_view to_string(ASTNodeOperator);
 
 }  // namespace soul

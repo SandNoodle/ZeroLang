@@ -24,6 +24,7 @@ namespace soul::ast::visitors
 
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::BinaryNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::CastNode)
+		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::ErrorNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::ForLoopNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::ForeachLoopNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::FunctionDeclarationNode)

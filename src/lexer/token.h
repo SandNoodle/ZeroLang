@@ -91,9 +91,13 @@ namespace soul
 			return std::tie(type, data) <=> std::tie(other.type, other.data);
 		}
 
-		explicit constexpr operator std::string() const { return std::format("<{}:\"{}\">", name(type), data); }
+		explicit constexpr operator std::string() const
+		{
+			return std::format("<{}:\"{}\">", internal_name(type), data);
+		}
 
 		static std::string_view name(Token::Type type) noexcept;
+		static std::string_view internal_name(Token::Type type) noexcept;
 	};
 
 	template <typename T>

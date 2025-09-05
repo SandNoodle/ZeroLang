@@ -31,25 +31,25 @@ namespace soul
 		return k_operators.at(op);
 	}
 
-	ASTNodeOperator to_node_operator(TokenType type)
+	ASTNodeOperator to_node_operator(Token::Type type)
 	{
-		static const std::unordered_map<TokenType, ASTNodeOperator> k_operators = {
-			{ TokenType::Plus,            ASTNodeOperator::Add          },
-			{ TokenType::Minus,           ASTNodeOperator::Subtract     },
-			{ TokenType::Star,            ASTNodeOperator::Multiply     },
-			{ TokenType::Slash,           ASTNodeOperator::Divide       },
-			{ TokenType::Percent,         ASTNodeOperator::Modulo       },
-			{ TokenType::DoublePlus,      ASTNodeOperator::Increment    },
-			{ TokenType::DoubleMinus,     ASTNodeOperator::Decrement    },
-			{ TokenType::Equal,           ASTNodeOperator::Equal        },
-			{ TokenType::BangEqual,       ASTNodeOperator::NotEqual     },
-			{ TokenType::Greater,         ASTNodeOperator::Greater      },
-			{ TokenType::GreaterEqual,    ASTNodeOperator::GreaterEqual },
-			{ TokenType::Less,            ASTNodeOperator::Less         },
-			{ TokenType::LessEqual,       ASTNodeOperator::LessEqual    },
-			{ TokenType::Bang,            ASTNodeOperator::LogicalNot   },
-			{ TokenType::DoubleAmpersand, ASTNodeOperator::LogicalAnd   },
-			{ TokenType::DoublePipe,      ASTNodeOperator::LogicalOr    },
+		static const std::unordered_map<Token::Type, ASTNodeOperator> k_operators = {
+			{ Token::Type::SymbolPlus,               ASTNodeOperator::Add          },
+			{ Token::Type::SymbolMinus,              ASTNodeOperator::Subtract     },
+			{ Token::Type::SymbolStar,               ASTNodeOperator::Multiply     },
+			{ Token::Type::SymbolSlash,              ASTNodeOperator::Divide       },
+			{ Token::Type::SymbolPercent,            ASTNodeOperator::Modulo       },
+			{ Token::Type::SymbolPlusPlus,           ASTNodeOperator::Increment    },
+			{ Token::Type::SymbolMinusMinus,         ASTNodeOperator::Decrement    },
+			{ Token::Type::SymbolEqual,              ASTNodeOperator::Equal        },
+			{ Token::Type::SymbolBangEqual,          ASTNodeOperator::NotEqual     },
+			{ Token::Type::SymbolGreater,            ASTNodeOperator::Greater      },
+			{ Token::Type::SymbolGreaterEqual,       ASTNodeOperator::GreaterEqual },
+			{ Token::Type::SymbolLess,               ASTNodeOperator::Less         },
+			{ Token::Type::SymbolLessEqual,          ASTNodeOperator::LessEqual    },
+			{ Token::Type::SymbolBang,               ASTNodeOperator::LogicalNot   },
+			{ Token::Type::SymbolAmpersandAmpersand, ASTNodeOperator::LogicalAnd   },
+			{ Token::Type::SymbolPipePipe,           ASTNodeOperator::LogicalOr    },
 		};
 		if (!k_operators.contains(type)) {
 			return ASTNodeOperator::Unknown;

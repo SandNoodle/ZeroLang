@@ -272,7 +272,6 @@ namespace soul::ast::visitors
 		}
 
 		if (from_type.is<StructType>() || to_type.is<StructType>()) {
-			// Casting from/to Struct types is not supported; maybe in the future.
 			return CastType::Impossible;
 		}
 

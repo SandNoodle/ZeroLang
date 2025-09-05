@@ -4,9 +4,74 @@
 
 namespace soul
 {
+	using namespace std::string_view_literals;
+
 	std::string_view Token::name(Token::Type type) noexcept
 	{
-		using namespace std::string_view_literals;
+		static const std::unordered_map<Token::Type, std::string_view> k_token_name = {
+			{ Token::Type::KeywordBreak,             "break"sv          },
+			{ Token::Type::KeywordCast,              "cast"sv           },
+			{ Token::Type::KeywordContinue,          "continue"sv       },
+			{ Token::Type::KeywordElse,              "else"sv           },
+			{ Token::Type::KeywordFalse,             "false"sv          },
+			{ Token::Type::KeywordFn,                "fn"sv             },
+			{ Token::Type::KeywordFor,               "for"sv            },
+			{ Token::Type::KeywordIf,                "if"sv             },
+			{ Token::Type::KeywordLet,               "let"sv            },
+			{ Token::Type::KeywordMut,               "mut"sv            },
+			{ Token::Type::KeywordNative,            "native"sv         },
+			{ Token::Type::KeywordReturn,            "return"sv         },
+			{ Token::Type::KeywordStruct,            "struct"sv         },
+			{ Token::Type::KeywordTrue,              "true"sv           },
+			{ Token::Type::KeywordWhile,             "while"sv          },
+			{ Token::Type::LiteralFloat,             "float literal"sv  },
+			{ Token::Type::LiteralIdentifier,        "identifier"sv     },
+			{ Token::Type::LiteralInteger,           "int literal"sv    },
+			{ Token::Type::LiteralString,            "string literal"sv },
+			{ Token::Type::SymbolAmpersand,          "&"sv              },
+			{ Token::Type::SymbolAmpersandAmpersand, "&&"sv             },
+			{ Token::Type::SymbolCaret,              "^"sv              },
+			{ Token::Type::SymbolComma,              ","sv              },
+			{ Token::Type::SymbolDot,                "."sv              },
+			{ Token::Type::SymbolGreater,            ">"sv              },
+			{ Token::Type::SymbolGreaterEqual,       ">="sv             },
+			{ Token::Type::SymbolLess,               "<"sv              },
+			{ Token::Type::SymbolLessEqual,          "<="sv             },
+			{ Token::Type::SymbolMinus,              "-"sv              },
+			{ Token::Type::SymbolMinusEqual,         "-="sv             },
+			{ Token::Type::SymbolMinusMinus,         "--"sv             },
+			{ Token::Type::SymbolPercent,            "%"sv              },
+			{ Token::Type::SymbolPipe,               "|"sv              },
+			{ Token::Type::SymbolPipePipe,           "||"sv             },
+			{ Token::Type::SymbolPlus,               "+"sv              },
+			{ Token::Type::SymbolPlusEqual,          "+="sv             },
+			{ Token::Type::SymbolPlusPlus,           "++"sv             },
+			{ Token::Type::SymbolQuestionMark,       "?"sv              },
+			{ Token::Type::SymbolSlash,              "/"sv              },
+			{ Token::Type::SymbolSlashEqual,         "/="sv             },
+			{ Token::Type::SymbolStar,               "*"sv              },
+			{ Token::Type::SymbolStarEqual,          "*="sv             },
+			{ Token::Type::SymbolBang,               "!"sv              },
+			{ Token::Type::SymbolBangEqual,          "!="sv             },
+			{ Token::Type::SymbolBraceLeft,          "{"sv              },
+			{ Token::Type::SymbolBraceRight,         "}"sv              },
+			{ Token::Type::SymbolBracketLeft,        "["sv              },
+			{ Token::Type::SymbolBracketRight,       "]"sv              },
+			{ Token::Type::SymbolColon,              ":"sv              },
+			{ Token::Type::SymbolColonColon,         "::"sv             },
+			{ Token::Type::SymbolEqual,              "="sv              },
+			{ Token::Type::SymbolEqualEqual,         "=="sv             },
+			{ Token::Type::SymbolParenLeft,          "("sv              },
+			{ Token::Type::SymbolParenRight,         ")"sv              },
+			{ Token::Type::SymbolSemicolon,          ";"sv              },
+			{ Token::Type::SpecialError,             "__ERROR__"sv      },
+			{ Token::Type::SpecialEndOfFile,         "__EOF__"sv        },
+		};
+		return k_token_name.at(type);
+	}
+
+	std::string_view Token::internal_name(Token::Type type) noexcept
+	{
 		static const std::unordered_map<Token::Type, std::string_view> k_token_name = {
 			{ Token::Type::KeywordBreak,             "keyword_break"sv              },
 			{ Token::Type::KeywordCast,              "keyword_cast"sv               },
@@ -39,7 +104,7 @@ namespace soul
 			{ Token::Type::SymbolMinus,              "symbol_minus"sv               },
 			{ Token::Type::SymbolMinusEqual,         "symbol_minus_equal"sv         },
 			{ Token::Type::SymbolMinusMinus,         "symbol_minus_minus"sv         },
-			{ Token::Type::SymbolPercent,             "symbol_percent"sv              },
+			{ Token::Type::SymbolPercent,            "symbol_percent"sv             },
 			{ Token::Type::SymbolPipe,               "symbol_pipe"sv                },
 			{ Token::Type::SymbolPipePipe,           "symbol_pipe_pipe"sv           },
 			{ Token::Type::SymbolPlus,               "symbol_plus"sv                },

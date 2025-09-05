@@ -254,7 +254,6 @@ namespace soul::lexer::ut
 			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 1, 1 }),
 			Token(Token::Type::SymbolPlus, "+"sv, SourceLocation{ 3, 0 }),
 			Token(Token::Type::SymbolPlusEqual, "+="sv, SourceLocation{ 4, 0 }),
-
 		};
 
 		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
@@ -264,4 +263,26 @@ namespace soul::lexer::ut
 		}
 	}
 
+	TEST_F(LexerTest, PrimitiveTypes)
+	{
+		static constexpr auto k_input_string = "bool chr f32 f64 i32 i64 str void"sv;
+		const auto            result_tokens  = Lexer::tokenize(k_input_string);
+
+		static constexpr std::array k_expected_tokens = {
+			Token(Token::Type::LiteralIdentifier, "bool"sv, SourceLocation{ 1, 0 }),
+			Token(Token::Type::LiteralIdentifier, "chr"sv, SourceLocation{ 1, 5 }),
+			Token(Token::Type::LiteralIdentifier, "f32"sv, SourceLocation{ 1, 9 }),
+			Token(Token::Type::LiteralIdentifier, "f64"sv, SourceLocation{ 1, 13 }),
+			Token(Token::Type::LiteralIdentifier, "i32"sv, SourceLocation{ 1, 17 }),
+			Token(Token::Type::LiteralIdentifier, "i64"sv, SourceLocation{ 1, 21 }),
+			Token(Token::Type::LiteralIdentifier, "str"sv, SourceLocation{ 1, 25 }),
+			Token(Token::Type::LiteralIdentifier, "void"sv, SourceLocation{ 1, 29 }),
+		};
+
+		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());
+		for (size_t index = 0; index < k_expected_tokens.size(); ++index) {
+			EXPECT_EQ(k_expected_tokens[index], result_tokens[index]);
+			EXPECT_EQ(k_expected_tokens[index].location, result_tokens[index].location);
+		}
+	}
 }  // namespace soul::lexer::ut

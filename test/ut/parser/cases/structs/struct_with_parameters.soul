@@ -2,5 +2,5 @@ struct my_struct {
 	first_variable : i32,
 	second_variable : str,
 	third_variable : bool,
-	fourth_variable : f32,
+	fourth_variable : f32
 }

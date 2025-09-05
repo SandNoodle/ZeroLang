@@ -1,0 +1,1 @@
+{"type":"module_declaration","name":"test_module","statements":[{"type":"variable_declaration","name":"my_cheeseburger","type_identifier":"i32","is_mutable":false,"expression":{"value":"69420"}}]}
