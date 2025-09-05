@@ -86,9 +86,7 @@ namespace soul::ast::visitors
 		accept(node.condition.get());
 		_ss << ",\"update\":";
 		accept(node.update.get());
-		_ss << ",\"statements\":{";
 		accept(node.statements.get());
-		_ss << "}";
 	}
 
 	void StringifyVisitor::visit(const ForeachLoopNode& node)
@@ -98,9 +96,8 @@ namespace soul::ast::visitors
 		accept(node.variable.get());
 		_ss << ",\"in_expression\":";
 		accept(node.in_expression.get());
-		_ss << ",\"statements\":{";
+		_ss << ",\"statements\":";
 		accept(node.statements.get());
-		_ss << '}';
 	}
 
 	void StringifyVisitor::visit(const FunctionDeclarationNode& node)
@@ -116,9 +113,8 @@ namespace soul::ast::visitors
 			}
 		}
 		_ss << "],";
-		_ss << "\"statements\":{";
+		_ss << "\"statements\":";
 		accept(node.statements.get());
-		_ss << '}';
 	}
 
 	void StringifyVisitor::visit(const IfNode& node)
@@ -126,12 +122,10 @@ namespace soul::ast::visitors
 		_ss << "\"type\":\"if\",";
 		_ss << "\"expression\":";
 		accept(node.condition.get());
-		_ss << ",\"if_statements\":{";
+		_ss << ",\"if_statements\":";
 		accept(node.if_statements.get());
-		_ss << "},";
-		_ss << "\"else_statements\":{";
+		_ss << ",\"else_statements\":";
 		accept(node.else_statements.get());
-		_ss << "}";
 	}
 
 	void StringifyVisitor::visit(const LiteralNode& node) { _ss << std::format("\"value\":\"{}\"", std::string(node)); }
