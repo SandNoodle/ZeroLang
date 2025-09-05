@@ -37,5 +37,7 @@ namespace soul::ast::nodes
 		                         Dependency condition,
 		                         Dependency update,
 		                         ScopeBlock statements);
+
+		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

@@ -22,4 +22,11 @@ namespace soul::ast::nodes
 			std::move(initialization), std::move(condition), std::move(update), std::move(statements));
 	}
 
+	ForLoopNode::Dependency ForLoopNode::clone() const
+	{
+		return create(initialization ? initialization->clone() : nullptr,
+		              condition ? condition->clone() : nullptr,
+		              update ? update->clone() : nullptr,
+		              statements->clone_block());
+	}
 }  // namespace soul::ast::nodes

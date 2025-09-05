@@ -28,5 +28,7 @@ namespace soul::ast::nodes
 		 * @return New 'ForeachLoop' expression statement node.
 		 */
 		static Dependency create(Dependency variable, Dependency in_expression, ScopeBlock statements);
+
+		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

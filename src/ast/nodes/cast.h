@@ -24,5 +24,7 @@ namespace soul::ast::nodes
 		 * @return New 'Cast' expression node.
 		 */
 		static Dependency create(Dependency expr, Identifier type_identifier);
+
+		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

@@ -23,6 +23,7 @@ namespace soul::ast::nodes
 		 * @return new 'Module' node.
 		 */
 		static Dependency create(Identifier module_name, Dependencies statements);
-	};
 
+		[[nodiscard]] Dependency clone() const override;
+	};
 }  // namespace soul::ast::nodes

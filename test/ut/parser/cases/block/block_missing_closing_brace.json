@@ -1,0 +1,1 @@
+{"type":"module_declaration","name":"test_module","statements":[{"type":"scope_block","statements":[{"type":"error","message":"expected '}', but got: 'special_eof'"}]}]}

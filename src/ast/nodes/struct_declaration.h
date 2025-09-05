@@ -27,5 +27,7 @@ namespace soul::ast::nodes
 		 * @return New 'Struct Declaration' statement node.
 		 */
 		static Dependency create(Identifier name, Dependencies statements);
+
+		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

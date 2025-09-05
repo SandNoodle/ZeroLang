@@ -11,4 +11,9 @@ namespace soul::ast::nodes
 	{
 		return std::make_unique<CastNode>(std::move(expression), std::move(type_identifier));
 	}
+
+	CastNode::Dependency CastNode::clone() const
+	{
+		return create(expression ? expression->clone() : nullptr, type_identifier);
+	}
 }  // namespace soul::ast::nodes

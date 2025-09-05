@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ast/ast.h"
-#include "core/types.h"
 #include "common/value.h"
+#include "core/types.h"
 
 namespace soul::ast::nodes
 {
@@ -26,5 +26,7 @@ namespace soul::ast::nodes
 		 * @return
 		 */
 		static Dependency create(Value value);
+
+		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

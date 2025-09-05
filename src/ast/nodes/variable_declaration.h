@@ -29,5 +29,7 @@ namespace soul::ast::nodes
 		 * @return New 'Variable Declaration' statement node.
 		 */
 		static Dependency create(Identifier name, Identifier type, Dependency expr, bool is_mutable);
+
+		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

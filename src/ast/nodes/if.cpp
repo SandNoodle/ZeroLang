@@ -1,5 +1,7 @@
 #include "ast/nodes/if.h"
 
+#include <ranges>
+
 namespace soul::ast::nodes
 {
 
@@ -15,4 +17,9 @@ namespace soul::ast::nodes
 		return std::make_unique<IfNode>(std::move(condition), std::move(if_statements), std::move(else_statements));
 	}
 
+	IfNode::Dependency IfNode::clone() const
+	{
+		return create(
+			condition ? condition->clone() : nullptr, if_statements->clone_block(), else_statements->clone_block());
+	}
 }  // namespace soul::ast::nodes

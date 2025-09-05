@@ -8,4 +8,6 @@ namespace soul::ast::nodes
 	{
 		return std::make_unique<ErrorNode>(std::move(message));
 	}
+
+	ErrorNode::Dependency ErrorNode::clone() const { return create(message); }
 }  // namespace soul::ast::nodes

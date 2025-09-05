@@ -44,7 +44,6 @@ namespace soul::parser
 		ast::ASTNode::Dependency parse_expression(Precedence precedence);
 
 		ast::ASTNode::Dependency parse_binary(ast::ASTNode::Dependency lhs);
-		ast::ASTNode::ScopeBlock parse_block_statement();
 		ast::ASTNode::Dependency parse_cast();
 		ast::ASTNode::Dependency parse_for_loop();
 		ast::ASTNode::Dependency parse_function_declaration();
@@ -55,7 +54,8 @@ namespace soul::parser
 		ast::ASTNode::Dependency parse_variable_declaration();
 		ast::ASTNode::Dependency parse_while_loop();
 
-		ast::ASTNode::Dependency parse_parameter_declaration();
+		ast::ASTNode::Dependencies parse_block_statement();
+		ast::ASTNode::Dependency   parse_parameter_declaration();
 
 		/**
 		 * @brief Creates new Error node in the AST and resynchronizes the parser.
