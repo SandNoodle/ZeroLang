@@ -5,6 +5,8 @@
 #include "ast/nodes/variable_declaration.h"
 #include "common/types/type.h"
 
+#include <ranges>
+
 namespace soul::ast::visitors
 {
 	using namespace types;
@@ -19,24 +21,29 @@ namespace soul::ast::visitors
 			return;
 		}
 
+		auto cloned_parameters{ node.parameters
+			                    | std::views::transform([this](const auto& p) { return clone(p.get()); })
+			                    | std::ranges::to<ASTNode::Dependencies>() };
+
 		StructType::ContainedTypes contained_types{};
 		contained_types.reserve(node.parameters.size());
 		for (std::size_t index = 0; index < node.parameters.size(); ++index) {
 			const auto* param = dynamic_cast<VariableDeclarationNode*>(node.parameters[index].get());
 			if (!param) {
-				node.parameters[index] = ErrorNode::create(std::format(
-					"cannot resolve type for '{}', because parameter is not of valid (node) type", node.name));
+				cloned_parameters[index] = ErrorNode::create(std::format(
+					"[INTERNAL] cannot resolve type for '{}', because parameter is not of valid (node) type",
+					node.name));
 				continue;
 			}
 			if (!_registered_types.contains(param->type_identifier)) {
-				node.parameters[index] = ErrorNode::create(
-					std::format("cannot resolve type '{}', because it was not registered", param->type_identifier));
+				cloned_parameters[index] = ErrorNode::create(
+					std::format("cannot resolve type '{}', because no such type exists", param->type_identifier));
 				continue;
 			}
 			contained_types.push_back(_registered_types.at(param->type_identifier));
 		}
 		_registered_types[node.name] = Type{ StructType{ std::move(contained_types) } };
-		_cloned_root = clone(node);
+		_cloned_root                 = StructDeclarationNode::create(node.name, std::move(cloned_parameters));
 	}
 	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::basic_types() noexcept
 	{

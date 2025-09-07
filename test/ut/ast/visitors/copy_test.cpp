@@ -78,21 +78,23 @@ namespace soul::ast::visitors
 		module_statements.push_back(std::move(function_declaration));
 		auto expected_module = ModuleNode::create("copy_module", std::move(module_statements));
 
+		StringifyVisitor stringify_expected_before{};
+		stringify_expected_before.accept(expected_module.get());
+
 		CopyVisitor copy_visitor{};
 		copy_visitor.accept(expected_module.get());
 
-		// Verify the results.
-		{
-			const auto& result_module = copy_visitor.cloned();
+		StringifyVisitor stringify_expected_after{};
+		stringify_expected_after.accept(expected_module.get());
 
-			StringifyVisitor stringify_result{};
-			stringify_result.accept(result_module.get());
+		EXPECT_EQ(stringify_expected_before.string(), stringify_expected_after.string());
 
-			StringifyVisitor stringify_expected{};
-			stringify_expected.accept(expected_module.get());
+		const auto& result_module = copy_visitor.cloned();
 
-			EXPECT_NE(expected_module.get(), result_module.get());
-			ASSERT_EQ(stringify_result.string(), stringify_expected.string());
-		}
+		StringifyVisitor stringify_result{};
+		stringify_result.accept(result_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		ASSERT_EQ(stringify_result.string(), stringify_expected_before.string());
 	}
 }  // namespace soul::ast::visitors

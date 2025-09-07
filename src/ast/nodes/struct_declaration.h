@@ -2,8 +2,6 @@
 
 #include "ast/ast.h"
 
-#include <vector>
-
 namespace soul::ast::nodes
 {
 	/**
