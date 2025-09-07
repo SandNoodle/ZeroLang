@@ -3,8 +3,8 @@
 #include "common/types/type.h"
 
 #include <algorithm>
-#include <sstream>
 #include <expected>
+#include <sstream>
 
 namespace soul::types
 {

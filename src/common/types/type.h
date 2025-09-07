@@ -5,9 +5,9 @@
 #include "common/types/struct_type.h"
 
 #include <concepts>
+#include <string>
 #include <type_traits>
 #include <variant>
-#include <string>
 
 namespace soul::types
 {
@@ -41,9 +41,9 @@ namespace soul::types
 		explicit Type(Variant&& type) noexcept;
 		Type(PrimitiveType::Kind primitive_type);
 
-		Type& operator=(const Type&) noexcept        = default;
-		Type& operator=(Type&&) noexcept             = default;
-		bool  operator==(const Type&) const noexcept = default;
+		Type&    operator=(const Type&) noexcept        = default;
+		Type&    operator=(Type&&) noexcept             = default;
+		bool     operator==(const Type&) const noexcept = default;
 		explicit operator std::string() const;
 
 		/**
@@ -67,7 +67,7 @@ namespace soul::types
 			return std::get<T>(_type);
 		}
 
-		friend std::ostream& operator<<(std::ostream& os, const Type& type);
+		friend std::ostream&      operator<<(std::ostream& os, const Type& type);
 		friend std::weak_ordering operator<=>(const Type&, const Type&);
 	};
 }  // namespace soul::types
