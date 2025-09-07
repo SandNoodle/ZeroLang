@@ -14,6 +14,7 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/visitors/stringify.h"
 
 #include <string>
 
@@ -80,11 +81,16 @@ namespace soul::ast::visitors
 		CopyVisitor copy_visitor{};
 		copy_visitor.accept(expected_module.get());
 
-		const auto& result_module = copy_visitor.get();
+		// Verify the results.
+		{
+			const auto&      result_module = copy_visitor.get();
+			StringifyVisitor stringify_result{};
+			stringify_result.accept(result_module.get());
 
-		dynamic_cast<ModuleNode*>(expected_module.get())->statements.emplace_back(LiteralNode::create(Value{ 1 }));
+			StringifyVisitor stringify_expected{};
+			stringify_expected.accept(expected_module.get());
 
-		// TODO: Dereference
-		ASSERT_EQ(expected_module.get(), result_module.get());
+			ASSERT_EQ(stringify_result.string(), stringify_expected.string());
+		}
 	}
 }  // namespace soul::ast::visitors
