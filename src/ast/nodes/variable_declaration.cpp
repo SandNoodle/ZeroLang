@@ -14,9 +14,4 @@ namespace soul::ast::nodes
 	{
 		return std::make_unique<VariableDeclarationNode>(std::move(name), std::move(type), std::move(expr), is_mutable);
 	}
-
-	VariableDeclarationNode::Dependency VariableDeclarationNode::clone() const
-	{
-		return create(name, type_identifier, expr ? expr->clone() : nullptr, is_mutable);
-	}
 }  // namespace soul::ast::nodes

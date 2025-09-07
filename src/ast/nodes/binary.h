@@ -28,7 +28,5 @@ namespace soul::ast::nodes
 		 * @return New 'Binary' expression node.
 		 */
 		static Dependency create(Dependency lhs, Dependency rhs, ASTNodeOperator op);
-
-		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

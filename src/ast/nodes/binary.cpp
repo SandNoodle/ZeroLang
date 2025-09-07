@@ -11,9 +11,4 @@ namespace soul::ast::nodes
 	{
 		return std::make_unique<BinaryNode>(std::move(lhs), std::move(rhs), op);
 	}
-
-	BinaryNode::Dependency BinaryNode::clone() const
-	{
-		return create(lhs ? lhs->clone() : nullptr, rhs ? rhs->clone() : nullptr, op);
-	}
 }  // namespace soul::ast::nodes

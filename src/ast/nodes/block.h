@@ -22,8 +22,5 @@ namespace soul::ast::nodes
 		 * @return New 'Block' expression node.
 		 */
 		static ScopeBlock create(Dependencies statements);
-
-		[[nodiscard]] Dependency clone() const override;
-		[[nodiscard]] ScopeBlock clone_block() const;
 	};
 }  // namespace soul::ast::nodes

@@ -12,8 +12,8 @@ namespace soul::ast::nodes
 	class ForeachLoopNode final : public VisitorAcceptor<ForeachLoopNode>
 	{
 		public:
-		Dependency   variable;
-		Dependency   in_expression;
+		Dependency variable;
+		Dependency in_expression;
 		ScopeBlock statements;
 
 		public:
@@ -28,7 +28,5 @@ namespace soul::ast::nodes
 		 * @return New 'ForeachLoop' expression statement node.
 		 */
 		static Dependency create(Dependency variable, Dependency in_expression, ScopeBlock statements);
-
-		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

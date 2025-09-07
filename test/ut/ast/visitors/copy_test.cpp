@@ -27,7 +27,7 @@ namespace soul::ast::visitors
 	{
 	};
 
-	TEST_F(CopyVisitorTest, Clone)
+	TEST_F(CopyVisitorTest, All)
 	{
 		auto struct_declaration_members = ASTNode::Dependencies{};
 		struct_declaration_members.reserve(3);
@@ -83,13 +83,15 @@ namespace soul::ast::visitors
 
 		// Verify the results.
 		{
-			const auto&      result_module = copy_visitor.get();
+			const auto& result_module = copy_visitor.cloned();
+
 			StringifyVisitor stringify_result{};
 			stringify_result.accept(result_module.get());
 
 			StringifyVisitor stringify_expected{};
 			stringify_expected.accept(expected_module.get());
 
+			EXPECT_NE(expected_module.get(), result_module.get());
 			ASSERT_EQ(stringify_result.string(), stringify_expected.string());
 		}
 	}

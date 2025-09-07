@@ -36,7 +36,5 @@ namespace soul::ast::nodes
 		                         Identifier   return_type,
 		                         Dependencies parameters,
 		                         ScopeBlock   statements);
-
-		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

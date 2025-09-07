@@ -13,11 +13,4 @@ namespace soul::ast::nodes
 	{
 		return std::make_unique<ForeachLoopNode>(std::move(variable), std::move(in_expression), std::move(statements));
 	}
-
-	ForeachLoopNode::Dependency ForeachLoopNode::clone() const
-	{
-		return create(variable ? variable->clone() : nullptr,
-		              in_expression ? in_expression->clone() : nullptr,
-		              statements->clone_block());
-	}
 }  // namespace soul::ast::nodes

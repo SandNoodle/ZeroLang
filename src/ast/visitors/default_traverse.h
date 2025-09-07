@@ -37,4 +37,5 @@ namespace soul::ast::visitors
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::UnaryNode)
 		SOUL_VISIT_NODE_OVERRIDE_DEFINE(nodes::VariableDeclarationNode)
 	};
+#undef SOUL_VISIT_NODE_OVERRIDE_DEFINE
 }  // namespace soul::ast::visitors

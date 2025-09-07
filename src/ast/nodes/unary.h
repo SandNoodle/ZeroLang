@@ -26,7 +26,5 @@ namespace soul::ast::nodes
 		 * @return New 'Unary' expression node.
 		 */
 		static Dependency create(Dependency expr, ASTNodeOperator op);
-
-		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

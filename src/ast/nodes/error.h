@@ -24,7 +24,5 @@ namespace soul::ast::nodes
 		 * @param message Error message associated with this node.
 		 */
 		static Dependency create(Message message);
-
-		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes

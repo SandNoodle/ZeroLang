@@ -27,8 +27,6 @@ namespace soul::ast::nodes
 		 * @param else_statements [Optional]
 		 */
 		static Dependency create(Dependency condition, ScopeBlock if_statements, ScopeBlock else_statements = {});
-
-		[[nodiscard]] Dependency clone() const override;
 	};
 
 }  // namespace soul::ast::nodes

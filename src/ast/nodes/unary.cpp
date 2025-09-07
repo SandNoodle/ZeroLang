@@ -8,6 +8,4 @@ namespace soul::ast::nodes
 	{
 		return std::make_unique<UnaryNode>(std::move(expr), op);
 	}
-
-	UnaryNode::Dependency UnaryNode::clone() const { return create(expr ? expr->clone() : nullptr, op); }
 }  // namespace soul::ast::nodes

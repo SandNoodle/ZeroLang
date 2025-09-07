@@ -12,23 +12,13 @@ namespace soul::ast::visitors
 
 	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::get() noexcept { return _registered_types; }
 
-	void TypeDiscovererVisitor::accept(ASTNode::Reference node)
-	{
-		if (!node) {
-			return;
-		}
-
-		const auto* struct_declaration = dynamic_cast<const StructDeclarationNode*>(node);
-		if (struct_declaration && _registered_types.contains(struct_declaration->name)) {
-			*node = ErrorNode(std::format("redefinition of type '{}'", struct_declaration->name));
-			return;
-		}
-
-		node->accept(*this);
-	}
-
 	void TypeDiscovererVisitor::visit(nodes::StructDeclarationNode& node)
 	{
+		if (_registered_types.contains(node.name)) {
+			_cloned_root = ErrorNode::create(std::format("redefinition of type '{}'", node.name));
+			return;
+		}
+
 		StructType::ContainedTypes contained_types{};
 		contained_types.reserve(node.parameters.size());
 		for (std::size_t index = 0; index < node.parameters.size(); ++index) {
@@ -46,6 +36,7 @@ namespace soul::ast::visitors
 			contained_types.push_back(_registered_types.at(param->type_identifier));
 		}
 		_registered_types[node.name] = Type{ StructType{ std::move(contained_types) } };
+		_cloned_root = clone(node);
 	}
 	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::basic_types() noexcept
 	{

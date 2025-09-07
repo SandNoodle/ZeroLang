@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast/nodes/nodes_fwd.h"
-#include "ast/visitors/default_traverse.h"
+#include "ast/visitors/copy.h"
 #include "common/types/types_fwd.h"
 
 #include <string_view>
@@ -12,7 +12,7 @@ namespace soul::ast::visitors
 	/**
 	 * @brief TypeDiscovererVisitor traverses
 	 */
-	class TypeDiscovererVisitor : public DefaultTraverseVisitor
+	class TypeDiscovererVisitor : public CopyVisitor
 	{
 		public:
 		using TypeMap = std::unordered_map<std::string_view, types::Type>;
@@ -32,12 +32,12 @@ namespace soul::ast::visitors
 		/** @brief */
 		TypeMap get() noexcept;
 
-		void accept(ASTNode::Reference) override;
+		using CopyVisitor::accept;
 
 		static TypeMap basic_types() noexcept;
 
 		protected:
-		using DefaultTraverseVisitor::visit;
+		using CopyVisitor::visit;
 		void visit(nodes::StructDeclarationNode&) override;
 	};
 }  // namespace soul::ast::visitors

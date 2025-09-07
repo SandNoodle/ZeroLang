@@ -26,7 +26,5 @@ namespace soul::ast::nodes
 		 * @return
 		 */
 		static Dependency create(Value value);
-
-		[[nodiscard]] Dependency clone() const override;
 	};
 }  // namespace soul::ast::nodes
