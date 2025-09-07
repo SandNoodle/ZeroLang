@@ -17,6 +17,7 @@
 
 namespace soul::ast::visitors::ut
 {
+#if 0
 	using namespace ast::nodes;
 	using namespace std::string_view_literals;
 	using namespace types;
@@ -576,4 +577,5 @@ namespace soul::ast::visitors::ut
 			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Int64);
 		}
 	}
+#endif
 }  // namespace soul::ast::visitors::ut

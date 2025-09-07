@@ -60,10 +60,5 @@ namespace soul::ast::visitors
 		void visit(nodes::StructDeclarationNode&) override;
 		void visit(nodes::UnaryNode&) override;
 		void visit(nodes::VariableDeclarationNode&) override;
-
-		private:
-		static CastType get_cast_type(const types::Type& from, const types::Type& to);
-
-		types::Type get_type_from_identifier(std::string_view type_identifier) const noexcept;
 	};
 }  // namespace soul::ast::visitors

@@ -18,10 +18,10 @@ namespace soul::ast::visitors
 		using TypeMap = std::unordered_map<std::string_view, types::Type>;
 
 		private:
-		TypeMap _registered_types;
+		TypeMap _registered_types = basic_types();
 
 		public:
-		TypeDiscovererVisitor();
+		TypeDiscovererVisitor()                                 = default;
 		TypeDiscovererVisitor(const TypeDiscovererVisitor&)     = delete;
 		TypeDiscovererVisitor(TypeDiscovererVisitor&&) noexcept = default;
 		~TypeDiscovererVisitor()                                = default;
@@ -32,11 +32,12 @@ namespace soul::ast::visitors
 		/** @brief */
 		TypeMap get() noexcept;
 
-		using DefaultTraverseVisitor::accept;
-		using DefaultTraverseVisitor::visit;
-		void visit(const nodes::StructDeclarationNode&) override;
+		void accept(ASTNode::Reference) override;
 
-		private:
-		void register_basic_types();
+		static TypeMap basic_types() noexcept;
+
+		protected:
+		using DefaultTraverseVisitor::visit;
+		void visit(nodes::StructDeclarationNode&) override;
 	};
 }  // namespace soul::ast::visitors

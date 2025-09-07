@@ -15,6 +15,7 @@
 
 namespace soul::ast::visitors
 {
+#if 0
 	using namespace soul::ast::nodes;
 	using namespace soul::types;
 
@@ -276,4 +277,5 @@ namespace soul::ast::visitors
 		}
 		return types::Type{};
 	}
+#endif
 }  // namespace soul::ast::visitors

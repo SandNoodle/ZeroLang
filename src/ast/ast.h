@@ -37,6 +37,8 @@ namespace soul::ast
 
 		public:
 		virtual ~ASTNode() = default;
+
+		[[nodiscard]] virtual Dependency clone() const = 0;
 	};
 
 	/**

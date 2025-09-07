@@ -1,15 +1,7 @@
 #include "ast/visitors/type_discoverer.h"
 
-#include "ast/nodes/binary.h"
-#include "ast/nodes/cast.h"
-#include "ast/nodes/for_loop.h"
-#include "ast/nodes/foreach_loop.h"
-#include "ast/nodes/function_declaration.h"
-#include "ast/nodes/if.h"
-#include "ast/nodes/literal.h"
-#include "ast/nodes/module.h"
+#include "ast/nodes/error.h"
 #include "ast/nodes/struct_declaration.h"
-#include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
 #include "common/types/type.h"
 
@@ -18,45 +10,57 @@ namespace soul::ast::visitors
 	using namespace types;
 	using namespace ast::nodes;
 
-	TypeDiscovererVisitor::TypeDiscovererVisitor() { register_basic_types(); }
-
 	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::get() noexcept { return _registered_types; }
 
-	void TypeDiscovererVisitor::visit(const nodes::StructDeclarationNode& node)
+	void TypeDiscovererVisitor::accept(ASTNode::Reference node)
 	{
-		if (_registered_types.contains(node.name)) {
-			// TODO: Error!
+		if (!node) {
 			return;
 		}
 
+		const auto* struct_declaration = dynamic_cast<const StructDeclarationNode*>(node);
+		if (struct_declaration && _registered_types.contains(struct_declaration->name)) {
+			*node = ErrorNode(std::format("redefinition of type '{}'", struct_declaration->name));
+			return;
+		}
+
+		node->accept(*this);
+	}
+
+	void TypeDiscovererVisitor::visit(nodes::StructDeclarationNode& node)
+	{
 		StructType::ContainedTypes contained_types{};
 		contained_types.reserve(node.parameters.size());
 		for (std::size_t index = 0; index < node.parameters.size(); ++index) {
 			const auto* param = dynamic_cast<VariableDeclarationNode*>(node.parameters[index].get());
 			if (!param) {
-				// TODO: Error!
-				return;
+				node.parameters[index] = ErrorNode::create(std::format(
+					"cannot resolve type for '{}', because parameter is not of valid (node) type", node.name));
+				continue;
 			}
 			if (!_registered_types.contains(param->type_identifier)) {
-				// TODO: Error!
-				return;
+				node.parameters[index] = ErrorNode::create(
+					std::format("cannot resolve type '{}', because it was not registered", param->type_identifier));
+				continue;
 			}
 			contained_types.push_back(_registered_types.at(param->type_identifier));
 		}
 		_registered_types[node.name] = Type{ StructType{ std::move(contained_types) } };
 	}
-
-	void TypeDiscovererVisitor::register_basic_types()
+	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::basic_types() noexcept
 	{
-		// IMPORTANT: Must match keywords defined in Lexer::create_identifier_token.
+		// IMPORTANT: Must match keywords defined in Lexer::scan_token.
 		using namespace std::string_view_literals;
-		_registered_types["bool"sv] = PrimitiveType::Kind::Boolean;
-		_registered_types["chr"sv]  = PrimitiveType::Kind::Char;
-		_registered_types["f32"sv]  = PrimitiveType::Kind::Float32;
-		_registered_types["f64"sv]  = PrimitiveType::Kind::Float64;
-		_registered_types["i32"sv]  = PrimitiveType::Kind::Int32;
-		_registered_types["i64"sv]  = PrimitiveType::Kind::Int64;
-		_registered_types["str"sv]  = PrimitiveType::Kind::String;
-		_registered_types["void"sv] = PrimitiveType::Kind::Void;
+		static const TypeDiscovererVisitor::TypeMap k_basic_types = {
+			{ "bool"sv, types::PrimitiveType::Kind::Boolean },
+            { "chr"sv,  types::PrimitiveType::Kind::Char    },
+			{ "f32"sv,  types::PrimitiveType::Kind::Float32 },
+            { "f64"sv,  types::PrimitiveType::Kind::Float64 },
+			{ "i32"sv,  types::PrimitiveType::Kind::Int32   },
+            { "i64"sv,  types::PrimitiveType::Kind::Int64   },
+			{ "str"sv,  types::PrimitiveType::Kind::String  },
+            { "void"sv, types::PrimitiveType::Kind::Void    },
+		};
+		return k_basic_types;
 	}
 }  // namespace soul::ast::visitors

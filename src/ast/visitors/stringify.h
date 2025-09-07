@@ -8,6 +8,9 @@
 
 namespace soul::ast::visitors
 {
+	/**
+	 * @brief
+	 */
 	class StringifyVisitor final : public DefaultTraverseVisitor
 	{
 		private:
@@ -18,8 +21,10 @@ namespace soul::ast::visitors
 
 		std::string string() const;
 
-		using DefaultTraverseVisitor::visit;
 		void accept(const ASTNode::Reference node) override;
+
+		protected:
+		using DefaultTraverseVisitor::visit;
 		void visit(const nodes::BinaryNode&) override;
 		void visit(const nodes::BlockNode&) override;
 		void visit(const nodes::CastNode&) override;
