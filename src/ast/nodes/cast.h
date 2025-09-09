@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast/ast.h"
+#include "core/types.h"
 
 namespace soul::ast::nodes
 {
@@ -9,6 +10,14 @@ namespace soul::ast::nodes
 	 */
 	class CastNode : public VisitorAcceptor<CastNode>
 	{
+		public:
+		enum class Type : u8
+		{
+			Implicit,
+			Explicit,
+			Impossible,
+		};
+
 		public:
 		Dependency expression      = nullptr;
 		Identifier type_identifier = {};

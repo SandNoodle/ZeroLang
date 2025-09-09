@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/types.h"
+#include "ast/ast.h"
 
 #include <concepts>
 #include <sstream>
@@ -13,9 +14,7 @@ namespace soul
 	template <typename T>
 	concept ValueKind = std::same_as<T, std::monostate>  //
 	                 || std::same_as<T, bool>            //
-	                 || std::same_as<T, i32>             //
 	                 || std::same_as<T, i64>             //
-	                 || std::same_as<T, f32>             //
 	                 || std::same_as<T, f64>             //
 	                 || std::same_as<T, std::string>     //
 	                 || std::same_as<T, char>            //
@@ -28,7 +27,7 @@ namespace soul
 	{
 		public:
 		using UnknownValue = std::monostate;
-		using Variant      = std::variant<UnknownValue, bool, i32, i64, f32, f64, std::string, char>;
+		using Variant      = std::variant<UnknownValue, bool, i64, f64, std::string, char>;
 
 		public:
 		Variant value = UnknownValue{};

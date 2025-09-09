@@ -16,6 +16,7 @@
 #include "ast/nodes/variable_declaration.h"
 
 #include <algorithm>
+#include <unordered_map>
 
 namespace soul::parser
 {
@@ -416,7 +417,8 @@ namespace soul::parser
 			                                Token::name(current_token_or_default().type)));
 		}
 
-		Value value{};
+		LiteralNode::LiteralType literal_type{};
+		Value                    value{};
 		if (token->type == Token::Type::LiteralFloat) {
 			f64        v{};
 			const auto result = std::from_chars(std::begin(token->data), std::end(token->data), v);
@@ -425,6 +427,10 @@ namespace soul::parser
 				                                std::make_error_condition(result.ec).message()));
 			}
 			value = Value{ v };
+
+			literal_type = v <= std::numeric_limits<f32>::lowest() || v >= std::numeric_limits<f32>::max()
+			                 ? LiteralNode::LiteralType::Float64
+			                 : LiteralNode::LiteralType::Float32;
 		}
 
 		if (token->type == Token::Type::LiteralInteger) {
@@ -435,20 +441,32 @@ namespace soul::parser
 				                                std::make_error_condition(result.ec).message()));
 			}
 			value = Value{ v };
+
+			literal_type = v <= std::numeric_limits<i32>::lowest() || v >= std::numeric_limits<i32>::max()
+			                 ? LiteralNode::LiteralType::Int64
+			                 : LiteralNode::LiteralType::Int32;
 		}
 
-		if (token->type == Token::Type::LiteralString || token->type == Token::Type::LiteralIdentifier) {
-			value = Value{ std::string(token->data) };
+		if (token->type == Token::Type::LiteralString) {
+			literal_type = LiteralNode::LiteralType::String;
+			value        = Value{ std::string(token->data) };
+		}
+
+		if (token->type == Token::Type::LiteralIdentifier) {
+			literal_type = LiteralNode::LiteralType::Identifier;
+			value        = Value{ std::string(token->data) };
 		}
 
 		if (token->type == Token::Type::KeywordTrue) {
-			value = Value{ true };
+			literal_type = LiteralNode::LiteralType::Bool;
+			value        = Value{ true };
 		}
 
 		if (token->type == Token::Type::KeywordFalse) {
-			value = Value{ false };
+			literal_type = LiteralNode::LiteralType::Bool;
+			value        = Value{ false };
 		}
-		return LiteralNode::create(std::move(value));
+		return LiteralNode::create(std::move(value), literal_type);
 	}
 
 	ASTNode::Dependency Parser::parse_struct_declaration()

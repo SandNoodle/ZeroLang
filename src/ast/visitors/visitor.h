@@ -6,10 +6,6 @@
 
 namespace soul::ast::visitors
 {
-#define SOUL_VISIT_NODE_DEFINE(node_name)                                         \
-	virtual constexpr void visit(node_name& node) { visit(std::as_const(node)); } \
-	virtual constexpr void visit(const node_name&) { /* Does nothing. */ }
-
 	/**
 	 * @brief Base class for visiting nodes in the Abstract Syntax Tree.
 	 */
@@ -18,19 +14,32 @@ namespace soul::ast::visitors
 		public:
 		virtual ~IVisitor() = default;
 
-		SOUL_VISIT_NODE_DEFINE(nodes::BinaryNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::BlockNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::CastNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::ErrorNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::ForLoopNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::ForeachLoopNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::FunctionDeclarationNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::IfNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::LiteralNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::ModuleNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::StructDeclarationNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::UnaryNode)
-		SOUL_VISIT_NODE_DEFINE(nodes::VariableDeclarationNode)
+		virtual constexpr void visit(const nodes::BinaryNode&) {}
+		virtual constexpr void visit(const nodes::BlockNode&) {}
+		virtual constexpr void visit(const nodes::CastNode&) {}
+		virtual constexpr void visit(const nodes::ErrorNode&) {}
+		virtual constexpr void visit(const nodes::ForLoopNode&) {}
+		virtual constexpr void visit(const nodes::ForeachLoopNode&) {}
+		virtual constexpr void visit(const nodes::FunctionDeclarationNode&) {}
+		virtual constexpr void visit(const nodes::IfNode&) {}
+		virtual constexpr void visit(const nodes::LiteralNode&) {}
+		virtual constexpr void visit(const nodes::ModuleNode&) {}
+		virtual constexpr void visit(const nodes::StructDeclarationNode&) {}
+		virtual constexpr void visit(const nodes::UnaryNode&) {}
+		virtual constexpr void visit(const nodes::VariableDeclarationNode&) {}
+
+		virtual constexpr void visit(nodes::BinaryNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::BlockNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::CastNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::ErrorNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::ForLoopNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::ForeachLoopNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::FunctionDeclarationNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::IfNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::LiteralNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::ModuleNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::StructDeclarationNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::UnaryNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::VariableDeclarationNode& node) { visit(std::as_const(node)); }
 	};
-#undef SOUL_VISIT_NODE_DEFINE
 }  // namespace soul::ast::visitors

@@ -10,9 +10,10 @@
 namespace soul::ast::visitors
 {
 	/**
-	 * @brief TypeDiscovererVisitor traverses
+	 * @brief TypeDiscovererVisitor traverses the AST while making note of each type declaration.
+	 * @important Starting the visitor from nodes other than ModuleNode will result in modification of the input AST.
 	 */
-	class TypeDiscovererVisitor : public CopyVisitor
+	class TypeDiscovererVisitor final : public CopyVisitor
 	{
 		public:
 		using TypeMap = std::unordered_map<std::string_view, types::Type>;
@@ -29,8 +30,8 @@ namespace soul::ast::visitors
 		TypeDiscovererVisitor& operator=(const TypeDiscovererVisitor&)     = delete;
 		TypeDiscovererVisitor& operator=(TypeDiscovererVisitor&&) noexcept = default;
 
-		/** @brief */
-		TypeMap get() noexcept;
+		/** @brief Returns name-to-type map of all discovered (and basic) types for a given AST. */
+		TypeMap discovered_types() noexcept;
 
 		using CopyVisitor::accept;
 

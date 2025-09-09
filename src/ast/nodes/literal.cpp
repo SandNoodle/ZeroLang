@@ -2,9 +2,12 @@
 
 namespace soul::ast::nodes
 {
-	LiteralNode::LiteralNode(Value value) : value(std::move(value)) {}
+	LiteralNode::LiteralNode(Value value, LiteralType literal_type)
+		: value(std::move(value)), literal_type(literal_type)
+	{
+	}
 
-	LiteralNode::Dependency LiteralNode::create(Value value) { return std::make_unique<LiteralNode>(std::move(value)); }
+	LiteralNode::Dependency LiteralNode::create(Value value, LiteralType literal_type) { return std::make_unique<LiteralNode>(std::move(value), literal_type); }
 
 	LiteralNode::operator std::string() const noexcept { return std::string(value); }
 }  // namespace soul::ast::nodes

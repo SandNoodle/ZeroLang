@@ -12,10 +12,26 @@ namespace soul::ast::nodes
 	class LiteralNode : public VisitorAcceptor<LiteralNode>
 	{
 		public:
-		Value value = {};
+		enum class LiteralType : u8
+		{
+			Unknown,
+
+			Bool,
+			Char,
+			Float32,
+			Float64,
+			Identifier,
+			Int32,
+			Int64,
+			String,
+		};
 
 		public:
-		LiteralNode(Value value);
+		Value       value        = {};
+		LiteralType literal_type = {};
+
+		public:
+		LiteralNode(Value value, LiteralType literal_type);
 		~LiteralNode() override = default;
 		operator std::string() const noexcept;
 
@@ -25,6 +41,6 @@ namespace soul::ast::nodes
 		 * @param value
 		 * @return
 		 */
-		static Dependency create(Value value);
+		static Dependency create(Value value, LiteralType literal_type = LiteralType::Unknown);
 	};
 }  // namespace soul::ast::nodes

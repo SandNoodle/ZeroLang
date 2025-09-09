@@ -12,38 +12,36 @@ namespace soul::ast::visitors
 	using namespace types;
 	using namespace ast::nodes;
 
-	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::get() noexcept { return _registered_types; }
+	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::discovered_types() noexcept { return _registered_types; }
 
 	void TypeDiscovererVisitor::visit(nodes::StructDeclarationNode& node)
 	{
 		if (_registered_types.contains(node.name)) {
-			_cloned_root = ErrorNode::create(std::format("redefinition of type '{}'", node.name));
+			_current_clone = ErrorNode::create(std::format("redefinition of type '{}'", node.name));
 			return;
 		}
 
-		auto cloned_parameters{ node.parameters
-			                    | std::views::transform([this](const auto& p) { return clone(p.get()); })
-			                    | std::ranges::to<ASTNode::Dependencies>() };
+		_current_clone           = clone(node);
+		auto& struct_declaration = dynamic_cast<StructDeclarationNode&>(*_current_clone.get());
 
 		StructType::ContainedTypes contained_types{};
 		contained_types.reserve(node.parameters.size());
 		for (std::size_t index = 0; index < node.parameters.size(); ++index) {
 			const auto* param = dynamic_cast<VariableDeclarationNode*>(node.parameters[index].get());
 			if (!param) {
-				cloned_parameters[index] = ErrorNode::create(std::format(
+				struct_declaration.parameters[index] = ErrorNode::create(std::format(
 					"[INTERNAL] cannot resolve type for '{}', because parameter is not of valid (node) type",
 					node.name));
 				continue;
 			}
 			if (!_registered_types.contains(param->type_identifier)) {
-				cloned_parameters[index] = ErrorNode::create(
+				struct_declaration.parameters[index] = ErrorNode::create(
 					std::format("cannot resolve type '{}', because no such type exists", param->type_identifier));
 				continue;
 			}
 			contained_types.push_back(_registered_types.at(param->type_identifier));
 		}
 		_registered_types[node.name] = Type{ StructType{ std::move(contained_types) } };
-		_cloned_root                 = StructDeclarationNode::create(node.name, std::move(cloned_parameters));
 	}
 	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::basic_types() noexcept
 	{

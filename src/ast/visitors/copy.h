@@ -10,15 +10,14 @@ namespace soul::ast::visitors
 	class CopyVisitor : public DefaultTraverseVisitor
 	{
 		protected:
-		ASTNode::Dependency _cloned_root{};
+		ASTNode::Dependency _current_clone{};
 
 		public:
 		CopyVisitor();
 
-		/**  @brief Returns cloned root node of the (sub)-tree. */
 		ASTNode::Dependency cloned() noexcept;
 
-		void accept(const ASTNode::Reference node) override;
+		using DefaultTraverseVisitor::accept;
 
 		protected:
 		using DefaultTraverseVisitor::visit;
@@ -36,6 +35,7 @@ namespace soul::ast::visitors
 		void visit(const nodes::UnaryNode&) override;
 		void visit(const nodes::VariableDeclarationNode&) override;
 
+		ASTNode::Dependency clone(const ASTNode::Reference node);
 		ASTNode::Dependency clone(const nodes::BinaryNode&);
 		ASTNode::ScopeBlock clone(const nodes::BlockNode&);
 		ASTNode::Dependency clone(const nodes::CastNode&);
@@ -49,7 +49,5 @@ namespace soul::ast::visitors
 		ASTNode::Dependency clone(const nodes::StructDeclarationNode&);
 		ASTNode::Dependency clone(const nodes::UnaryNode&);
 		ASTNode::Dependency clone(const nodes::VariableDeclarationNode&);
-
-		ASTNode::Dependency clone(const ASTNode::Reference);
 	};
 }  // namespace soul::ast::visitors

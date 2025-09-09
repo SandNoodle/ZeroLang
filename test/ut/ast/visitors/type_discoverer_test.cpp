@@ -61,7 +61,7 @@ namespace soul::ast::visitors::ut
 		auto k_expected_types               = TypeDiscovererVisitor::basic_types();
 		k_expected_types["first_struct"sv]  = first_struct_type;
 		k_expected_types["second_struct"sv] = second_struct_type;
-		ASSERT_EQ(k_expected_types, type_discoverer.get());
+		ASSERT_EQ(k_expected_types, type_discoverer.discovered_types());
 	}
 
 	TEST_F(TypeDiscovererTest, RedefinitionOfType)
@@ -104,7 +104,7 @@ namespace soul::ast::visitors::ut
 		auto k_expected_types              = TypeDiscovererVisitor::basic_types();
 		k_expected_types["first_struct"sv] = Type{ StructType{
 			{ PrimitiveType::Kind::Int32, PrimitiveType::Kind::Float64, PrimitiveType::Kind::String } } };
-		EXPECT_EQ(k_expected_types, type_discoverer.get());
+		EXPECT_EQ(k_expected_types, type_discoverer.discovered_types());
 
 		const auto&      result_module = type_discoverer.cloned();
 		StringifyVisitor stringify_result{};

@@ -13,6 +13,8 @@ namespace soul::ast
 	class IVisitable
 	{
 		public:
+		virtual ~IVisitable() = default;
+
 		virtual void accept(visitors::IVisitor& visitor)       = 0;
 		virtual void accept(visitors::IVisitor& visitor) const = 0;
 
