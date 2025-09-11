@@ -30,86 +30,71 @@ namespace soul::ast::visitors
 	{
 	}
 
-	void TypeResolverVisitor::visit(BinaryNode& node)
+	void TypeResolverVisitor::visit(const BinaryNode& node)
 	{
-		accept(node.lhs.get());
-		accept(node.rhs.get());
+		CopyVisitor::visit(node);
 
-		_current_clone       = clone(node);
+		auto& binary_node = dynamic_cast<BinaryNode&>(*_current_clone);
+		if (!binary_node.lhs) {
+			binary_node.lhs
+				= ErrorNode::create(ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain LHS expression" });
+		}
+
+		if (!binary_node.rhs) {
+			binary_node.rhs
+				= ErrorNode::create(ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain RHS expression" });
+		}
+
 		_current_clone->type = PrimitiveType::Kind::Void;  // TODO
 	}
 
-	void TypeResolverVisitor::visit(BlockNode& node)
+	void TypeResolverVisitor::visit(const BlockNode& node)
 	{
 		// ENTER SCOPE: Mark a restorepoint for variables declared in the current scope.
 		const std::size_t variables_until_this_point = _variables_in_scope.size();
 
-		for (auto& statement : node.statements) {
-			accept(statement.get());
-		}
+		CopyVisitor::visit(node);
+		_current_clone->type = PrimitiveType::Kind::Void;
 
 		// EXIT SCOPE: Remove variables defined in that scope.
 		const std::size_t variables_declared_in_scope = _variables_in_scope.size() - variables_until_this_point;
 		_variables_in_scope.erase(_variables_in_scope.end() - static_cast<std::ptrdiff_t>(variables_declared_in_scope),
 		                          _variables_in_scope.end());
-
-		_current_clone       = clone(node);
-		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
-	void TypeResolverVisitor::visit(nodes::CastNode& node)
+	void TypeResolverVisitor::visit(const nodes::CastNode& node)
 	{
-		accept(node.expression.get());
-
-		_current_clone       = clone(node);
+		CopyVisitor::visit(node);
 		_current_clone->type = get_type_or_default(node.type_identifier);
 	}
 
-	void TypeResolverVisitor::visit(ForLoopNode& node)
+	void TypeResolverVisitor::visit(const ForLoopNode& node)
 	{
-		accept(node.initialization.get());
-		accept(node.condition.get());
-		accept(node.update.get());
-		accept(node.statements.get());
-
-		_current_clone       = clone(node);
+		CopyVisitor::visit(node);
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
-	void TypeResolverVisitor::visit(ForeachLoopNode& node)
+	void TypeResolverVisitor::visit(const ForeachLoopNode& node)
 	{
-		accept(node.variable.get());
-		accept(node.in_expression.get());
-		accept(node.statements.get());
-
-		_current_clone       = clone(node);
+		CopyVisitor::visit(node);
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
-	void TypeResolverVisitor::visit(FunctionDeclarationNode& node)
+	void TypeResolverVisitor::visit(const FunctionDeclarationNode& node)
 	{
-		for (auto& parameter : node.parameters) {
-			accept(parameter.get());
-		}
-		accept(node.statements.get());
-
-		_current_clone       = clone(node);
+		CopyVisitor::visit(node);
 		_current_clone->type = get_type_or_default(node.return_type);
 	}
 
-	void TypeResolverVisitor::visit(IfNode& node)
+	void TypeResolverVisitor::visit(const IfNode& node)
 	{
-		accept(node.condition.get());
-		accept(node.if_statements.get());
-		accept(node.else_statements.get());
-
-		_current_clone       = clone(node);
+		CopyVisitor::visit(node);
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
-	void TypeResolverVisitor::visit(LiteralNode& node)
+	void TypeResolverVisitor::visit(const LiteralNode& node)
 	{
-		_current_clone = clone(node);
+		CopyVisitor::visit(node);
 
 		if (node.literal_type == LiteralNode::LiteralType::Unknown) {
 			_current_clone->type = PrimitiveType::Kind::Unknown;
@@ -156,41 +141,35 @@ namespace soul::ast::visitors
 
 	void TypeResolverVisitor::visit(const ModuleNode& node)
 	{
+		CopyVisitor::visit(node);
+
 		// NOTE: Modules are a collection of type declarations and functions, thus don't have their own type.
-		_current_clone       = clone(node);
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
-	void TypeResolverVisitor::visit(StructDeclarationNode& node)
+	void TypeResolverVisitor::visit(const StructDeclarationNode& node)
 	{
-		_current_clone = clone(node);
-
-		for (auto& parameter : node.parameters) {
-			accept(parameter.get());
-		}
-		node.type = get_type_or_default(node.name);
+		CopyVisitor::visit(node);
+		_current_clone->type = get_type_or_default(node.name);
 	}
 
-	void TypeResolverVisitor::visit(UnaryNode& node)
+	void TypeResolverVisitor::visit(const UnaryNode& node)
 	{
-		_current_clone = clone(node);
-
-		// TODO
+		CopyVisitor::visit(node);
+		_current_clone->type = PrimitiveType::Kind::Void;  // TODO
 	}
 
-	void TypeResolverVisitor::visit(VariableDeclarationNode& node)
+	void TypeResolverVisitor::visit(const VariableDeclarationNode& node)
 	{
+		CopyVisitor::visit(node);
+
 		if (is_variable_declared(node.name)) {
 			_current_clone
 				= ErrorNode::create(std::format("variable declaration '{}' is being shadowed by a new one", node.name));
 			return;
 		}
 
-		_variables_in_scope.emplace_back(std::make_pair(node.name, &node));
-
-		accept(node.expr.get());
-
-		_current_clone       = clone(node);
+		_variables_in_scope.emplace_back(std::make_pair(node.name, _current_clone.get()));
 		_current_clone->type = get_type_or_default(node.type_identifier);
 	}
 

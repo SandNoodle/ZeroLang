@@ -16,7 +16,7 @@ namespace soul::ast::visitors
 		public:
 		virtual ~DefaultTraverseVisitor() = default;
 
-		virtual void accept(const ASTNode::Reference node);
+		virtual void accept(ASTNode::Reference node);
 
 		protected:
 		virtual void visit(const nodes::BinaryNode&) override;

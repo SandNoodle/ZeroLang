@@ -19,7 +19,7 @@ namespace soul::ast::visitors
 {
 	using namespace soul::ast::nodes;
 
-	void DefaultTraverseVisitor::accept(const ASTNode::Reference node)
+	void DefaultTraverseVisitor::accept(ASTNode::Reference node)
 	{
 		if (!node) {
 			return;

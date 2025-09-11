@@ -33,9 +33,11 @@ namespace soul::ast::visitors
 		/** @brief Returns name-to-type map of all discovered (and basic) types for a given AST. */
 		TypeMap discovered_types() noexcept;
 
+		static TypeMap basic_types() noexcept;
+
 		using CopyVisitor::accept;
 
-		static TypeMap basic_types() noexcept;
+		[[nodiscard]] constexpr bool affects() const noexcept override { return true; }
 
 		protected:
 		using CopyVisitor::visit;

@@ -19,6 +19,8 @@ namespace soul::ast::visitors
 
 		using DefaultTraverseVisitor::accept;
 
+		[[nodiscard]] constexpr bool affects() const noexcept override { return true; }
+
 		protected:
 		using DefaultTraverseVisitor::visit;
 		void visit(const nodes::BinaryNode&) override;

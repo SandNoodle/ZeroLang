@@ -41,6 +41,7 @@ namespace soul::ast::visitors::ut
 		module_statements.emplace_back(std::move(second_struct));
 		auto expected_module = ModuleNode::create("discovery_module", std::move(module_statements));
 
+		// ...discover them...
 		StringifyVisitor stringify_expected_before{};
 		stringify_expected_before.accept(expected_module.get());
 

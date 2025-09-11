@@ -14,6 +14,12 @@ namespace soul::ast::visitors
 		public:
 		virtual ~IVisitor() = default;
 
+		/**
+		 * @brief Returns true if a visitor modifies or affects the AST in any shape or form, i.e. does not perform
+		 * `read-only` operations.
+		 */
+		[[nodiscard]] virtual constexpr bool affects() const noexcept { return false; }
+
 		virtual constexpr void visit(const nodes::BinaryNode&) {}
 		virtual constexpr void visit(const nodes::BlockNode&) {}
 		virtual constexpr void visit(const nodes::CastNode&) {}

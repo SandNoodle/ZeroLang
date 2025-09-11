@@ -30,10 +30,9 @@ namespace soul::ast::visitors
 		using VariableContext = std::vector<std::pair<std::string_view, ASTNode::Reference>>;
 
 		private:
-		ASTNode::Reference _visited_node = nullptr;
-		TypeMap            _registered_types;
-		Options            _options;
-		VariableContext    _variables_in_scope;
+		TypeMap         _registered_types;
+		Options         _options;
+		VariableContext _variables_in_scope;
 
 		public:
 		TypeResolverVisitor(TypeMap type_map, Options options = Options::None);
@@ -44,22 +43,24 @@ namespace soul::ast::visitors
 		TypeResolverVisitor& operator=(const TypeResolverVisitor&)     = delete;
 		TypeResolverVisitor& operator=(TypeResolverVisitor&&) noexcept = default;
 
-		using DefaultTraverseVisitor::accept;
+		using CopyVisitor::accept;
+
+		[[nodiscard]] constexpr bool affects() const noexcept override { return true; }
 
 		protected:
-		using DefaultTraverseVisitor::visit;
-		void visit(nodes::BinaryNode&) override;
-		void visit(nodes::BlockNode&) override;
-		void visit(nodes::CastNode&) override;
-		void visit(nodes::ForLoopNode&) override;
-		void visit(nodes::ForeachLoopNode&) override;
-		void visit(nodes::FunctionDeclarationNode&) override;
-		void visit(nodes::IfNode&) override;
-		void visit(nodes::LiteralNode&) override;
+		using CopyVisitor::visit;
+		void visit(const nodes::BinaryNode&) override;
+		void visit(const nodes::BlockNode&) override;
+		void visit(const nodes::CastNode&) override;
+		void visit(const nodes::ForLoopNode&) override;
+		void visit(const nodes::ForeachLoopNode&) override;
+		void visit(const nodes::FunctionDeclarationNode&) override;
+		void visit(const nodes::IfNode&) override;
+		void visit(const nodes::LiteralNode&) override;
 		void visit(const nodes::ModuleNode&) override;
-		void visit(nodes::StructDeclarationNode&) override;
-		void visit(nodes::UnaryNode&) override;
-		void visit(nodes::VariableDeclarationNode&) override;
+		void visit(const nodes::StructDeclarationNode&) override;
+		void visit(const nodes::UnaryNode&) override;
+		void visit(const nodes::VariableDeclarationNode&) override;
 
 		private:
 		types::Type get_type_or_default(std::string_view type_identifier) const noexcept;

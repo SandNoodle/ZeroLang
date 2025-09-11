@@ -21,7 +21,7 @@ namespace soul::ast::visitors
 			return;
 		}
 
-		_current_clone           = clone(node);
+		CopyVisitor::visit(node);
 		auto& struct_declaration = dynamic_cast<StructDeclarationNode&>(*_current_clone.get());
 
 		StructType::ContainedTypes contained_types{};
