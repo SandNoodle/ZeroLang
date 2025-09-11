@@ -5,6 +5,7 @@
 #include "ast/visitors/type_discoverer.h"
 #include "common/types/types_fwd.h"
 
+#include <optional>
 #include <string_view>
 #include <tuple>
 #include <vector>
@@ -18,24 +19,17 @@ namespace soul::ast::visitors
 	class TypeResolverVisitor final : public CopyVisitor
 	{
 		public:
-		enum Options : u8
-		{
-			None             = 1 << 0,
-			ForceStrictCasts = 1 << 1,
-		};
-
 		using TypeMap = TypeDiscovererVisitor::TypeMap;
 
 		private:
-		using VariableContext = std::vector<std::pair<std::string_view, ASTNode::Reference>>;
+		using VariableContext = std::vector<std::pair<std::string_view, types::Type>>;
 
 		private:
 		TypeMap         _registered_types;
-		Options         _options;
 		VariableContext _variables_in_scope;
 
 		public:
-		TypeResolverVisitor(TypeMap type_map, Options options = Options::None);
+		TypeResolverVisitor(TypeMap type_map);
 		TypeResolverVisitor(const TypeResolverVisitor&)     = delete;
 		TypeResolverVisitor(TypeResolverVisitor&&) noexcept = default;
 		~TypeResolverVisitor()                              = default;
@@ -44,8 +38,6 @@ namespace soul::ast::visitors
 		TypeResolverVisitor& operator=(TypeResolverVisitor&&) noexcept = default;
 
 		using CopyVisitor::accept;
-
-		[[nodiscard]] constexpr bool affects() const noexcept override { return true; }
 
 		protected:
 		using CopyVisitor::visit;
@@ -63,7 +55,7 @@ namespace soul::ast::visitors
 		void visit(const nodes::VariableDeclarationNode&) override;
 
 		private:
-		types::Type get_type_or_default(std::string_view type_identifier) const noexcept;
-		bool        is_variable_declared(std::string_view name) const noexcept;
+		types::Type                get_type_or_default(std::string_view type_identifier) const noexcept;
+		std::optional<types::Type> get_variable_type(std::string_view name) const noexcept;
 	};
 }  // namespace soul::ast::visitors

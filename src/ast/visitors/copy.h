@@ -2,6 +2,8 @@
 
 #include "ast/visitors/default_traverse.h"
 
+#include <cassert>
+
 namespace soul::ast::visitors
 {
 	/**
@@ -51,5 +53,18 @@ namespace soul::ast::visitors
 		ASTNode::Dependency clone(const nodes::StructDeclarationNode&);
 		ASTNode::Dependency clone(const nodes::UnaryNode&);
 		ASTNode::Dependency clone(const nodes::VariableDeclarationNode&);
+
+		template <typename T>
+		constexpr bool is() const noexcept
+		{
+			return dynamic_cast<T*>(_current_clone.get()) != nullptr;
+		}
+
+		template <typename T>
+		constexpr T& as()
+		{
+			assert(dynamic_cast<T*>(_current_clone.get()));
+			return dynamic_cast<T&>(*_current_clone);
+		}
 	};
 }  // namespace soul::ast::visitors

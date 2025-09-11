@@ -37,8 +37,6 @@ namespace soul::ast::visitors
 
 		using CopyVisitor::accept;
 
-		[[nodiscard]] constexpr bool affects() const noexcept override { return true; }
-
 		protected:
 		using CopyVisitor::visit;
 		void visit(nodes::StructDeclarationNode&) override;

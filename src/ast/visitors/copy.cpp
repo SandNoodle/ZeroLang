@@ -100,7 +100,10 @@ namespace soul::ast::visitors
 		                      clone(*static_cast<BlockNode*>(node.else_statements.get())));
 	}
 
-	ASTNode::Dependency CopyVisitor::clone(const nodes::LiteralNode& node) { return LiteralNode::create(node.value); }
+	ASTNode::Dependency CopyVisitor::clone(const nodes::LiteralNode& node)
+	{
+		return LiteralNode::create(node.value, node.literal_type);
+	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::ModuleNode& node)
 	{

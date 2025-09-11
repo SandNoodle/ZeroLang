@@ -22,7 +22,7 @@ namespace soul::ast::visitors
 		}
 
 		CopyVisitor::visit(node);
-		auto& struct_declaration = dynamic_cast<StructDeclarationNode&>(*_current_clone.get());
+		auto& struct_declaration = as<StructDeclarationNode>();
 
 		StructType::ContainedTypes contained_types{};
 		contained_types.reserve(node.parameters.size());

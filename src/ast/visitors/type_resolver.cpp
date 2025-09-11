@@ -25,24 +25,23 @@ namespace soul::ast::visitors
 
 	CastNode::Type get_cast_type(const Type& from_type, const Type& to_type);
 
-	TypeResolverVisitor::TypeResolverVisitor(TypeMap type_map, Options options)
-		: _registered_types(std::move(type_map)), _options(options)
-	{
-	}
+	TypeResolverVisitor::TypeResolverVisitor(TypeMap type_map) : _registered_types(std::move(type_map)) {}
 
 	void TypeResolverVisitor::visit(const BinaryNode& node)
 	{
 		CopyVisitor::visit(node);
 
-		auto& binary_node = dynamic_cast<BinaryNode&>(*_current_clone);
+		auto& binary_node = as<BinaryNode>();
 		if (!binary_node.lhs) {
-			binary_node.lhs
-				= ErrorNode::create(ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain LHS expression" });
+			_current_clone = ErrorNode::create(
+				ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain LHS expression (nullptr)" });
+			return;
 		}
 
 		if (!binary_node.rhs) {
-			binary_node.rhs
-				= ErrorNode::create(ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain RHS expression" });
+			_current_clone = ErrorNode::create(
+				ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain RHS expression (nullptr)" });
+			return;
 		}
 
 		_current_clone->type = PrimitiveType::Kind::Void;  // TODO
@@ -64,8 +63,23 @@ namespace soul::ast::visitors
 
 	void TypeResolverVisitor::visit(const nodes::CastNode& node)
 	{
+		if (!node.expression) {
+			_current_clone = ErrorNode::create(
+				ErrorNode::Message{ "[INTERNAL] CastNode does not contain an expression (nullptr)" });
+		}
+
 		CopyVisitor::visit(node);
-		_current_clone->type = get_type_or_default(node.type_identifier);
+
+		const auto& cast_node = as<CastNode>();
+		const auto  from_type = cast_node.expression->type;
+		const auto  to_type   = get_type_or_default(cast_node.type_identifier);
+		if (get_cast_type(from_type, to_type) == CastNode::Type::Impossible) {
+			_current_clone = ErrorNode::create(
+				std::format("cannot cast from type '{}' to '{}'", std::string(from_type), std::string(to_type)));
+			return;
+		}
+
+		_current_clone->type = to_type;
 	}
 
 	void TypeResolverVisitor::visit(const ForLoopNode& node)
@@ -117,7 +131,13 @@ namespace soul::ast::visitors
 		}
 
 		if (node.literal_type == LiteralNode::LiteralType::Identifier) {
-			_current_clone->type = PrimitiveType::Kind::Unknown;  // TODO
+			const auto& type_identifier = get_variable_type(node.value.get<std::string>());
+			if (!type_identifier) {
+				_current_clone = ErrorNode::create(
+					std::format("use of undeclared identifier '{}'", node.value.get<std::string>()));
+				return;
+			}
+			_current_clone->type = *type_identifier;
 			return;
 		}
 
@@ -163,14 +183,14 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
-		if (is_variable_declared(node.name)) {
+		if (get_variable_type(node.name)) {
 			_current_clone
-				= ErrorNode::create(std::format("variable declaration '{}' is being shadowed by a new one", node.name));
+				= ErrorNode::create(std::format("variable declaration '{}' shadows previous one", node.name));
 			return;
 		}
 
-		_variables_in_scope.emplace_back(std::make_pair(node.name, _current_clone.get()));
 		_current_clone->type = get_type_or_default(node.type_identifier);
+		_variables_in_scope.emplace_back(std::make_pair(node.name, _current_clone->type));
 	}
 
 	CastNode::Type get_cast_type(const Type& from_type, const Type& to_type)
@@ -289,9 +309,13 @@ namespace soul::ast::visitors
 		return types::Type{};
 	}
 
-	bool TypeResolverVisitor::is_variable_declared(std::string_view name) const noexcept
+	std::optional<Type> TypeResolverVisitor::get_variable_type(std::string_view name) const noexcept
 	{
-		return std::ranges::find(_variables_in_scope, name, &decltype(_variables_in_scope)::value_type::first)
-		    != std::end(_variables_in_scope);
+		const auto it{ std::ranges::find(
+			_variables_in_scope, name, &decltype(_variables_in_scope)::value_type::first) };
+		if (it == std::end(_variables_in_scope)) [[unlikely]] {
+			return std::nullopt;
+		}
+		return it->second;
 	}
 }  // namespace soul::ast::visitors
