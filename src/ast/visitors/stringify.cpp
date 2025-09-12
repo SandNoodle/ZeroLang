@@ -86,6 +86,7 @@ namespace soul::ast::visitors
 		accept(node.condition.get());
 		_ss << ",\"update\":";
 		accept(node.update.get());
+		_ss << ",\"statements\":";
 		accept(node.statements.get());
 	}
 

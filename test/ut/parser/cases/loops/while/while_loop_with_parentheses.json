@@ -1,1 +1,1 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"for_loop","initialization":"__nullptr__","condition":{"value":"false"},"update":"__nullptr__"{"type":"scope_block","statements":[]}}]}
+{"type":"module_declaration","name":"test_module","statements":[{"type":"for_loop","initialization":"__nullptr__","condition":{"value":"false"},"update":"__nullptr__","statements":{"type":"scope_block","statements":[]}}]}
