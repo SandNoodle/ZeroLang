@@ -7,7 +7,10 @@ namespace soul::ast::nodes
 	{
 	}
 
-	LiteralNode::Dependency LiteralNode::create(Value value, LiteralType literal_type) { return std::make_unique<LiteralNode>(std::move(value), literal_type); }
+	LiteralNode::Dependency LiteralNode::create(Value value, LiteralType literal_type)
+	{
+		return std::make_unique<LiteralNode>(std::move(value), literal_type);
+	}
 
 	LiteralNode::operator std::string() const noexcept { return std::string(value); }
 }  // namespace soul::ast::nodes

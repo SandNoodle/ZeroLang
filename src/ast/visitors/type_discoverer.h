@@ -11,7 +11,6 @@ namespace soul::ast::visitors
 {
 	/**
 	 * @brief TypeDiscovererVisitor traverses the AST while making note of each type declaration.
-	 * @important Starting the visitor from nodes other than ModuleNode will result in modification of the input AST.
 	 */
 	class TypeDiscovererVisitor final : public CopyVisitor
 	{

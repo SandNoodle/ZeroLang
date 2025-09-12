@@ -49,7 +49,9 @@ namespace soul::ast::visitors
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::BinaryNode& node)
 	{
-		return BinaryNode::create(clone(node.lhs.get()), clone(node.rhs.get()), node.op);
+		auto lhs{ clone(node.lhs.get()) };
+		auto rhs{ clone(node.rhs.get()) };
+		return BinaryNode::create(std::move(lhs), std::move(rhs), node.op);
 	}
 
 	ASTNode::ScopeBlock CopyVisitor::clone(const nodes::BlockNode& node)
@@ -69,17 +71,20 @@ namespace soul::ast::visitors
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::ForLoopNode& node)
 	{
-		return ForLoopNode::create(clone(node.initialization.get()),
-		                           clone(node.condition.get()),
-		                           clone(node.update.get()),
-		                           clone(*static_cast<BlockNode*>(node.statements.get())));
+		auto initialization{ clone(node.initialization.get()) };
+		auto condition{ clone(node.condition.get()) };
+		auto update{ clone(node.update.get()) };
+		auto statements{ clone(*static_cast<BlockNode*>(node.statements.get())) };
+		return ForLoopNode::create(
+			std::move(initialization), std::move(condition), std::move(update), std::move(statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::ForeachLoopNode& node)
 	{
-		return ForeachLoopNode::create(clone(node.variable.get()),
-		                               clone(node.in_expression.get()),
-		                               clone(*static_cast<BlockNode*>(node.statements.get())));
+		auto variable{ clone(node.variable.get()) };
+		auto in_expression{ clone(node.in_expression.get()) };
+		auto statements{ clone(*static_cast<BlockNode*>(node.statements.get())) };
+		return ForeachLoopNode::create(std::move(variable), std::move(in_expression), std::move(statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::FunctionDeclarationNode& node)
@@ -87,17 +92,17 @@ namespace soul::ast::visitors
 		auto cloned_parameters{ node.parameters
 			                    | std::views::transform([this](const auto& p) { return clone(p.get()); })
 			                    | std::ranges::to<ASTNode::Dependencies>() };
-		return FunctionDeclarationNode::create(node.name,
-		                                       node.return_type,
-		                                       std::move(cloned_parameters),
-		                                       clone(*static_cast<BlockNode*>(node.statements.get())));
+		auto statements{ clone(*static_cast<BlockNode*>(node.statements.get())) };
+		return FunctionDeclarationNode::create(
+			node.name, node.return_type, std::move(cloned_parameters), std::move(statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::IfNode& node)
 	{
-		return IfNode::create(clone(node.condition.get()),
-		                      clone(*static_cast<BlockNode*>(node.if_statements.get())),
-		                      clone(*static_cast<BlockNode*>(node.else_statements.get())));
+		auto condition{ clone(node.condition.get()) };
+		auto if_statements{ clone(*static_cast<BlockNode*>(node.if_statements.get())) };
+		auto else_statements{ clone(*static_cast<BlockNode*>(node.else_statements.get())) };
+		return IfNode::create(std::move(condition), std::move(if_statements), std::move(else_statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::LiteralNode& node)

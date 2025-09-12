@@ -14,7 +14,6 @@ namespace soul::ast::visitors
 {
 	/**
 	 * @brief TypeResolverVisitor traverses the AST while resolving each node into the correct type.
-	 * @important Starting the visitor from nodes other than ModuleNode will result in modification of the input AST.
 	 */
 	class TypeResolverVisitor final : public CopyVisitor
 	{
@@ -22,7 +21,7 @@ namespace soul::ast::visitors
 		using TypeMap = TypeDiscovererVisitor::TypeMap;
 
 		private:
-		using VariableContext = std::vector<std::pair<std::string_view, types::Type>>;
+		using VariableContext = std::vector<std::pair<std::string, types::Type>>;
 
 		private:
 		TypeMap         _registered_types;
