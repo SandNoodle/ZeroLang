@@ -1,6 +1,6 @@
 #include "parser/parser.h"
 
-#include "ast/ast_operator.h"
+#include "ast/ast.h"
 #include "ast/nodes/binary.h"
 #include "ast/nodes/block.h"
 #include "ast/nodes/cast.h"
@@ -180,7 +180,7 @@ namespace soul::parser
 		auto precedence = precedence_rule(binary_operator->type).precedence;
 		auto rhs        = parse_expression(precedence);
 
-		return BinaryNode::create(std::move(lhs), std::move(rhs), to_node_operator(binary_operator->type));
+		return BinaryNode::create(std::move(lhs), std::move(rhs), ASTNode::as_operator(binary_operator->type));
 	}
 
 	ASTNode::Dependency Parser::parse_cast()

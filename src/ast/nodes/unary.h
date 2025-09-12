@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ast/ast.h"
-#include "ast/ast_operator.h"
 
 namespace soul::ast::nodes
 {
@@ -12,11 +11,11 @@ namespace soul::ast::nodes
 	class UnaryNode final : public VisitorAcceptor<UnaryNode>
 	{
 		public:
-		ASTNodeOperator op;
-		Dependency      expr;
+		Operator   op;
+		Dependency expr;
 
 		public:
-		explicit UnaryNode(Dependency expr, ASTNodeOperator op);
+		explicit UnaryNode(Dependency expr, Operator op);
 		~UnaryNode() override = default;
 
 		/**
@@ -25,6 +24,6 @@ namespace soul::ast::nodes
 		 * @param op Operator binding the expression.
 		 * @return New 'Unary' expression node.
 		 */
-		static Dependency create(Dependency expr, ASTNodeOperator op);
+		static Dependency create(Dependency expr, Operator op);
 	};
 }  // namespace soul::ast::nodes

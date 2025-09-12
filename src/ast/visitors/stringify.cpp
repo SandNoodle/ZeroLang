@@ -45,7 +45,7 @@ namespace soul::ast::visitors
 		_ss << "\"lhs\":";
 		accept(node.lhs.get());
 		_ss << ',';
-		_ss << "\"operator\":\"" << to_string(node.op) << "\",";
+		_ss << "\"operator\":\"" << ASTNode::name(node.op) << "\",";
 		_ss << "\"rhs\":";
 		accept(node.rhs.get());
 	}
@@ -161,7 +161,7 @@ namespace soul::ast::visitors
 	void StringifyVisitor::visit(const UnaryNode& node)
 	{
 		_ss << "\"type\":\"unary\",";
-		_ss << "\"operator\":\"" << to_string(node.op) << "\",";
+		_ss << "\"operator\":\"" << ASTNode::name(node.op) << "\",";
 		_ss << "\"expression\":";
 		accept(node.expr.get());
 	}

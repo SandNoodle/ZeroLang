@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ast/ast.h"
-#include "ast/ast_operator.h"
 
 namespace soul::ast::nodes
 {
@@ -12,12 +11,12 @@ namespace soul::ast::nodes
 	class BinaryNode final : public VisitorAcceptor<BinaryNode>
 	{
 		public:
-		ASTNodeOperator op  = ASTNodeOperator::Unknown;
-		Dependency      lhs = nullptr;
-		Dependency      rhs = nullptr;
+		Operator   op  = Operator::Unknown;
+		Dependency lhs = nullptr;
+		Dependency rhs = nullptr;
 
 		public:
-		explicit BinaryNode(Dependency lhs, Dependency rhs, ASTNodeOperator op);
+		explicit BinaryNode(Dependency lhs, Dependency rhs, Operator op);
 		~BinaryNode() override = default;
 
 		/**
@@ -27,6 +26,6 @@ namespace soul::ast::nodes
 		 * @param op Operator binding the two sides together.
 		 * @return New 'Binary' expression node.
 		 */
-		static Dependency create(Dependency lhs, Dependency rhs, ASTNodeOperator op);
+		static Dependency create(Dependency lhs, Dependency rhs, Operator op);
 	};
 }  // namespace soul::ast::nodes

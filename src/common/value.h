@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/types.h"
 #include "ast/ast.h"
+#include "core/types.h"
 
 #include <concepts>
 #include <sstream>

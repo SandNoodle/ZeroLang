@@ -38,10 +38,10 @@ namespace soul::ast::visitors
 
 		auto if_node_true_statements = ASTNode::Dependencies{};
 		if_node_true_statements.emplace_back(
-			UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNodeOperator::Decrement));
+			UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNode::Operator::Decrement));
 		auto if_node_false_statements = ASTNode::Dependencies{};
 		if_node_false_statements.emplace_back(
-			UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNodeOperator::Increment));
+			UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNode::Operator::Increment));
 
 		auto if_node = IfNode::create(LiteralNode::create(Value{ true }),
 		                              BlockNode::create(std::move(if_node_true_statements)),
@@ -50,8 +50,8 @@ namespace soul::ast::visitors
 		auto for_loop_initialization
 			= VariableDeclarationNode::create("index", "i32", LiteralNode::create(Value{ 0 }), false);
 		auto for_loop_condition = BinaryNode::create(
-			LiteralNode::create(Value{ "index" }), LiteralNode::create(Value{ 10 }), ASTNodeOperator::LessEqual);
-		auto for_loop_update     = UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNodeOperator::Increment);
+			LiteralNode::create(Value{ "index" }), LiteralNode::create(Value{ 10 }), ASTNode::Operator::LessEqual);
+		auto for_loop_update     = UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNode::Operator::Increment);
 		auto for_loop_statements = ASTNode::Dependencies{};
 		for_loop_statements.push_back(std::move(if_node));
 
