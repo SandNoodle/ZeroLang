@@ -31,20 +31,27 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
-		auto& binary_node = as<BinaryNode>();
-		if (!binary_node.lhs) {
-			_current_clone = ErrorNode::create(
-				ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain LHS expression (nullptr)" });
+		if (!node.lhs) {
+			_current_clone = ErrorNode::create("[INTERNAL] BinaryNode does not contain LHS expression (nullptr)");
 			return;
 		}
 
-		if (!binary_node.rhs) {
-			_current_clone = ErrorNode::create(
-				ErrorNode::Message{ "[INTERNAL] BinaryNode does not contain RHS expression (nullptr)" });
+		if (!node.rhs) {
+			_current_clone = ErrorNode::create("[INTERNAL] BinaryNode does not contain RHS expression (nullptr)");
 			return;
 		}
 
-		_current_clone->type = PrimitiveType::Kind::Void;  // TODO
+		const auto& binary_node = as<BinaryNode>();
+		const auto  result_type
+			= get_type_for_operator(binary_node.op, std::array{ binary_node.lhs->type, binary_node.rhs->type });
+		if (result_type == Type{}) {
+			_current_clone = ErrorNode::create(std::format("operator ('{}') does not exist for types '{}' and '{}'",
+			                                               std::string(ASTNode::name(binary_node.op)),
+			                                               std::string(binary_node.lhs->type),
+			                                               std::string(binary_node.rhs->type)));
+			return;
+		}
+		_current_clone->type = result_type;
 	}
 
 	void TypeResolverVisitor::visit(const BlockNode& node)
@@ -63,12 +70,11 @@ namespace soul::ast::visitors
 
 	void TypeResolverVisitor::visit(const nodes::CastNode& node)
 	{
-		if (!node.expression) {
-			_current_clone = ErrorNode::create(
-				ErrorNode::Message{ "[INTERNAL] CastNode does not contain an expression (nullptr)" });
-		}
-
 		CopyVisitor::visit(node);
+
+		if (!node.expression) {
+			_current_clone = ErrorNode::create("[INTERNAL] CastNode does not contain an expression (nullptr)");
+		}
 
 		const auto& cast_node = as<CastNode>();
 		const auto  from_type = cast_node.expression->type;
@@ -85,24 +91,92 @@ namespace soul::ast::visitors
 	void TypeResolverVisitor::visit(const ForLoopNode& node)
 	{
 		CopyVisitor::visit(node);
+
+		const auto& for_loop = as<ForLoopNode>();
+
+		if (for_loop.condition) {
+			const bool is_condition_bool_coercible
+				= get_cast_type(for_loop.condition->type, PrimitiveType::Kind::Boolean) != CastNode::Type::Impossible;
+			if (!is_condition_bool_coercible) {
+				_current_clone = ErrorNode::create(
+					std::format("condition in for loop statement must be convertible to a '{}' type",
+				                std::string(Type{ PrimitiveType::Kind::Boolean })));
+				return;
+			}
+		}
+
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
 	void TypeResolverVisitor::visit(const ForeachLoopNode& node)
 	{
 		CopyVisitor::visit(node);
+
+		if (!node.variable) {
+			_current_clone
+				= ErrorNode::create("[INTERNAL] ForeachLoopNode does not contain variable expression (nullptr)");
+		}
+
+		if (!node.in_expression) {
+			_current_clone
+				= ErrorNode::create("[INTERNAL] ForeachLoopNode does not contain in_expression expression (nullptr)");
+		}
+
+		const auto& foreach_node = as<ForeachLoopNode>();
+		if (!foreach_node.in_expression->type.is<ArrayType>()) {
+			_current_clone = ErrorNode::create(
+				std::format("expression iterated in for each loop statement must be of an array type"));
+			return;
+		}
+
+		const auto is_variable_possible_be_of_in_expression_type
+			= get_cast_type(foreach_node.in_expression->type.as<ArrayType>().data_type(), foreach_node.variable->type)
+		   != CastNode::Type::Impossible;
+		if (!is_variable_possible_be_of_in_expression_type) {
+			_current_clone = ErrorNode::create(std::format(
+				"type missmatch in for each loop statement between variable ('{}') and iterated expression ('{}')",
+				std::string(foreach_node.variable->type),
+				std::string(foreach_node.in_expression->type)));
+			return;
+		}
+
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
 	void TypeResolverVisitor::visit(const FunctionDeclarationNode& node)
 	{
 		CopyVisitor::visit(node);
+
+		const auto& function_declaration = as<FunctionDeclarationNode>();
+		for (std::size_t index = 0; index < function_declaration.parameters.size(); ++index) {
+			const auto* parameter
+				= dynamic_cast<VariableDeclarationNode*>(function_declaration.parameters[index].get());
+			if (!parameter) {
+				_current_clone
+					= ErrorNode::create(std::format("[INTERNAL] FunctionDeclarationNode contains "
+				                                    "non-VariableDeclarationNode in the parameter list (at {})",
+				                                    index));
+				return;
+			}
+		}
+
 		_current_clone->type = get_type_or_default(node.return_type);
 	}
 
 	void TypeResolverVisitor::visit(const IfNode& node)
 	{
 		CopyVisitor::visit(node);
+
+		const auto& if_node = as<IfNode>();
+		const bool  is_condition_bool_coercible
+			= get_cast_type(if_node.condition->type, PrimitiveType::Kind::Boolean) != CastNode::Type::Impossible;
+		if (!is_condition_bool_coercible) {
+			_current_clone = ErrorNode::create(
+				std::format("condition in if statement statement must be convertible to a '{}' type",
+			                std::string(Type{ PrimitiveType::Kind::Boolean })));
+			return;
+		}
+
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
@@ -176,7 +250,21 @@ namespace soul::ast::visitors
 	void TypeResolverVisitor::visit(const UnaryNode& node)
 	{
 		CopyVisitor::visit(node);
-		_current_clone->type = PrimitiveType::Kind::Void;  // TODO
+
+		const auto& unary_node = as<UnaryNode>();
+		if (!unary_node.expr) {
+			_current_clone = ErrorNode::create("[INTERNAL] UnaryNode does not contain expression (nullptr)");
+			return;
+		}
+
+		const auto result_type = get_type_for_operator(unary_node.op, std::array{ unary_node.expr->type });
+		if (result_type == Type{}) {
+			_current_clone = ErrorNode::create(std::format("operator ('{}') does not exist for type '{}'",
+			                                               std::string(ASTNode::name(unary_node.op)),
+			                                               std::string(unary_node.expr->type)));
+			return;
+		}
+		_current_clone->type = result_type;
 	}
 
 	void TypeResolverVisitor::visit(const VariableDeclarationNode& node)

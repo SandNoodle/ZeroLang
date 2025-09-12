@@ -6,6 +6,7 @@
 #include "common/types/types_fwd.h"
 
 #include <optional>
+#include <ranges>
 #include <string_view>
 #include <tuple>
 #include <vector>
@@ -56,5 +57,8 @@ namespace soul::ast::visitors
 		private:
 		types::Type                get_type_or_default(std::string_view type_identifier) const noexcept;
 		std::optional<types::Type> get_variable_type(std::string_view name) const noexcept;
+		types::Type                get_type_for_operator(ASTNode::Operator                      op,
+		                                                 const std::ranges::forward_range auto& input_types) const noexcept;
 	};
 }  // namespace soul::ast::visitors
+#include "ast/visitors/type_resolver.inl"
