@@ -46,7 +46,7 @@ namespace soul::ast::visitors
 			= get_type_for_operator(binary_node.op, std::array{ binary_node.lhs->type, binary_node.rhs->type });
 		if (result_type == Type{}) {
 			_current_clone = ErrorNode::create(std::format("operator ('{}') does not exist for types '{}' and '{}'",
-			                                               std::string(ASTNode::name(binary_node.op)),
+			                                               ASTNode::name(binary_node.op),
 			                                               std::string(binary_node.lhs->type),
 			                                               std::string(binary_node.rhs->type)));
 			return;
@@ -129,10 +129,9 @@ namespace soul::ast::visitors
 			return;
 		}
 
-		const auto is_variable_possible_be_of_in_expression_type
-			= get_cast_type(foreach_node.in_expression->type.as<ArrayType>().data_type(), foreach_node.variable->type)
-		   != CastNode::Type::Impossible;
-		if (!is_variable_possible_be_of_in_expression_type) {
+		const auto relation_type
+			= get_cast_type(foreach_node.in_expression->type.as<ArrayType>().data_type(), foreach_node.variable->type);
+		if (relation_type == CastNode::Type::Impossible) {
 			_current_clone = ErrorNode::create(std::format(
 				"type missmatch in for each loop statement between variable ('{}') and iterated expression ('{}')",
 				std::string(foreach_node.variable->type),
@@ -184,27 +183,7 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
-		if (node.literal_type == LiteralNode::LiteralType::Unknown) {
-			_current_clone->type = PrimitiveType::Kind::Unknown;
-			return;
-		}
-
-		if (node.literal_type == LiteralNode::LiteralType::Bool) {
-			_current_clone->type = PrimitiveType::Kind::Boolean;
-			return;
-		}
-
-		if (node.literal_type == LiteralNode::LiteralType::Float32) {
-			_current_clone->type = PrimitiveType::Kind::Float32;
-			return;
-		}
-
-		if (node.literal_type == LiteralNode::LiteralType::Float64) {
-			_current_clone->type = PrimitiveType::Kind::Float64;
-			return;
-		}
-
-		if (node.literal_type == LiteralNode::LiteralType::Identifier) {
+		if (node.literal_type == LiteralNode::Type::Identifier) {
 			const auto& type_identifier = get_variable_type(node.value.get<std::string>());
 			if (!type_identifier) {
 				_current_clone = ErrorNode::create(
@@ -215,22 +194,23 @@ namespace soul::ast::visitors
 			return;
 		}
 
-		if (node.literal_type == LiteralNode::LiteralType::Int32) {
-			_current_clone->type = PrimitiveType::Kind::Int32;
+		static constexpr std::array k_literal_to_type{
+			std::make_pair(LiteralNode::Type::Unknown, PrimitiveType::Kind::Unknown),
+			std::make_pair(LiteralNode::Type::Boolean, PrimitiveType::Kind::Boolean),
+			std::make_pair(LiteralNode::Type::Char, PrimitiveType::Kind::Char),
+			std::make_pair(LiteralNode::Type::Float32, PrimitiveType::Kind::Float32),
+			std::make_pair(LiteralNode::Type::Float64, PrimitiveType::Kind::Float64),
+			std::make_pair(LiteralNode::Type::Int32, PrimitiveType::Kind::Int32),
+			std::make_pair(LiteralNode::Type::Int64, PrimitiveType::Kind::Int64),
+			std::make_pair(LiteralNode::Type::String, PrimitiveType::Kind::String),
+		};
+		const auto it{ std::ranges::find(
+			k_literal_to_type, node.literal_type, &decltype(k_literal_to_type)::value_type::first) };
+		if (it == std::end(k_literal_to_type)) [[unlikely]] {
+			_current_clone->type = PrimitiveType::Kind::Unknown;
 			return;
 		}
-
-		if (node.literal_type == LiteralNode::LiteralType::Int64) {
-			_current_clone->type = PrimitiveType::Kind::Int64;
-			return;
-		}
-
-		if (node.literal_type == LiteralNode::LiteralType::String) {
-			_current_clone->type = PrimitiveType::Kind::String;
-			return;
-		}
-
-		_current_clone->type = PrimitiveType::Kind::Unknown;
+		_current_clone->type = it->second;
 	}
 
 	void TypeResolverVisitor::visit(const ModuleNode& node)
@@ -260,7 +240,7 @@ namespace soul::ast::visitors
 		const auto result_type = get_type_for_operator(unary_node.op, std::array{ unary_node.expr->type });
 		if (result_type == Type{}) {
 			_current_clone = ErrorNode::create(std::format("operator ('{}') does not exist for type '{}'",
-			                                               std::string(ASTNode::name(unary_node.op)),
+			                                               ASTNode::name(unary_node.op),
 			                                               std::string(unary_node.expr->type)));
 			return;
 		}

@@ -2,8 +2,8 @@
 
 #include "ast/ast.h"
 
-#include <vector>
 #include <span>
+#include <vector>
 
 namespace soul::types
 {

@@ -16,6 +16,7 @@
 #include "ast/visitors/type_resolver.h"
 
 #include <string_view>
+#include <unordered_map>
 
 namespace soul::ast::visitors::ut
 {
@@ -42,9 +43,238 @@ namespace soul::ast::visitors::ut
 		}
 	};
 
+	TEST_F(TypeResolverTest, BinaryNode_Arithmetic)
+	{
+		static constexpr std::array k_arithmetic_operators = { ASTNode::Operator::Add,
+			                                                   ASTNode::Operator::Sub,
+			                                                   ASTNode::Operator::Mul,
+			                                                   ASTNode::Operator::Div,
+			                                                   ASTNode::Operator::Mod };
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(k_arithmetic_operators.size());
+		for (const auto op : k_arithmetic_operators) {
+			module_statements.emplace_back(
+				BinaryNode::create(LiteralNode::create(Value{ 1L }, LiteralNode::Type::Int64),
+			                       LiteralNode::create(Value{ 5L }, LiteralNode::Type::Int64),
+			                       op));
+		}
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), k_arithmetic_operators.size());
+
+		for (std::size_t index = 0; index < k_arithmetic_operators.size(); ++index) {
+			const auto* as_binary = dynamic_cast<BinaryNode*>(as_module->statements[index].get());
+			ASSERT_TRUE(as_binary);
+			EXPECT_EQ(as_binary->op, k_arithmetic_operators[index]);
+			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Int64);
+
+			const auto* as_lhs = dynamic_cast<LiteralNode*>(as_binary->lhs.get());
+			ASSERT_TRUE(as_lhs);
+			EXPECT_EQ(as_lhs->value, Value{ 1L });
+			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Int64);
+			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Int64);
+
+			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_binary->rhs.get());
+			ASSERT_TRUE(as_rhs);
+			EXPECT_EQ(as_rhs->value, Value{ 5L });
+			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Int64);
+			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Int64);
+		}
+	}
+
+	TEST_F(TypeResolverTest, BinaryNode_Comparison)
+	{
+		static constexpr std::array k_comparison_operators
+
+			= { ASTNode::Operator::Equal,        ASTNode::Operator::NotEqual, ASTNode::Operator::Greater,
+			    ASTNode::Operator::GreaterEqual, ASTNode::Operator::Less,     ASTNode::Operator::LessEqual };
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(k_comparison_operators.size());
+		for (const auto op : k_comparison_operators) {
+			module_statements.emplace_back(
+				BinaryNode::create(LiteralNode::create(Value{ 1.0 }, LiteralNode::Type::Float64),
+			                       LiteralNode::create(Value{ 5.0 }, LiteralNode::Type::Float64),
+			                       op));
+		}
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), k_comparison_operators.size());
+
+		for (std::size_t index = 0; index < k_comparison_operators.size(); ++index) {
+			const auto* as_binary = dynamic_cast<BinaryNode*>(as_module->statements[index].get());
+			ASSERT_TRUE(as_binary) << index;
+			EXPECT_EQ(as_binary->op, k_comparison_operators[index]);
+			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Boolean);
+
+			const auto* as_lhs = dynamic_cast<LiteralNode*>(as_binary->lhs.get());
+			ASSERT_TRUE(as_lhs);
+			EXPECT_EQ(as_lhs->value, Value{ 1.0 });
+			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Float64);
+			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Float64);
+
+			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_binary->rhs.get());
+			ASSERT_TRUE(as_rhs);
+			EXPECT_EQ(as_rhs->value, Value{ 5.0 });
+			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Float64);
+			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Float64);
+		}
+	}
+
+	TEST_F(TypeResolverTest, BinaryNode_Logical)
+	{
+		static constexpr std::array k_logical_operators
+			= { ASTNode::Operator::LogicalOr, ASTNode::Operator::LogicalAnd };
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(k_logical_operators.size());
+		for (const auto op : k_logical_operators) {
+			module_statements.emplace_back(
+				BinaryNode::create(LiteralNode::create(Value{ true }, LiteralNode::Type::Boolean),
+			                       LiteralNode::create(Value{ false }, LiteralNode::Type::Boolean),
+			                       op));
+		}
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), k_logical_operators.size());
+
+		for (std::size_t index = 0; index < k_logical_operators.size(); ++index) {
+			const auto* as_binary = dynamic_cast<BinaryNode*>(as_module->statements[index].get());
+			ASSERT_TRUE(as_binary) << index;
+			EXPECT_EQ(as_binary->op, k_logical_operators[index]);
+			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Boolean);
+
+			const auto* as_lhs = dynamic_cast<LiteralNode*>(as_binary->lhs.get());
+			ASSERT_TRUE(as_lhs);
+			EXPECT_EQ(as_lhs->value, Value{ true });
+			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Boolean);
+			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Boolean);
+
+			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_binary->rhs.get());
+			ASSERT_TRUE(as_rhs);
+			EXPECT_EQ(as_rhs->value, Value{ false });
+			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Boolean);
+			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Boolean);
+		}
+	}
+
+	TEST_F(TypeResolverTest, BinaryNode_NoOverload)
+	{
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.emplace_back(
+			BinaryNode::create(LiteralNode::create(Value{ "my_string" }, LiteralNode::Type::String),
+		                       LiteralNode::create(Value{ 5.0 }, LiteralNode::Type::Float32),
+		                       ASTNode::Operator::LogicalAnd));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message,
+		          std::format("operator ('{}') does not exist for types '{}' and '{}'",
+		                      ASTNode::name(ASTNode::Operator::LogicalAnd),
+		                      std::string(Type{ PrimitiveType::Kind::String }),
+		                      std::string(Type{ PrimitiveType::Kind::Float32 })));
+	}
+
+	TEST_F(TypeResolverTest, BlockNode)
+	{
+		auto block_node_statements = ASTNode::Dependencies{};
+		block_node_statements.emplace_back(VariableDeclarationNode::create(
+			"in_scope", "f32", LiteralNode::create(Value{ "before_scope" }, LiteralNode::Type::Identifier), false));
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(3);
+		module_statements.emplace_back(VariableDeclarationNode::create(
+			"before_scope", "f32", LiteralNode::create(Value{ 1.0 }, LiteralNode::Type::Float32), false));
+		module_statements.emplace_back(BlockNode::create(std::move(block_node_statements)));
+		module_statements.emplace_back(VariableDeclarationNode::create(
+			"after_scope", "i32", LiteralNode::create(Value{ 5 }, LiteralNode::Type::Int32), false));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 3);
+
+		const auto* as_before_scope_variable = dynamic_cast<VariableDeclarationNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_before_scope_variable);
+		EXPECT_EQ(as_before_scope_variable->name, "before_scope");
+		EXPECT_EQ(as_before_scope_variable->type_identifier, "f32");
+		EXPECT_TRUE(as_before_scope_variable->expr);
+		{
+			const auto* as_literal = dynamic_cast<LiteralNode*>(as_before_scope_variable->expr.get());
+			ASSERT_TRUE(as_literal);
+			EXPECT_EQ(as_literal->value, Value{ 1.0 });
+			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Float32);
+			EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Float32);
+		}
+		EXPECT_FALSE(as_before_scope_variable->is_mutable);
+		EXPECT_EQ(as_before_scope_variable->type, PrimitiveType::Kind::Float32);
+
+		const auto* as_block = dynamic_cast<BlockNode*>(as_module->statements[1].get());
+		ASSERT_TRUE(as_block);
+		ASSERT_EQ(as_block->statements.size(), 1);
+		{
+			const auto* as_in_scope_variable = dynamic_cast<VariableDeclarationNode*>(as_block->statements[0].get());
+			ASSERT_TRUE(as_in_scope_variable);
+			EXPECT_EQ(as_in_scope_variable->name, "in_scope");
+			EXPECT_EQ(as_in_scope_variable->type_identifier, "f32");
+			EXPECT_TRUE(as_in_scope_variable->expr);
+			{
+				const auto* as_literal = dynamic_cast<LiteralNode*>(as_in_scope_variable->expr.get());
+				ASSERT_TRUE(as_literal);
+				EXPECT_EQ(as_literal->value, Value{ "before_scope" });
+				EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Identifier);
+				EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Float32);
+			}
+			EXPECT_FALSE(as_in_scope_variable->is_mutable);
+			EXPECT_EQ(as_in_scope_variable->type, PrimitiveType::Kind::Float32);
+		}
+
+		const auto* as_after_scope_variable = dynamic_cast<VariableDeclarationNode*>(as_module->statements[2].get());
+		ASSERT_TRUE(as_after_scope_variable);
+		EXPECT_EQ(as_after_scope_variable->name, "after_scope");
+		EXPECT_EQ(as_after_scope_variable->type_identifier, "i32");
+		EXPECT_TRUE(as_after_scope_variable->expr);
+		{
+			const auto* as_literal = dynamic_cast<LiteralNode*>(as_after_scope_variable->expr.get());
+			ASSERT_TRUE(as_literal);
+			EXPECT_EQ(as_literal->value, Value{ 5 });
+			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Int32);
+			EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Int32);
+		}
+		EXPECT_FALSE(as_after_scope_variable->is_mutable);
+		EXPECT_EQ(as_after_scope_variable->type, PrimitiveType::Kind::Int32);
+	}
+
 	TEST_F(TypeResolverTest, Cast_BasicType)
 	{
-		auto cast_node = CastNode::create(LiteralNode::create(Value{ 128L }, LiteralNode::LiteralType::Int64), "i32");
+		auto cast_node         = CastNode::create(LiteralNode::create(Value{ 128L }, LiteralNode::Type::Int64), "i32");
 		auto module_statements = ASTNode::Dependencies{};
 		module_statements.push_back(std::move(cast_node));
 		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
@@ -64,13 +294,13 @@ namespace soul::ast::visitors::ut
 		const auto* as_literal = dynamic_cast<LiteralNode*>(as_cast->expression.get());
 		ASSERT_TRUE(as_literal);
 		EXPECT_EQ(as_literal->value, Value{ 128L });
-		EXPECT_EQ(as_literal->literal_type, LiteralNode::LiteralType::Int64);
+		EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Int64);
 		EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Int64);
 	}
 
 	TEST_F(TypeResolverTest, Cast_Impossible)
 	{
-		auto cast_node = CastNode::create(LiteralNode::create(Value{ 128L }, LiteralNode::LiteralType::Int64), "chr");
+		auto cast_node         = CastNode::create(LiteralNode::create(Value{ 128L }, LiteralNode::Type::Int64), "chr");
 		auto module_statements = ASTNode::Dependencies{};
 		module_statements.push_back(std::move(cast_node));
 		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
@@ -93,17 +323,17 @@ namespace soul::ast::visitors::ut
 	TEST_F(TypeResolverTest, ForLoop)
 	{
 		auto initialization = VariableDeclarationNode::create(
-			"index", "i32", LiteralNode::create(Value{ 0 }, LiteralNode::LiteralType::Int32), true);
+			"index", "i32", LiteralNode::create(Value{ 0 }, LiteralNode::Type::Int32), true);
 
-		auto condition = BinaryNode::create(LiteralNode::create(Value{ "index" }, LiteralNode::LiteralType::Identifier),
-		                                    LiteralNode::create(Value{ 10 }, LiteralNode::LiteralType::Int32),
+		auto condition = BinaryNode::create(LiteralNode::create(Value{ "index" }, LiteralNode::Type::Identifier),
+		                                    LiteralNode::create(Value{ 10 }, LiteralNode::Type::Int32),
 		                                    ASTNode::Operator::Less);
 
-		auto update = UnaryNode::create(LiteralNode::create(Value{ "index" }, LiteralNode::LiteralType::Identifier),
+		auto update = UnaryNode::create(LiteralNode::create(Value{ "index" }, LiteralNode::Type::Identifier),
 		                                ASTNode::Operator::Increment);
 
 		auto for_loop_statements = ASTNode::Dependencies{};
-		for_loop_statements.emplace_back(LiteralNode::create(Value{ "my_string" }, LiteralNode::LiteralType::String));
+		for_loop_statements.emplace_back(LiteralNode::create(Value{ "my_string" }, LiteralNode::Type::String));
 
 		auto for_loop          = ForLoopNode::create(std::move(initialization),
                                             std::move(condition),
@@ -135,7 +365,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_value);
 			EXPECT_EQ(as_value->type, PrimitiveType::Kind::Int32);
 			EXPECT_EQ(as_value->value, Value{ 0 });
-			EXPECT_EQ(as_value->literal_type, LiteralNode::LiteralType::Int32);
+			EXPECT_EQ(as_value->literal_type, LiteralNode::Type::Int32);
 		}
 
 		const auto* as_condition = dynamic_cast<BinaryNode*>(as_for_loop->condition.get());
@@ -148,13 +378,13 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_lhs);
 			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Int32);
 			EXPECT_EQ(as_lhs->value, Value{ "index" });
-			EXPECT_EQ(as_lhs->literal_type, LiteralNode::LiteralType::Identifier);
+			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Identifier);
 
 			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_condition->rhs.get());
 			ASSERT_TRUE(as_rhs);
 			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Int32);
 			EXPECT_EQ(as_rhs->value, Value{ 10 });
-			EXPECT_EQ(as_rhs->literal_type, LiteralNode::LiteralType::Int32);
+			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Int32);
 		}
 
 		const auto* as_update = dynamic_cast<UnaryNode*>(as_for_loop->update.get());
@@ -167,7 +397,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_value);
 			EXPECT_EQ(as_value->type, PrimitiveType::Kind::Int32);
 			EXPECT_EQ(as_value->value, Value{ "index" });
-			EXPECT_EQ(as_value->literal_type, LiteralNode::LiteralType::Identifier);
+			EXPECT_EQ(as_value->literal_type, LiteralNode::Type::Identifier);
 		}
 
 		const auto* as_statements = dynamic_cast<BlockNode*>(as_for_loop->statements.get());
@@ -177,8 +407,8 @@ namespace soul::ast::visitors::ut
 
 	TEST_F(TypeResolverTest, ForLoop_ConditionNotBool)
 	{
-		auto condition = BinaryNode::create(LiteralNode::create(Value{ "index" }, LiteralNode::LiteralType::Identifier),
-		                                    LiteralNode::create(Value{ 10 }, LiteralNode::LiteralType::Int32),
+		auto condition = BinaryNode::create(LiteralNode::create(Value{ "index" }, LiteralNode::Type::Identifier),
+		                                    LiteralNode::create(Value{ 10 }, LiteralNode::Type::Int32),
 		                                    ASTNode::Operator::Add);
 		auto for_loop
 			= ForLoopNode::create(nullptr, std::move(condition), nullptr, BlockNode::create(ASTNode::Dependencies{}));
@@ -199,6 +429,195 @@ namespace soul::ast::visitors::ut
 		          std::format("condition in for loop statement must be convertible to a '{}' type",
 		                      std::string(Type{ PrimitiveType::Kind::Boolean })));
 	}
+
+	TEST_F(TypeResolverTest, FunctionDeclarationNode)
+	{
+		auto function_declaration_parameters = ASTNode::Dependencies{};
+		function_declaration_parameters.reserve(3);
+		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("a", "i32", nullptr, false));
+		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("b", "f64", nullptr, false));
+		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("c", "chr", nullptr, false));
+		auto function_declaration_statements = ASTNode::Dependencies{};
+		function_declaration_statements.emplace_back(VariableDeclarationNode::create(
+			"d", "chr", LiteralNode::create(Value{ "c" }, LiteralNode::Type::Identifier), false));
+		auto function_declaration
+			= FunctionDeclarationNode::create("my_function",
+		                                      "str",
+		                                      std::move(function_declaration_parameters),
+		                                      BlockNode::create(std::move(function_declaration_statements)));
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.push_back(std::move(function_declaration));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_function_declaration);
+		EXPECT_EQ(as_function_declaration->name, "my_function");
+		EXPECT_EQ(as_function_declaration->return_type, "str");
+		ASSERT_EQ(as_function_declaration->parameters.size(), 3);
+		{
+			const auto* as_variable_declaration
+				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
+			ASSERT_TRUE(as_variable_declaration);
+			EXPECT_EQ(as_variable_declaration->name, "a");
+			EXPECT_EQ(as_variable_declaration->type_identifier, "i32");
+			EXPECT_FALSE(as_variable_declaration->expr);
+			EXPECT_FALSE(as_variable_declaration->is_mutable);
+			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Int32);
+		}
+		{
+			const auto* as_variable_declaration
+				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[1].get());
+			ASSERT_TRUE(as_variable_declaration);
+			EXPECT_EQ(as_variable_declaration->name, "b");
+			EXPECT_EQ(as_variable_declaration->type_identifier, "f64");
+			EXPECT_FALSE(as_variable_declaration->expr);
+			EXPECT_FALSE(as_variable_declaration->is_mutable);
+			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float64);
+		}
+		{
+			const auto* as_variable_declaration
+				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[2].get());
+			ASSERT_TRUE(as_variable_declaration);
+			EXPECT_EQ(as_variable_declaration->name, "c");
+			EXPECT_EQ(as_variable_declaration->type_identifier, "chr");
+			EXPECT_FALSE(as_variable_declaration->expr);
+			EXPECT_FALSE(as_variable_declaration->is_mutable);
+			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Char);
+		}
+		const auto* as_statements = dynamic_cast<BlockNode*>(as_function_declaration->statements.get());
+		ASSERT_TRUE(as_statements);
+		ASSERT_EQ(as_statements->statements.size(), 1);
+
+		const auto* as_variable_declaration
+			= dynamic_cast<VariableDeclarationNode*>(as_statements->statements[0].get());
+		ASSERT_TRUE(as_variable_declaration);
+		EXPECT_EQ(as_variable_declaration->name, "d");
+		EXPECT_EQ(as_variable_declaration->type_identifier, "chr");
+		EXPECT_TRUE(as_variable_declaration->expr);
+		{
+			const auto* as_literal = dynamic_cast<LiteralNode*>(as_variable_declaration->expr.get());
+			ASSERT_TRUE(as_literal);
+			EXPECT_EQ(as_literal->value, Value{ "c" });
+			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Identifier);
+			EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Char);
+		}
+		EXPECT_FALSE(as_variable_declaration->is_mutable);
+		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Char);
+	}
+
+	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousParameter) {}
+
+	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousOne) {}
+
+	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShouldntShadowWithDifferentArguments) {}
+
+	TEST_F(TypeResolverTest, LiteralNode)
+	{
+		const auto get_value = [](LiteralNode::Type type) -> Value {
+			switch (type) {
+				case LiteralNode::Type::Boolean:
+					return Value{ true };
+				case LiteralNode::Type::Char:
+					return Value{ 'c' };
+				case LiteralNode::Type::Float32:
+					return Value{ 1.0f };
+				case LiteralNode::Type::Float64:
+					return Value{ 10.0 };
+				case LiteralNode::Type::Identifier:
+					return Value{ "index" };
+				case LiteralNode::Type::Int32:
+					return Value{ 1 };
+				case LiteralNode::Type::Int64:
+					return Value{ 10L };
+				case LiteralNode::Type::String:
+					return Value{ "my_string" };
+				case LiteralNode::Type::Unknown:
+				default:
+					return Value{};
+			}
+		};
+
+		static constexpr std::array k_literal_types = {
+			LiteralNode::Type::Unknown, LiteralNode::Type::Boolean, LiteralNode::Type::Char,
+			LiteralNode::Type::Float32, LiteralNode::Type::Float64, LiteralNode::Type::Identifier,
+			LiteralNode::Type::Int32,   LiteralNode::Type::Int64,   LiteralNode::Type::String,
+		};
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(k_literal_types.size() + 1);
+		module_statements.emplace_back(VariableDeclarationNode::create("index", "f32", nullptr, false));
+		for (const auto type : k_literal_types) {
+			module_statements.emplace_back(LiteralNode::create(get_value(type), type));
+		}
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), k_literal_types.size() + 1);
+
+		const auto* as_variable_declaration = dynamic_cast<VariableDeclarationNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_variable_declaration);
+		EXPECT_EQ(as_variable_declaration->name, "index");
+		EXPECT_EQ(as_variable_declaration->type_identifier, "f32");
+		EXPECT_FALSE(as_variable_declaration->expr);
+		EXPECT_FALSE(as_variable_declaration->is_mutable);
+		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float32);
+
+		static const std::unordered_map<LiteralNode::Type, PrimitiveType::Kind> k_expected_types = {
+			{ LiteralNode::Type::Unknown,    PrimitiveType::Kind::Unknown                                         },
+			{ LiteralNode::Type::Boolean,    PrimitiveType::Kind::Boolean                                         },
+			{ LiteralNode::Type::Char,       PrimitiveType::Kind::Char                                            },
+			{ LiteralNode::Type::Float32,    PrimitiveType::Kind::Float32                                         },
+			{ LiteralNode::Type::Float64,    PrimitiveType::Kind::Float64                                         },
+			{ LiteralNode::Type::Identifier, PrimitiveType::Kind::Float32 /* has to match variable declaration */ },
+			{ LiteralNode::Type::Int32,      PrimitiveType::Kind::Int32                                           },
+			{ LiteralNode::Type::Int64,      PrimitiveType::Kind::Int64                                           },
+			{ LiteralNode::Type::String,     PrimitiveType::Kind::String                                          },
+		};
+		for (std::size_t index = 0; index < k_literal_types.size(); ++index) {
+			const auto literal_type = k_literal_types[index];
+
+			const auto* as_literal = dynamic_cast<LiteralNode*>(as_module->statements[index + 1].get());
+			ASSERT_TRUE(as_literal);
+			EXPECT_EQ(as_literal->value, get_value(literal_type));
+			EXPECT_EQ(as_literal->literal_type, literal_type);
+			EXPECT_EQ(as_literal->type, k_expected_types.at(literal_type));
+		}
+	}
+
+	TEST_F(TypeResolverTest, LiteralNode_UndeclaredIdentifier)
+	{
+		static constexpr auto k_variable_name = "undeclared_variable";
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.emplace_back(LiteralNode::create(Value{ k_variable_name }, LiteralNode::Type::Identifier));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message, std::format("use of undeclared identifier '{}'", k_variable_name));
+	}
+
+	TEST_F(TypeResolverTest, StructDeclarationNode) {}
+
+	TEST_F(TypeResolverTest, UnaryNode) {}
 
 	TEST_F(TypeResolverTest, VariableDeclaration_ShadowsPreviousOne)
 	{

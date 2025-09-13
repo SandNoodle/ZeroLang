@@ -62,6 +62,14 @@ namespace soul::types
                          .input_types = { PrimitiveType::Kind::Float64, PrimitiveType::Kind::Float64 },
                          .return_type = PrimitiveType::Kind::Float64 },
 
+		// ASTNode::Operator::Mod
+		OperatorOverload{ .op          = ASTNode::Operator::Mod,
+                         .input_types = { PrimitiveType::Kind::Int32, PrimitiveType::Kind::Int32 },
+                         .return_type = PrimitiveType::Kind::Int32   },
+		OperatorOverload{ .op          = ASTNode::Operator::Mod,
+                         .input_types = { PrimitiveType::Kind::Int64, PrimitiveType::Kind::Int64 },
+                         .return_type = PrimitiveType::Kind::Int64   },
+
 		// ASTNode::Operator::Increment
 		OperatorOverload{ .op          = ASTNode::Operator::Increment,
                          .input_types = { PrimitiveType::Kind::Int32 },

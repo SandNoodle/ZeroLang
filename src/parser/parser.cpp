@@ -417,7 +417,7 @@ namespace soul::parser
 			                                Token::name(current_token_or_default().type)));
 		}
 
-		LiteralNode::LiteralType literal_type{};
+		LiteralNode::Type        literal_type{};
 		Value                    value{};
 		if (token->type == Token::Type::LiteralFloat) {
 			f64        v{};
@@ -429,8 +429,8 @@ namespace soul::parser
 			value = Value{ v };
 
 			literal_type = v <= std::numeric_limits<f32>::lowest() || v >= std::numeric_limits<f32>::max()
-			                 ? LiteralNode::LiteralType::Float64
-			                 : LiteralNode::LiteralType::Float32;
+			                 ? LiteralNode::Type::Float64
+			                 : LiteralNode::Type::Float32;
 		}
 
 		if (token->type == Token::Type::LiteralInteger) {
@@ -443,27 +443,27 @@ namespace soul::parser
 			value = Value{ v };
 
 			literal_type = v <= std::numeric_limits<i32>::lowest() || v >= std::numeric_limits<i32>::max()
-			                 ? LiteralNode::LiteralType::Int64
-			                 : LiteralNode::LiteralType::Int32;
+			                 ? LiteralNode::Type::Int64
+			                 : LiteralNode::Type::Int32;
 		}
 
 		if (token->type == Token::Type::LiteralString) {
-			literal_type = LiteralNode::LiteralType::String;
+			literal_type = LiteralNode::Type::String;
 			value        = Value{ std::string(token->data) };
 		}
 
 		if (token->type == Token::Type::LiteralIdentifier) {
-			literal_type = LiteralNode::LiteralType::Identifier;
+			literal_type = LiteralNode::Type::Identifier;
 			value        = Value{ std::string(token->data) };
 		}
 
 		if (token->type == Token::Type::KeywordTrue) {
-			literal_type = LiteralNode::LiteralType::Bool;
+			literal_type = LiteralNode::Type::Boolean;
 			value        = Value{ true };
 		}
 
 		if (token->type == Token::Type::KeywordFalse) {
-			literal_type = LiteralNode::LiteralType::Bool;
+			literal_type = LiteralNode::Type::Boolean;
 			value        = Value{ false };
 		}
 		return LiteralNode::create(std::move(value), literal_type);
