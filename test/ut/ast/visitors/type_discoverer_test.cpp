@@ -124,7 +124,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(first_parameter);
 		EXPECT_EQ(first_parameter->name, "my_int");
 		EXPECT_EQ(first_parameter->type_identifier, "i32");
-		EXPECT_FALSE(first_parameter->expr);
+		EXPECT_FALSE(first_parameter->expression);
 		EXPECT_FALSE(first_parameter->is_mutable);
 
 		const auto* second_parameter
@@ -132,7 +132,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(second_parameter);
 		EXPECT_EQ(second_parameter->name, "my_float");
 		EXPECT_EQ(second_parameter->type_identifier, "f64");
-		EXPECT_FALSE(second_parameter->expr);
+		EXPECT_FALSE(second_parameter->expression);
 		EXPECT_FALSE(second_parameter->is_mutable);
 
 		const auto* third_parameter
@@ -140,7 +140,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(third_parameter);
 		EXPECT_EQ(third_parameter->name, "my_string");
 		EXPECT_EQ(third_parameter->type_identifier, "str");
-		EXPECT_FALSE(third_parameter->expr);
+		EXPECT_FALSE(third_parameter->expression);
 		EXPECT_FALSE(third_parameter->is_mutable);
 
 		const auto* as_error_node = dynamic_cast<ErrorNode*>(as_result_module->statements[1].get());
@@ -191,7 +191,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(first_parameter);
 		EXPECT_EQ(first_parameter->name, "my_int");
 		EXPECT_EQ(first_parameter->type_identifier, "i32");
-		EXPECT_FALSE(first_parameter->expr);
+		EXPECT_FALSE(first_parameter->expression);
 		EXPECT_FALSE(first_parameter->is_mutable);
 
 		const auto* second_parameter = dynamic_cast<ErrorNode*>(as_struct_declaration->parameters[1].get());
@@ -203,7 +203,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(third_parameter);
 		EXPECT_EQ(third_parameter->name, "my_float");
 		EXPECT_EQ(third_parameter->type_identifier, "f64");
-		EXPECT_FALSE(third_parameter->expr);
+		EXPECT_FALSE(third_parameter->expression);
 		EXPECT_FALSE(third_parameter->is_mutable);
 	}
 }  // namespace soul::ast::visitors::ut

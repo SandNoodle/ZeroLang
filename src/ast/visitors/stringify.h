@@ -9,7 +9,8 @@
 namespace soul::ast::visitors
 {
 	/**
-	 * @brief
+	 * @brief StringifyVisitor traverses the AST and converts each visited node into its (valid) JSON representation.
+	 * Its useful for debugging.
 	 */
 	class StringifyVisitor final : public DefaultTraverseVisitor
 	{

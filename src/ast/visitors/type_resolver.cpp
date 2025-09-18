@@ -175,7 +175,7 @@ namespace soul::ast::visitors
 			}
 		}
 
-		_current_clone->type = get_type_or_default(node.return_type);
+		_current_clone->type = get_type_or_default(node.type_identifier);
 		_functions_in_module.emplace_back(
 			node.name,
 			FunctionDeclaration{ .input_types = want_types | std::ranges::to<std::vector<types::Type>>(),
@@ -254,16 +254,16 @@ namespace soul::ast::visitors
 		CopyVisitor::visit(node);
 
 		const auto& unary_node = as<UnaryNode>();
-		if (!unary_node.expr) {
+		if (!unary_node.expression) {
 			_current_clone = ErrorNode::create("[INTERNAL] UnaryNode does not contain expression (nullptr)");
 			return;
 		}
 
-		const auto result_type = get_type_for_operator(unary_node.op, std::array{ unary_node.expr->type });
+		const auto result_type = get_type_for_operator(unary_node.op, std::array{ unary_node.expression->type });
 		if (result_type == Type{}) {
 			_current_clone = ErrorNode::create(std::format("operator ('{}') does not exist for type '{}'",
 			                                               ASTNode::name(unary_node.op),
-			                                               std::string(unary_node.expr->type)));
+			                                               std::string(unary_node.expression->type)));
 			return;
 		}
 		_current_clone->type = result_type;

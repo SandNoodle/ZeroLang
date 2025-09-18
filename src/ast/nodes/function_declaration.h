@@ -13,7 +13,7 @@ namespace soul::ast::nodes
 	{
 		public:
 		Identifier   name;
-		Identifier   return_type;
+		Identifier   type_identifier;
 		Dependencies parameters;
 		ScopeBlock   statements;
 

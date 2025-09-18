@@ -94,7 +94,7 @@ namespace soul::ast::visitors
 			                    | std::ranges::to<ASTNode::Dependencies>() };
 		auto statements{ clone(*static_cast<BlockNode*>(node.statements.get())) };
 		return FunctionDeclarationNode::create(
-			node.name, node.return_type, std::move(cloned_parameters), std::move(statements));
+			node.name, node.type_identifier, std::move(cloned_parameters), std::move(statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::IfNode& node)
@@ -128,12 +128,12 @@ namespace soul::ast::visitors
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::UnaryNode& node)
 	{
-		return UnaryNode::create(clone(node.expr.get()), node.op);
+		return UnaryNode::create(clone(node.expression.get()), node.op);
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::VariableDeclarationNode& node)
 	{
 		return VariableDeclarationNode::create(
-			node.name, node.type_identifier, clone(node.expr.get()), node.is_mutable);
+			node.name, node.type_identifier, clone(node.expression.get()), node.is_mutable);
 	}
 }  // namespace soul::ast::visitors

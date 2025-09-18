@@ -7,7 +7,7 @@ namespace soul::ast::nodes
 	                                                 Dependencies parameters,
 	                                                 ScopeBlock   statements)
 		: name(std::move(identifier)),
-		  return_type(std::move(return_type_identifier)),
+		  type_identifier(std::move(return_type_identifier)),
 		  parameters(std::move(parameters)),
 		  statements(std::move(statements))
 	{

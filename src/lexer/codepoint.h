@@ -5,7 +5,7 @@
 namespace soul
 {
 	/**
-	 * @brief
+	 * @brief Represents a single character encoded in a UTF-8 format.
 	 */
 	struct CodePoint
 	{

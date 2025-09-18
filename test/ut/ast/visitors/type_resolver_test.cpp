@@ -234,9 +234,9 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_before_scope_variable);
 		EXPECT_EQ(as_before_scope_variable->name, "before_scope");
 		EXPECT_EQ(as_before_scope_variable->type_identifier, "f32");
-		EXPECT_TRUE(as_before_scope_variable->expr);
+		EXPECT_TRUE(as_before_scope_variable->expression);
 		{
-			const auto* as_literal = dynamic_cast<LiteralNode*>(as_before_scope_variable->expr.get());
+			const auto* as_literal = dynamic_cast<LiteralNode*>(as_before_scope_variable->expression.get());
 			ASSERT_TRUE(as_literal);
 			EXPECT_EQ(as_literal->value, Value{ 1.0 });
 			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Float32);
@@ -253,9 +253,9 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_in_scope_variable);
 			EXPECT_EQ(as_in_scope_variable->name, "in_scope");
 			EXPECT_EQ(as_in_scope_variable->type_identifier, "f32");
-			EXPECT_TRUE(as_in_scope_variable->expr);
+			EXPECT_TRUE(as_in_scope_variable->expression);
 			{
-				const auto* as_literal = dynamic_cast<LiteralNode*>(as_in_scope_variable->expr.get());
+				const auto* as_literal = dynamic_cast<LiteralNode*>(as_in_scope_variable->expression.get());
 				ASSERT_TRUE(as_literal);
 				EXPECT_EQ(as_literal->value, Value{ "before_scope" });
 				EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Identifier);
@@ -269,9 +269,9 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_after_scope_variable);
 		EXPECT_EQ(as_after_scope_variable->name, "after_scope");
 		EXPECT_EQ(as_after_scope_variable->type_identifier, "i32");
-		EXPECT_TRUE(as_after_scope_variable->expr);
+		EXPECT_TRUE(as_after_scope_variable->expression);
 		{
-			const auto* as_literal = dynamic_cast<LiteralNode*>(as_after_scope_variable->expr.get());
+			const auto* as_literal = dynamic_cast<LiteralNode*>(as_after_scope_variable->expression.get());
 			ASSERT_TRUE(as_literal);
 			EXPECT_EQ(as_literal->value, Value{ 5 });
 			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Int32);
@@ -368,9 +368,9 @@ namespace soul::ast::visitors::ut
 		EXPECT_EQ(as_initialization->name, "index");
 		EXPECT_EQ(as_initialization->type_identifier, "i32");
 		EXPECT_TRUE(as_initialization->is_mutable);
-		ASSERT_TRUE(as_initialization->expr);
+		ASSERT_TRUE(as_initialization->expression);
 		{
-			const auto* as_value = dynamic_cast<LiteralNode*>(as_initialization->expr.get());
+			const auto* as_value = dynamic_cast<LiteralNode*>(as_initialization->expression.get());
 			ASSERT_TRUE(as_value);
 			EXPECT_EQ(as_value->type, PrimitiveType::Kind::Int32);
 			EXPECT_EQ(as_value->value, Value{ 0 });
@@ -402,7 +402,7 @@ namespace soul::ast::visitors::ut
 		{
 			EXPECT_EQ(as_update->op, ASTNode::Operator::Increment);
 
-			const auto* as_value = dynamic_cast<LiteralNode*>(as_update->expr.get());
+			const auto* as_value = dynamic_cast<LiteralNode*>(as_update->expression.get());
 			ASSERT_TRUE(as_value);
 			EXPECT_EQ(as_value->type, PrimitiveType::Kind::Int32);
 			EXPECT_EQ(as_value->value, Value{ "index" });
@@ -469,7 +469,7 @@ namespace soul::ast::visitors::ut
 		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
 		ASSERT_TRUE(as_function_declaration);
 		EXPECT_EQ(as_function_declaration->name, "my_function");
-		EXPECT_EQ(as_function_declaration->return_type, "str");
+		EXPECT_EQ(as_function_declaration->type_identifier, "str");
 		ASSERT_EQ(as_function_declaration->parameters.size(), 3);
 		{
 			const auto* as_variable_declaration
@@ -477,7 +477,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_variable_declaration);
 			EXPECT_EQ(as_variable_declaration->name, "a");
 			EXPECT_EQ(as_variable_declaration->type_identifier, "i32");
-			EXPECT_FALSE(as_variable_declaration->expr);
+			EXPECT_FALSE(as_variable_declaration->expression);
 			EXPECT_FALSE(as_variable_declaration->is_mutable);
 			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Int32);
 		}
@@ -487,7 +487,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_variable_declaration);
 			EXPECT_EQ(as_variable_declaration->name, "b");
 			EXPECT_EQ(as_variable_declaration->type_identifier, "f64");
-			EXPECT_FALSE(as_variable_declaration->expr);
+			EXPECT_FALSE(as_variable_declaration->expression);
 			EXPECT_FALSE(as_variable_declaration->is_mutable);
 			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float64);
 		}
@@ -497,7 +497,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_variable_declaration);
 			EXPECT_EQ(as_variable_declaration->name, "c");
 			EXPECT_EQ(as_variable_declaration->type_identifier, "chr");
-			EXPECT_FALSE(as_variable_declaration->expr);
+			EXPECT_FALSE(as_variable_declaration->expression);
 			EXPECT_FALSE(as_variable_declaration->is_mutable);
 			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Char);
 		}
@@ -510,9 +510,9 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_variable_declaration);
 		EXPECT_EQ(as_variable_declaration->name, "d");
 		EXPECT_EQ(as_variable_declaration->type_identifier, "chr");
-		EXPECT_TRUE(as_variable_declaration->expr);
+		EXPECT_TRUE(as_variable_declaration->expression);
 		{
-			const auto* as_literal = dynamic_cast<LiteralNode*>(as_variable_declaration->expr.get());
+			const auto* as_literal = dynamic_cast<LiteralNode*>(as_variable_declaration->expression.get());
 			ASSERT_TRUE(as_literal);
 			EXPECT_EQ(as_literal->value, Value{ "c" });
 			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Identifier);
@@ -552,7 +552,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_parameter);
 		EXPECT_EQ(as_parameter->name, "a");
 		EXPECT_EQ(as_parameter->type_identifier, "i32");
-		EXPECT_FALSE(as_parameter->expr);
+		EXPECT_FALSE(as_parameter->expression);
 		EXPECT_FALSE(as_parameter->is_mutable);
 
 		const auto* as_error = dynamic_cast<ErrorNode*>(as_function_declaration->parameters[1].get());
@@ -585,7 +585,7 @@ namespace soul::ast::visitors::ut
 		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
 		ASSERT_TRUE(as_function_declaration);
 		EXPECT_EQ(as_function_declaration->name, k_function_name);
-		EXPECT_EQ(as_function_declaration->return_type, "i32");
+		EXPECT_EQ(as_function_declaration->type_identifier, "i32");
 		EXPECT_EQ(as_function_declaration->parameters.size(), 0);
 		EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
 		EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
@@ -634,7 +634,7 @@ namespace soul::ast::visitors::ut
 				= dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
 			ASSERT_TRUE(as_function_declaration);
 			EXPECT_EQ(as_function_declaration->name, k_function_name);
-			EXPECT_EQ(as_function_declaration->return_type, "i32");
+			EXPECT_EQ(as_function_declaration->type_identifier, "i32");
 			EXPECT_EQ(as_function_declaration->parameters.size(), 1);
 			EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
 			EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
@@ -644,7 +644,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_parameter);
 			EXPECT_EQ(as_parameter->name, "a");
 			EXPECT_EQ(as_parameter->type_identifier, "i32");
-			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->expression);
 			EXPECT_FALSE(as_parameter->is_mutable);
 			EXPECT_EQ(as_parameter->type, PrimitiveType::Kind::Int32);
 		}
@@ -653,7 +653,7 @@ namespace soul::ast::visitors::ut
 				= dynamic_cast<FunctionDeclarationNode*>(as_module->statements[1].get());
 			ASSERT_TRUE(as_function_declaration);
 			EXPECT_EQ(as_function_declaration->name, k_function_name);
-			EXPECT_EQ(as_function_declaration->return_type, "i32");
+			EXPECT_EQ(as_function_declaration->type_identifier, "i32");
 			EXPECT_EQ(as_function_declaration->parameters.size(), 1);
 			EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
 			EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
@@ -663,7 +663,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_parameter);
 			EXPECT_EQ(as_parameter->name, "a");
 			EXPECT_EQ(as_parameter->type_identifier, "f32");
-			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->expression);
 			EXPECT_FALSE(as_parameter->is_mutable);
 			EXPECT_EQ(as_parameter->type, PrimitiveType::Kind::Float32);
 		}
@@ -719,7 +719,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_variable_declaration);
 		EXPECT_EQ(as_variable_declaration->name, "index");
 		EXPECT_EQ(as_variable_declaration->type_identifier, "f32");
-		EXPECT_FALSE(as_variable_declaration->expr);
+		EXPECT_FALSE(as_variable_declaration->expression);
 		EXPECT_FALSE(as_variable_declaration->is_mutable);
 		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float32);
 
@@ -801,7 +801,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_parameter);
 			EXPECT_EQ(as_parameter->name, "a");
 			EXPECT_EQ(as_parameter->type_identifier, "i32");
-			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->expression);
 			EXPECT_FALSE(as_parameter->is_mutable);
 		}
 		{
@@ -810,7 +810,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_parameter);
 			EXPECT_EQ(as_parameter->name, "b");
 			EXPECT_EQ(as_parameter->type_identifier, "f32");
-			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->expression);
 			EXPECT_FALSE(as_parameter->is_mutable);
 		}
 		{
@@ -819,7 +819,7 @@ namespace soul::ast::visitors::ut
 			ASSERT_TRUE(as_parameter);
 			EXPECT_EQ(as_parameter->name, "c");
 			EXPECT_EQ(as_parameter->type_identifier, "bool");
-			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->expression);
 			EXPECT_FALSE(as_parameter->is_mutable);
 		}
 	}
@@ -850,7 +850,7 @@ namespace soul::ast::visitors::ut
 			EXPECT_EQ(as_unary->op, k_arithmetic_operators[index]);
 			EXPECT_EQ(as_unary->type, PrimitiveType::Kind::Int64);
 
-			const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expr.get());
+			const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expression.get());
 			ASSERT_TRUE(as_expression);
 			EXPECT_EQ(as_expression->value, Value{ 1L });
 			EXPECT_EQ(as_expression->literal_type, LiteralNode::Type::Int64);
@@ -877,7 +877,7 @@ namespace soul::ast::visitors::ut
 		EXPECT_EQ(as_unary->op, ASTNode::Operator::LogicalNot);
 		EXPECT_EQ(as_unary->type, PrimitiveType::Kind::Boolean);
 
-		const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expr.get());
+		const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expression.get());
 		ASSERT_TRUE(as_expression);
 		EXPECT_EQ(as_expression->value, Value{ true });
 		EXPECT_EQ(as_expression->literal_type, LiteralNode::Type::Boolean);
@@ -930,7 +930,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_variable_declaration);
 		EXPECT_EQ(as_variable_declaration->name, k_variable_name);
 		EXPECT_EQ(as_variable_declaration->type_identifier, "f32");
-		EXPECT_FALSE(as_variable_declaration->expr);
+		EXPECT_FALSE(as_variable_declaration->expression);
 		EXPECT_TRUE(as_variable_declaration->is_mutable);
 		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float32);
 
@@ -966,7 +966,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_variable_declaration);
 		EXPECT_EQ(as_variable_declaration->name, k_variable_name);
 		EXPECT_EQ(as_variable_declaration->type_identifier, "f32");
-		EXPECT_FALSE(as_variable_declaration->expr);
+		EXPECT_FALSE(as_variable_declaration->expression);
 		EXPECT_TRUE(as_variable_declaration->is_mutable);
 		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float32);
 
@@ -1011,7 +1011,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_inner_variable);
 		EXPECT_EQ(as_inner_variable->name, k_variable_name);
 		EXPECT_EQ(as_inner_variable->type_identifier, "i32");
-		EXPECT_FALSE(as_inner_variable->expr);
+		EXPECT_FALSE(as_inner_variable->expression);
 		EXPECT_FALSE(as_inner_variable->is_mutable);
 		EXPECT_EQ(as_inner_variable->type, PrimitiveType::Kind::Int32);
 
@@ -1019,7 +1019,7 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_outer_variable);
 		EXPECT_EQ(as_outer_variable->name, k_variable_name);
 		EXPECT_EQ(as_outer_variable->type_identifier, "f32");
-		EXPECT_FALSE(as_outer_variable->expr);
+		EXPECT_FALSE(as_outer_variable->expression);
 		EXPECT_TRUE(as_outer_variable->is_mutable);
 		EXPECT_EQ(as_outer_variable->type, PrimitiveType::Kind::Float32);
 	}

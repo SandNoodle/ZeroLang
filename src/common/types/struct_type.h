@@ -8,7 +8,7 @@ namespace soul::types
 	class Type;
 
 	/**
-	 * @brief
+	 * @brief Represents a composite data structure that is a collection of (possibly) different data types.
 	 */
 	class StructType
 	{

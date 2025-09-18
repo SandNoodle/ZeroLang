@@ -27,8 +27,8 @@ namespace soul::ast::nodes
 		};
 
 		public:
-		Value       value        = {};
-		Type        literal_type = {};
+		Value value        = {};
+		Type  literal_type = {};
 
 		public:
 		LiteralNode(Value value, Type literal_type);

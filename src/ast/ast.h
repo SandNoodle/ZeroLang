@@ -11,6 +11,9 @@
 
 namespace soul::ast
 {
+	/**
+	 * @brief IVisitable interface enables visitor traversal of a given class.
+	 */
 	class IVisitable
 	{
 		public:
@@ -47,19 +50,20 @@ namespace soul::ast
 	};
 
 	/**
-	 * @brief Class that automatically calls accept method on a given AST node.
-	 * @tparam DerivedT Type to call visitor on.
+	 * @brief VisitorAcceptor is a utility class that simplifies traversing the AST, by calling the correct
+	 * `Visitor::visit` method for a given node.
+	 * @tparam Node Type that satisfies NodeKind concept.
 	 */
-	template <typename DerivedT>
+	template <nodes::NodeKind Node>
 	class VisitorAcceptor : public ASTNode
 	{
 		private:
-		void accept(visitors::IVisitor& visitor) override { visitor.visit(static_cast<DerivedT&>(*this)); }
-		void accept(visitors::IVisitor& visitor) const override { visitor.visit(static_cast<const DerivedT&>(*this)); }
+		void accept(visitors::IVisitor& visitor) override { visitor.visit(static_cast<Node&>(*this)); }
+		void accept(visitors::IVisitor& visitor) const override { visitor.visit(static_cast<const Node&>(*this)); }
 	};
 
 	/**
-	 * @brief Represents binding relation between nodes.
+	 * @brief Operator which represents the type of binding relation between nodes.
 	 */
 	enum class ASTNode::Operator : u8
 	{

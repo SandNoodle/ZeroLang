@@ -7,7 +7,8 @@
 namespace soul::types
 {
 	/**
-	 * @brief
+	 * @brief Represents the most basic data type present in the language.
+	 * It's a base from which all the other types are constructed.
 	 */
 	class PrimitiveType
 	{

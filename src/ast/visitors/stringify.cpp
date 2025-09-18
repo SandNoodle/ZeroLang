@@ -105,7 +105,7 @@ namespace soul::ast::visitors
 	{
 		_ss << "\"type\":\"function_declaration\",";
 		_ss << "\"name\":\"" << (!node.name.empty() ? node.name : k_unnamed) << "\",";
-		_ss << "\"return_type\":\"" << (!node.return_type.empty() ? node.return_type : k_unnamed) << "\",";
+		_ss << "\"return_type\":\"" << (!node.type_identifier.empty() ? node.type_identifier : k_unnamed) << "\",";
 		_ss << "\"parameters\":[";
 		for (size_t index = 0; index < node.parameters.size(); ++index) {
 			accept(node.parameters[index].get());
@@ -164,7 +164,7 @@ namespace soul::ast::visitors
 		_ss << "\"type\":\"unary\",";
 		_ss << "\"operator\":\"" << ASTNode::name(node.op) << "\",";
 		_ss << "\"expression\":";
-		accept(node.expr.get());
+		accept(node.expression.get());
 	}
 
 	void StringifyVisitor::visit(const VariableDeclarationNode& node)
@@ -174,7 +174,7 @@ namespace soul::ast::visitors
 		_ss << "\"type_identifier\":\"" << (!node.type_identifier.empty() ? node.type_identifier : k_unnamed) << "\",";
 		_ss << "\"is_mutable\":" << std::boolalpha << node.is_mutable << ",";
 		_ss << "\"expression\":";
-		accept(node.expr.get());
+		accept(node.expression.get());
 	}
 
 #undef PRINT_TYPE

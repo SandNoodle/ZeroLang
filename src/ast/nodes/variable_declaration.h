@@ -13,7 +13,7 @@ namespace soul::ast::nodes
 		public:
 		Identifier name            = {};
 		Identifier type_identifier = {};
-		Dependency expr            = nullptr;
+		Dependency expression      = nullptr;
 		bool       is_mutable      = false;
 
 		public:

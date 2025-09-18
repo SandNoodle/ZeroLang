@@ -11,6 +11,9 @@
 
 namespace soul
 {
+	/**
+	 * @brief ValueKind is a concept that specifies (and is satisfied by) types that can be represented in the language.
+	 */
 	template <typename T>
 	concept ValueKind = std::same_as<T, std::monostate>  //
 	                 || std::same_as<T, bool>            //
@@ -21,7 +24,7 @@ namespace soul
 		;
 
 	/**
-	 * @brief
+	 * @brief Represents a single `value` of a given type in the language.
 	 */
 	class Value
 	{
@@ -45,7 +48,9 @@ namespace soul
 		explicit              operator std::string() const noexcept;
 
 		/**
-		 * @brief
+		 * @brief Verifies if Value of a given ValueKind type.
+		 * @tparam T Type satisfying the ValueKind concept.
+		 * @return \b true if it is, \b false otherwise.
 		 */
 		template <ValueKind T>
 		[[nodiscard]] constexpr bool is() const noexcept
@@ -54,7 +59,9 @@ namespace soul
 		}
 
 		/**
-		 * @brief
+		 * @brief Returns the underlying value (of a given type).
+		 * @important Does not perform any validation - assumes that Value::is<T> was used first.
+		 * @tparam T Type satisfying the ValueKind concept.
 		 */
 		template <ValueKind T>
 		[[nodiscard]] constexpr const T& get() const noexcept
@@ -62,6 +69,11 @@ namespace soul
 			return std::get<T>(value);
 		}
 
+		/**
+		 * @brief Returns the underlying value (of a given type).
+		 * @important Does not perform any validation - assumes that Value::is<T> was used first.
+		 * @tparam T Type satisfying the ValueKind concept.
+		 */
 		template <ValueKind T>
 		[[nodiscard]] constexpr T& get() noexcept
 		{

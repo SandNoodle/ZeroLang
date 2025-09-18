@@ -10,8 +10,7 @@ namespace soul::types
 	class Type;
 
 	/**
-	 * @brief
-	 * @detail
+	 * @brief Represents a collection of elements of a given type.
 	 */
 	class ArrayType
 	{

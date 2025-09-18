@@ -51,7 +51,7 @@ namespace soul::ast::visitors
 			= VariableDeclarationNode::create("index", "i32", LiteralNode::create(Value{ 0 }), false);
 		auto for_loop_condition = BinaryNode::create(
 			LiteralNode::create(Value{ "index" }), LiteralNode::create(Value{ 10 }), ASTNode::Operator::LessEqual);
-		auto for_loop_update     = UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNode::Operator::Increment);
+		auto for_loop_update = UnaryNode::create(LiteralNode::create(Value{ "index" }), ASTNode::Operator::Increment);
 		auto for_loop_statements = ASTNode::Dependencies{};
 		for_loop_statements.push_back(std::move(if_node));
 

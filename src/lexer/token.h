@@ -9,75 +9,15 @@
 namespace soul
 {
 	/**
-	 * @brief Class representing a single lexical token.
-	 * Otherwise known as a 'Lexeme'.
+	 * @brief Represents a single lexical token, otherwise known as Lexeme.
 	 */
 	struct Token
 	{
 		public:
-		enum class Type : u8
-		{
-			KeywordBreak,
-			KeywordCast,
-			KeywordContinue,
-			KeywordElse,
-			KeywordFalse,
-			KeywordFn,
-			KeywordFor,
-			KeywordIf,
-			KeywordLet,
-			KeywordMut,
-			KeywordNative,
-			KeywordReturn,
-			KeywordStruct,
-			KeywordTrue,
-			KeywordWhile,
+		enum class Type : u8;
 
-			LiteralFloat,
-			LiteralIdentifier,
-			LiteralInteger,
-			LiteralString,
-
-			SymbolAmpersand,
-			SymbolAmpersandAmpersand,
-			SymbolBang,
-			SymbolBangEqual,
-			SymbolBraceLeft,
-			SymbolBraceRight,
-			SymbolBracketLeft,
-			SymbolBracketRight,
-			SymbolCaret,
-			SymbolColon,
-			SymbolColonColon,
-			SymbolComma,
-			SymbolDot,
-			SymbolEqual,
-			SymbolEqualEqual,
-			SymbolGreater,
-			SymbolGreaterEqual,
-			SymbolLess,
-			SymbolLessEqual,
-			SymbolMinus,
-			SymbolMinusEqual,
-			SymbolMinusMinus,
-			SymbolPercent,
-			SymbolParenLeft,
-			SymbolParenRight,
-			SymbolPipe,
-			SymbolPipePipe,
-			SymbolPlus,
-			SymbolPlusEqual,
-			SymbolPlusPlus,
-			SymbolQuestionMark,
-			SymbolSemicolon,
-			SymbolSlash,
-			SymbolSlashEqual,
-			SymbolStar,
-			SymbolStarEqual,
-
-			SpecialError,
-			SpecialEndOfFile,
-		} type;
+		public:
+		Type             type;
 		std::string_view data;
 		SourceLocation   location;
 
@@ -106,4 +46,71 @@ namespace soul
 		stream << static_cast<std::string>(token);
 		return stream;
 	}
+
+	/**
+	 * @brief Represents the `type` of the Token, i.e. does it describe a keyword, literal, normal or a special symbol.
+	 */
+	enum class Token::Type : u8
+	{
+		KeywordBreak,
+		KeywordCast,
+		KeywordContinue,
+		KeywordElse,
+		KeywordFalse,
+		KeywordFn,
+		KeywordFor,
+		KeywordIf,
+		KeywordLet,
+		KeywordMut,
+		KeywordNative,
+		KeywordReturn,
+		KeywordStruct,
+		KeywordTrue,
+		KeywordWhile,
+
+		LiteralFloat,
+		LiteralIdentifier,
+		LiteralInteger,
+		LiteralString,
+
+		SymbolAmpersand,
+		SymbolAmpersandAmpersand,
+		SymbolBang,
+		SymbolBangEqual,
+		SymbolBraceLeft,
+		SymbolBraceRight,
+		SymbolBracketLeft,
+		SymbolBracketRight,
+		SymbolCaret,
+		SymbolColon,
+		SymbolColonColon,
+		SymbolComma,
+		SymbolDot,
+		SymbolEqual,
+		SymbolEqualEqual,
+		SymbolGreater,
+		SymbolGreaterEqual,
+		SymbolLess,
+		SymbolLessEqual,
+		SymbolMinus,
+		SymbolMinusEqual,
+		SymbolMinusMinus,
+		SymbolPercent,
+		SymbolParenLeft,
+		SymbolParenRight,
+		SymbolPipe,
+		SymbolPipePipe,
+		SymbolPlus,
+		SymbolPlusEqual,
+		SymbolPlusPlus,
+		SymbolQuestionMark,
+		SymbolSemicolon,
+		SymbolSlash,
+		SymbolSlashEqual,
+		SymbolStar,
+		SymbolStarEqual,
+
+		SpecialError,
+		SpecialEndOfFile,
+	};
 }  // namespace soul

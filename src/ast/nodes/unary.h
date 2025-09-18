@@ -12,7 +12,7 @@ namespace soul::ast::nodes
 	{
 		public:
 		Operator   op;
-		Dependency expr;
+		Dependency expression;
 
 		public:
 		explicit UnaryNode(Dependency expr, Operator op);

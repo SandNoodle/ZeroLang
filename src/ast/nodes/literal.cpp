@@ -2,10 +2,7 @@
 
 namespace soul::ast::nodes
 {
-	LiteralNode::LiteralNode(Value value, Type literal_type)
-		: value(std::move(value)), literal_type(literal_type)
-	{
-	}
+	LiteralNode::LiteralNode(Value value, Type literal_type) : value(std::move(value)), literal_type(literal_type) {}
 
 	LiteralNode::Dependency LiteralNode::create(Value value, Type literal_type)
 	{

@@ -12,7 +12,8 @@
 namespace soul::types
 {
 	/**
-	 * @brief Concept defining all the possible Type System's builtin types.
+	 * @brief TypeKind is a concept that specifies (and is satisfied by) types in the language's type system that
+	 * it supports.
 	 */
 	template <typename T>
 	concept TypeKind = std::same_as<T, PrimitiveType>  //
@@ -23,8 +24,8 @@ namespace soul::types
 	std::weak_ordering operator<=>(const Type& lhs, const Type& rhs);
 
 	/**
-	 * @brief Backbone of the Soul's Type System.
-	 * This class is capable of representing all possible builtin and user defined types.
+	 * @brief Class that represents a specific type in the language's type system.
+	 * It is capable of describing all builtin, nested and user defined types.
 	 */
 	class Type
 	{
@@ -47,9 +48,9 @@ namespace soul::types
 		explicit operator std::string() const;
 
 		/**
-		 * @brief
-		 * @tparam
-		 * @return
+		 * @brief Verifies if a Type is of a given TypeKind's type.
+		 * @tparam T Type satisfying the TypeKind concept.
+		 * @return \b true if it is, \b false otherwise.
 		 */
 		template <TypeKind T>
 		[[nodiscard]] constexpr bool is() const noexcept
@@ -58,8 +59,9 @@ namespace soul::types
 		}
 
 		/**
-		 * @brief
-		 * @return
+		 * @brief Returns the requested underlying type.
+		 * @important Does not perform any validation - assumes that Type::is<T> was used first.
+		 * @tparam T Type satisfying the TypeKind concept.
 		 */
 		template <TypeKind T>
 		[[nodiscard]] constexpr const T& as() const noexcept

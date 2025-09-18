@@ -7,7 +7,9 @@
 namespace soul::ast::visitors
 {
 	/**
-	 * @brief
+	 * @brief CopyVisitor traverses the AST and performs a deep copy on each node, which is then put into a separate
+	 * AST. Both trees are equal to each other, but exist as a separate objects in memory. It's most useful when a
+	 * visitor can/must modify the input tree.
 	 */
 	class CopyVisitor : public DefaultTraverseVisitor
 	{
@@ -17,6 +19,7 @@ namespace soul::ast::visitors
 		public:
 		CopyVisitor();
 
+		/** @brief Returns the cloned (sub-) tree. */
 		ASTNode::Dependency cloned() noexcept;
 
 		using DefaultTraverseVisitor::accept;
@@ -54,13 +57,12 @@ namespace soul::ast::visitors
 		ASTNode::Dependency clone(const nodes::UnaryNode&);
 		ASTNode::Dependency clone(const nodes::VariableDeclarationNode&);
 
-		template <typename T>
-		constexpr bool is() const noexcept
-		{
-			return dynamic_cast<T*>(_current_clone.get()) != nullptr;
-		}
-
-		template <typename T>
+		/**
+		 * @brief Returns the underlying node.
+		 * @important Does not perform any validation - assumes that DefaultTraverseVisitor::is<T> was used first.
+		 * @tparam T Type satisfying the NodeKind concept.
+		 */
+		template <nodes::NodeKind T>
 		constexpr T& as()
 		{
 			assert(dynamic_cast<T*>(_current_clone.get()));

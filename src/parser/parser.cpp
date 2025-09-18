@@ -417,8 +417,8 @@ namespace soul::parser
 			                                Token::name(current_token_or_default().type)));
 		}
 
-		LiteralNode::Type        literal_type{};
-		Value                    value{};
+		LiteralNode::Type literal_type{};
+		Value             value{};
 		if (token->type == Token::Type::LiteralFloat) {
 			f64        v{};
 			const auto result = std::from_chars(std::begin(token->data), std::end(token->data), v);

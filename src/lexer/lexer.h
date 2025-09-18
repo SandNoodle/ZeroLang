@@ -11,7 +11,8 @@
 namespace soul::lexer
 {
 	/**
-	 * @brief Class used performing a lexical analysis on the given input text.
+	 * @brief Lexer performs lexical analysis on an input text, i.e. converts it into a linear sequence of lexical
+	 * tokens (called Lexemes).
 	 */
 	class Lexer
 	{

@@ -90,9 +90,9 @@ namespace soul::ast::visitors
 		}
 	}
 
-	void DefaultTraverseVisitor::visit(const UnaryNode& node) { accept(node.expr.get()); }
+	void DefaultTraverseVisitor::visit(const UnaryNode& node) { accept(node.expression.get()); }
 
-	void DefaultTraverseVisitor::visit(const VariableDeclarationNode& node) { accept(node.expr.get()); }
+	void DefaultTraverseVisitor::visit(const VariableDeclarationNode& node) { accept(node.expression.get()); }
 
 	void DefaultTraverseVisitor::visit(BinaryNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(BlockNode& node) { visit(std::as_const(node)); }

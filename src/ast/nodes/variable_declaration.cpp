@@ -3,7 +3,7 @@
 namespace soul::ast::nodes
 {
 	VariableDeclarationNode::VariableDeclarationNode(Identifier name, Identifier type, Dependency expr, bool is_mutable)
-		: name(std::move(name)), type_identifier(std::move(type)), expr(std::move(expr)), is_mutable(is_mutable)
+		: name(std::move(name)), type_identifier(std::move(type)), expression(std::move(expr)), is_mutable(is_mutable)
 	{
 	}
 

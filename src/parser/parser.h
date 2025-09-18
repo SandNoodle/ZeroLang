@@ -11,8 +11,8 @@
 namespace soul::parser
 {
 	/**
-	 * @brief Class implementing parser for Soul language.
-	 * Translates list of tokens into an Abstract Syntax Tree (AST).
+	 * @brief Parser performs syntactic analysis on a given linear list of lexical tokens, i.e. converts it into an
+	 * Abstract Syntax Tree (AST).
 	 */
 	class Parser
 	{
