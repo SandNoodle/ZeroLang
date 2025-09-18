@@ -97,7 +97,7 @@ namespace soul::parser
 	ASTNode::Dependency Parser::parse_statement()
 	{
 		// Statements
-		switch (_current_token->type) {
+		switch (current_token_or_default().type) {
 			case Token::Type::KeywordFn:
 				return parse_function_declaration();
 			case Token::Type::KeywordFor:
@@ -127,7 +127,7 @@ namespace soul::parser
 
 	ASTNode::Dependency Parser::parse_expression(Parser::Precedence precedence)
 	{
-		auto prefix_rule = precedence_rule(_current_token->type).prefix;
+		auto prefix_rule = precedence_rule(current_token_or_default().type).prefix;
 		if (!prefix_rule) [[unlikely]] {
 			return create_error(std::format("[INTERNAL] no prefix precedence rule for '{}' was specified.",
 			                                Token::internal_name(current_token_or_default().type)));
@@ -135,8 +135,8 @@ namespace soul::parser
 
 		auto prefix_expression = (this->*prefix_rule)();
 
-		while (precedence <= precedence_rule(_current_token->type).precedence) {
-			auto infix_rule = precedence_rule(_current_token->type).infix;
+		while (precedence <= precedence_rule(current_token_or_default().type).precedence) {
+			auto infix_rule = precedence_rule(current_token_or_default().type).infix;
 			if (!infix_rule) [[unlikely]] {
 				return create_error(std::format("[INTERNAL] no infix precedence rule for '{}' was specified.",
 				                                Token::internal_name(current_token_or_default().type)));
