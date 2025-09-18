@@ -13,10 +13,9 @@ namespace soul::ast::visitors
 			return;
 		}
 
-		if (_depth_current > _depth_max) {
+		if (++_depth_current > _depth_max) {
 			return;
 		}
-		_depth_current++;
 		node->accept(*this);
 		_depth_current--;
 	}
