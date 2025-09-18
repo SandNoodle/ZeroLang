@@ -31,18 +31,18 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
+		auto& binary_node = as<BinaryNode>();
 		if (!node.lhs) {
-			_current_clone = ErrorNode::create("[INTERNAL] BinaryNode does not contain LHS expression (nullptr)");
-			return;
+			binary_node.lhs = ErrorNode::create("[INTERNAL] BinaryNode does not contain LHS expression (nullptr)");
 		}
-
 		if (!node.rhs) {
-			_current_clone = ErrorNode::create("[INTERNAL] BinaryNode does not contain RHS expression (nullptr)");
+			binary_node.rhs = ErrorNode::create("[INTERNAL] BinaryNode does not contain RHS expression (nullptr)");
+		}
+		if (dynamic_cast<ErrorNode*>(binary_node.lhs.get()) && dynamic_cast<ErrorNode*>(binary_node.rhs.get())) {
 			return;
 		}
 
-		const auto& binary_node = as<BinaryNode>();
-		const auto  result_type
+		const auto result_type
 			= get_type_for_operator(binary_node.op, std::array{ binary_node.lhs->type, binary_node.rhs->type });
 		if (result_type == Type{}) {
 			_current_clone = ErrorNode::create(std::format("operator ('{}') does not exist for types '{}' and '{}'",
@@ -93,7 +93,6 @@ namespace soul::ast::visitors
 		CopyVisitor::visit(node);
 
 		const auto& for_loop = as<ForLoopNode>();
-
 		if (for_loop.condition) {
 			const bool is_condition_bool_coercible
 				= get_cast_type(for_loop.condition->type, PrimitiveType::Kind::Boolean) != CastNode::Type::Impossible;
@@ -112,17 +111,20 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
+		auto& foreach_node = as<ForeachLoopNode>();
 		if (!node.variable) {
-			_current_clone
+			foreach_node.variable
 				= ErrorNode::create("[INTERNAL] ForeachLoopNode does not contain variable expression (nullptr)");
 		}
-
 		if (!node.in_expression) {
-			_current_clone
+			foreach_node.in_expression
 				= ErrorNode::create("[INTERNAL] ForeachLoopNode does not contain in_expression expression (nullptr)");
 		}
+		if (dynamic_cast<ErrorNode*>(foreach_node.variable.get())
+		    && dynamic_cast<ErrorNode*>(foreach_node.in_expression.get())) {
+			return;
+		}
 
-		const auto& foreach_node = as<ForeachLoopNode>();
 		if (!foreach_node.in_expression->type.is<ArrayType>()) {
 			_current_clone = ErrorNode::create(
 				std::format("expression iterated in for each loop statement must be of an array type"));
@@ -144,14 +146,28 @@ namespace soul::ast::visitors
 
 	void TypeResolverVisitor::visit(const FunctionDeclarationNode& node)
 	{
+		// NOTE: Soul does not support global variables; we can assume that a function declaration is an entirely new
+		// scope without any previous declarations.
+		_variables_in_scope.clear();
+
 		CopyVisitor::visit(node);
 
-		const auto& function_declaration = as<FunctionDeclarationNode>();
+		auto& function_declaration = as<FunctionDeclarationNode>();
+		auto  want_types           = function_declaration.parameters
+		                | std::views::transform([](const auto& parameter) -> types::Type { return parameter->type; });
+		if (get_function_declaration(node.name, want_types)) {
+			_current_clone
+				= ErrorNode::create(std::format("function declaration '{}' shadows previous one", node.name));
+			return;
+		}
+
 		for (std::size_t index = 0; index < function_declaration.parameters.size(); ++index) {
-			const auto* parameter
-				= dynamic_cast<VariableDeclarationNode*>(function_declaration.parameters[index].get());
-			if (!parameter) {
-				_current_clone
+			const auto* parameter = function_declaration.parameters[index].get();
+			if (dynamic_cast<const ErrorNode*>(parameter)) {
+				return;
+			}
+			if (!dynamic_cast<const VariableDeclarationNode*>(parameter)) {
+				function_declaration.parameters[index]
 					= ErrorNode::create(std::format("[INTERNAL] FunctionDeclarationNode contains "
 				                                    "non-VariableDeclarationNode in the parameter list (at {})",
 				                                    index));
@@ -160,6 +176,12 @@ namespace soul::ast::visitors
 		}
 
 		_current_clone->type = get_type_or_default(node.return_type);
+		_functions_in_module.emplace_back(
+			node.name,
+			FunctionDeclaration{ .input_types = want_types | std::ranges::to<std::vector<types::Type>>(),
+		                         .return_type = function_declaration.type
+
+		    });
 	}
 
 	void TypeResolverVisitor::visit(const IfNode& node)

@@ -513,11 +513,152 @@ namespace soul::ast::visitors::ut
 		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Char);
 	}
 
-	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousParameter) {}
+	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousParameter)
+	{
+		auto function_declaration_parameters = ASTNode::Dependencies{};
+		function_declaration_parameters.reserve(2);
+		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("a", "i32", nullptr, false));
+		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("a", "str", nullptr, false));
+		auto function_declaration = FunctionDeclarationNode::create("my_function",
+		                                                            "i32",
+		                                                            std::move(function_declaration_parameters),
+		                                                            BlockNode::create(ASTNode::Dependencies{}));
 
-	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousOne) {}
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.push_back(std::move(function_declaration));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
 
-	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShouldntShadowWithDifferentArguments) {}
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_function_declaration);
+		ASSERT_EQ(as_function_declaration->parameters.size(), 2);
+
+		const auto* as_parameter = dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
+		ASSERT_TRUE(as_parameter);
+		EXPECT_EQ(as_parameter->name, "a");
+		EXPECT_EQ(as_parameter->type_identifier, "i32");
+		EXPECT_FALSE(as_parameter->expr);
+		EXPECT_FALSE(as_parameter->is_mutable);
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_function_declaration->parameters[1].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message, "variable declaration 'a' shadows previous one");
+	}
+
+	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousOne)
+	{
+		static constexpr auto k_function_name = "my_function";
+
+		auto first_function_declaration = FunctionDeclarationNode::create(
+			k_function_name, "i32", ASTNode::Dependencies{}, BlockNode::create(ASTNode::Dependencies{}));
+		auto second_function_declaration = FunctionDeclarationNode::create(
+			k_function_name, "i32", ASTNode::Dependencies{}, BlockNode::create(ASTNode::Dependencies{}));
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(2);
+		module_statements.push_back(std::move(first_function_declaration));
+		module_statements.push_back(std::move(second_function_declaration));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 2);
+
+		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_function_declaration);
+		EXPECT_EQ(as_function_declaration->name, k_function_name);
+		EXPECT_EQ(as_function_declaration->return_type, "i32");
+		EXPECT_EQ(as_function_declaration->parameters.size(), 0);
+		EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
+		EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[1].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message, std::format("function declaration '{}' shadows previous one", k_function_name));
+	}
+
+	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShouldntShadowWithDifferentArguments)
+	{
+		static constexpr auto k_function_name = "my_function";
+
+		auto first_function_declaration_parameters = ASTNode::Dependencies{};
+		first_function_declaration_parameters.emplace_back(VariableDeclarationNode::create("a", "i32", nullptr, false));
+		auto first_function_declaration
+			= FunctionDeclarationNode::create(k_function_name,
+		                                      "i32",
+		                                      std::move(first_function_declaration_parameters),
+		                                      BlockNode::create(ASTNode::Dependencies{}));
+
+		auto second_function_declaration_parameters = ASTNode::Dependencies{};
+		second_function_declaration_parameters.emplace_back(
+			VariableDeclarationNode::create("a", "f32", nullptr, false));
+		auto second_function_declaration
+			= FunctionDeclarationNode::create(k_function_name,
+		                                      "i32",
+		                                      std::move(second_function_declaration_parameters),
+		                                      BlockNode::create(ASTNode::Dependencies{}));
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(2);
+		module_statements.push_back(std::move(first_function_declaration));
+		module_statements.push_back(std::move(second_function_declaration));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 2);
+
+		{
+			const auto* as_function_declaration
+				= dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
+			ASSERT_TRUE(as_function_declaration);
+			EXPECT_EQ(as_function_declaration->name, k_function_name);
+			EXPECT_EQ(as_function_declaration->return_type, "i32");
+			EXPECT_EQ(as_function_declaration->parameters.size(), 1);
+			EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
+			EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
+
+			const auto* as_parameter
+				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
+			ASSERT_TRUE(as_parameter);
+			EXPECT_EQ(as_parameter->name, "a");
+			EXPECT_EQ(as_parameter->type_identifier, "i32");
+			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->is_mutable);
+			EXPECT_EQ(as_parameter->type, PrimitiveType::Kind::Int32);
+		}
+		{
+			const auto* as_function_declaration
+				= dynamic_cast<FunctionDeclarationNode*>(as_module->statements[1].get());
+			ASSERT_TRUE(as_function_declaration);
+			EXPECT_EQ(as_function_declaration->name, k_function_name);
+			EXPECT_EQ(as_function_declaration->return_type, "i32");
+			EXPECT_EQ(as_function_declaration->parameters.size(), 1);
+			EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
+			EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
+
+			const auto* as_parameter
+				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
+			ASSERT_TRUE(as_parameter);
+			EXPECT_EQ(as_parameter->name, "a");
+			EXPECT_EQ(as_parameter->type_identifier, "f32");
+			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->is_mutable);
+			EXPECT_EQ(as_parameter->type, PrimitiveType::Kind::Float32);
+		}
+	}
 
 	TEST_F(TypeResolverTest, LiteralNode)
 	{
@@ -615,9 +756,146 @@ namespace soul::ast::visitors::ut
 		EXPECT_EQ(as_error->message, std::format("use of undeclared identifier '{}'", k_variable_name));
 	}
 
-	TEST_F(TypeResolverTest, StructDeclarationNode) {}
+	TEST_F(TypeResolverTest, StructDeclarationNode)
+	{
+		auto struct_declaration_parameters = ASTNode::Dependencies{};
+		struct_declaration_parameters.push_back(VariableDeclarationNode::create("a", "i32", nullptr, false));
+		struct_declaration_parameters.push_back(VariableDeclarationNode::create("b", "f32", nullptr, false));
+		struct_declaration_parameters.push_back(VariableDeclarationNode::create("c", "bool", nullptr, false));
+		auto struct_declaration = StructDeclarationNode::create("my_struct", std::move(struct_declaration_parameters));
 
-	TEST_F(TypeResolverTest, UnaryNode) {}
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.push_back(std::move(struct_declaration));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto expected_type = Type{ StructType{ {
+			PrimitiveType::Kind::Int32,
+			PrimitiveType::Kind::Float32,
+			PrimitiveType::Kind::Boolean,
+		} } };
+
+		const auto* as_struct_declaration = dynamic_cast<StructDeclarationNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_struct_declaration);
+		EXPECT_EQ(as_struct_declaration->name, "my_struct");
+		EXPECT_EQ(as_struct_declaration->type, expected_type);
+		ASSERT_EQ(as_struct_declaration->parameters.size(), 3);
+		{
+			const auto* as_parameter
+				= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[0].get());
+			ASSERT_TRUE(as_parameter);
+			EXPECT_EQ(as_parameter->name, "a");
+			EXPECT_EQ(as_parameter->type_identifier, "i32");
+			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->is_mutable);
+		}
+		{
+			const auto* as_parameter
+				= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[1].get());
+			ASSERT_TRUE(as_parameter);
+			EXPECT_EQ(as_parameter->name, "b");
+			EXPECT_EQ(as_parameter->type_identifier, "f32");
+			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->is_mutable);
+		}
+		{
+			const auto* as_parameter
+				= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[2].get());
+			ASSERT_TRUE(as_parameter);
+			EXPECT_EQ(as_parameter->name, "c");
+			EXPECT_EQ(as_parameter->type_identifier, "bool");
+			EXPECT_FALSE(as_parameter->expr);
+			EXPECT_FALSE(as_parameter->is_mutable);
+		}
+	}
+
+	TEST_F(TypeResolverTest, UnaryNode_Arithmetic)
+	{
+		static constexpr std::array k_arithmetic_operators
+			= { ASTNode::Operator::Increment, ASTNode::Operator::Decrement };
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(k_arithmetic_operators.size());
+		for (const auto op : k_arithmetic_operators) {
+			module_statements.emplace_back(
+				UnaryNode::create(LiteralNode::create(Value{ 1L }, LiteralNode::Type::Int64), op));
+		}
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), k_arithmetic_operators.size());
+
+		for (std::size_t index = 0; index < k_arithmetic_operators.size(); ++index) {
+			const auto* as_unary = dynamic_cast<UnaryNode*>(as_module->statements[index].get());
+			ASSERT_TRUE(as_unary);
+			EXPECT_EQ(as_unary->op, k_arithmetic_operators[index]);
+			EXPECT_EQ(as_unary->type, PrimitiveType::Kind::Int64);
+
+			const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expr.get());
+			ASSERT_TRUE(as_expression);
+			EXPECT_EQ(as_expression->value, Value{ 1L });
+			EXPECT_EQ(as_expression->literal_type, LiteralNode::Type::Int64);
+			EXPECT_EQ(as_expression->type, PrimitiveType::Kind::Int64);
+		}
+	}
+
+	TEST_F(TypeResolverTest, UnaryNode_Logical)
+	{
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.emplace_back(UnaryNode::create(LiteralNode::create(Value{ true }, LiteralNode::Type::Boolean),
+		                                                 ASTNode::Operator::LogicalNot));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_unary = dynamic_cast<UnaryNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_unary);
+		EXPECT_EQ(as_unary->op, ASTNode::Operator::LogicalNot);
+		EXPECT_EQ(as_unary->type, PrimitiveType::Kind::Boolean);
+
+		const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expr.get());
+		ASSERT_TRUE(as_expression);
+		EXPECT_EQ(as_expression->value, Value{ true });
+		EXPECT_EQ(as_expression->literal_type, LiteralNode::Type::Boolean);
+		EXPECT_EQ(as_expression->type, PrimitiveType::Kind::Boolean);
+	}
+
+	TEST_F(TypeResolverTest, UnaryNode_NoOverload)
+	{
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.emplace_back(UnaryNode::create(
+			LiteralNode::create(Value{ "my_string" }, LiteralNode::Type::String), ASTNode::Operator::LogicalNot));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message,
+		          std::format("operator ('{}') does not exist for type '{}'",
+		                      ASTNode::name(ASTNode::Operator::LogicalNot),
+		                      std::string(Type{ PrimitiveType::Kind::String })));
+	}
 
 	TEST_F(TypeResolverTest, VariableDeclaration_ShadowsPreviousOne)
 	{
