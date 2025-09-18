@@ -1,1 +1,1 @@
-let my_variable : i32 = cast<i32>(1.23);
+let my_variable : i32 = cast<i32>(1.23)

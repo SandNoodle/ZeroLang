@@ -34,6 +34,7 @@ namespace soul::ast::visitors
 		void visit(const nodes::ErrorNode&) override;
 		void visit(const nodes::ForLoopNode&) override;
 		void visit(const nodes::ForeachLoopNode&) override;
+		void visit(const nodes::FunctionCallNode&) override;
 		void visit(const nodes::FunctionDeclarationNode&) override;
 		void visit(const nodes::IfNode&) override;
 		void visit(const nodes::LiteralNode&) override;
@@ -49,6 +50,7 @@ namespace soul::ast::visitors
 		ASTNode::Dependency clone(const nodes::ErrorNode&);
 		ASTNode::Dependency clone(const nodes::ForLoopNode&);
 		ASTNode::Dependency clone(const nodes::ForeachLoopNode&);
+		ASTNode::Dependency clone(const nodes::FunctionCallNode&);
 		ASTNode::Dependency clone(const nodes::FunctionDeclarationNode&);
 		ASTNode::Dependency clone(const nodes::IfNode&);
 		ASTNode::Dependency clone(const nodes::LiteralNode&);

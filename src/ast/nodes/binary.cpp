@@ -3,7 +3,7 @@
 namespace soul::ast::nodes
 {
 	BinaryNode::BinaryNode(Dependency lhs, Dependency rhs, Operator op)
-		: lhs(std::move(lhs)), rhs(std::move(rhs)), op(op)
+		: op(op), lhs(std::move(lhs)), rhs(std::move(rhs))
 	{
 	}
 

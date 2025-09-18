@@ -8,6 +8,7 @@
 #include "ast/nodes/error.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
+#include "ast/nodes/function_call.h"
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
@@ -437,6 +438,103 @@ namespace soul::ast::visitors::ut
 		EXPECT_EQ(as_error->message,
 		          std::format("condition in for loop statement must be convertible to a '{}' type",
 		                      std::string(Type{ PrimitiveType::Kind::Boolean })));
+	}
+
+	TEST_F(TypeResolverTest, FunctionCallNode)
+	{
+		static constexpr auto k_function_name = "my_function";
+
+		auto function_declaration_parameters = ASTNode::Dependencies{};
+		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("a", "str", nullptr, false));
+		auto function_declaration = FunctionDeclarationNode::create(k_function_name,
+		                                                            "f32",
+		                                                            std::move(function_declaration_parameters),
+		                                                            BlockNode::create(ASTNode::Dependencies{}));
+
+		auto function_call_parameters = ASTNode::Dependencies{};
+		function_call_parameters.emplace_back(LiteralNode::create(Value{ "some_string" }, LiteralNode::Type::String));
+		auto function_call     = FunctionCallNode::create(k_function_name, ASTNode::Dependencies{});
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.push_back(std::move(function_call));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message, std::format("cannot call non-existing function '{}'", k_function_name));
+	}
+
+	TEST_F(TypeResolverTest, FunctionCallNode_NonExistingFunction)
+	{
+		auto function_call     = FunctionCallNode::create("non_existing", ASTNode::Dependencies{});
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.push_back(std::move(function_call));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 1);
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message, "cannot call non-existing function 'non_existing'");
+	}
+
+	TEST_F(TypeResolverTest, FunctionCallNode_ParametersDoNotMatch)
+	{
+		static constexpr auto k_function_name = "my_function";
+
+		auto function_declaration_parameters = ASTNode::Dependencies{};
+		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("a", "str", nullptr, false));
+		auto function_declaration = FunctionDeclarationNode::create(k_function_name,
+		                                                            "f32",
+		                                                            std::move(function_declaration_parameters),
+		                                                            BlockNode::create(ASTNode::Dependencies{}));
+
+		auto function_call_parameters = ASTNode::Dependencies{};
+		function_call_parameters.emplace_back(LiteralNode::create(Value{ "some_string" }, LiteralNode::Type::String));
+		auto function_call     = FunctionCallNode::create(k_function_name, ASTNode::Dependencies{});
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(2);
+		module_statements.push_back(std::move(function_declaration));
+		module_statements.push_back(std::move(function_call));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
+		ASSERT_TRUE(as_module);
+		ASSERT_EQ(as_module->statements.size(), 2);
+
+		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
+		ASSERT_TRUE(as_function_declaration);
+		EXPECT_EQ(as_function_declaration->name, k_function_name);
+		EXPECT_EQ(as_function_declaration->type_identifier, "f32");
+		EXPECT_EQ(as_function_declaration->parameters.size(), 1);
+		EXPECT_TRUE(as_function_declaration->statements->statements.empty());
+		{
+			const auto* as_parameter
+				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
+			ASSERT_TRUE(as_parameter);
+			EXPECT_EQ(as_parameter->name, "a");
+			EXPECT_EQ(as_parameter->type_identifier, "str");
+			EXPECT_FALSE(as_parameter->expression);
+			EXPECT_FALSE(as_parameter->is_mutable);
+		}
+
+		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[1].get());
+		ASSERT_TRUE(as_error);
+		EXPECT_EQ(as_error->message, std::format("cannot call non-existing function '{}'", k_function_name));
 	}
 
 	TEST_F(TypeResolverTest, FunctionDeclarationNode)

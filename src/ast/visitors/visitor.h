@@ -26,6 +26,7 @@ namespace soul::ast::visitors
 		virtual constexpr void visit(const nodes::ErrorNode&) {}
 		virtual constexpr void visit(const nodes::ForLoopNode&) {}
 		virtual constexpr void visit(const nodes::ForeachLoopNode&) {}
+		virtual constexpr void visit(const nodes::FunctionCallNode&) {}
 		virtual constexpr void visit(const nodes::FunctionDeclarationNode&) {}
 		virtual constexpr void visit(const nodes::IfNode&) {}
 		virtual constexpr void visit(const nodes::LiteralNode&) {}
@@ -40,6 +41,7 @@ namespace soul::ast::visitors
 		virtual constexpr void visit(nodes::ErrorNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::ForLoopNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::ForeachLoopNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::FunctionCallNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::FunctionDeclarationNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::IfNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::LiteralNode& node) { visit(std::as_const(node)); }

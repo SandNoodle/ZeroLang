@@ -2,7 +2,7 @@
 
 namespace soul::ast::nodes
 {
-	UnaryNode::UnaryNode(Dependency expr, Operator op) : expression(std::move(expr)), op(op) {}
+	UnaryNode::UnaryNode(Dependency expr, Operator op) : op(op), expression(std::move(expr)) {}
 
 	UnaryNode::Dependency UnaryNode::create(Dependency expr, Operator op)
 	{

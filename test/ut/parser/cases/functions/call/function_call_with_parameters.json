@@ -1,0 +1,36 @@
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "function_call",
+      "name": "my_function",
+      "parameters": [
+        {
+          "type": "literal",
+          "literal_type": "literal_type_int32",
+          "value": "1"
+        },
+        {
+          "type": "binary",
+          "operator": "operator_less",
+          "lhs": {
+            "type": "literal",
+            "literal_type": "literal_type_identifier",
+            "value": "index"
+          },
+          "rhs": {
+            "type": "literal",
+            "literal_type": "literal_type_int32",
+            "value": "10"
+          }
+        },
+        {
+          "type": "literal",
+          "literal_type": "literal_type_string",
+          "value": "some_string"
+        }
+      ]
+    }
+  ]
+}

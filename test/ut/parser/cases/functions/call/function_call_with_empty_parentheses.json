@@ -1,0 +1,11 @@
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "function_call",
+      "name": "my_function",
+      "parameters": []
+    }
+  ]
+}

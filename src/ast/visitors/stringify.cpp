@@ -6,6 +6,7 @@
 #include "ast/nodes/error.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
+#include "ast/nodes/function_call.h"
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
@@ -85,6 +86,16 @@ namespace soul::ast::visitors
 		encode("variable", node.variable.get());
 		encode("in_expression", node.in_expression.get());
 		encode("statements", node.statements.get(), false);
+	}
+
+	void StringifyVisitor::visit(const nodes::FunctionCallNode& node)
+	{
+		encode("type", "function_call");
+		encode("name", node.name);
+		encode("parameters",
+		       node.parameters | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
+		           | std::ranges::to<ASTNode::References>(),
+		       false);
 	}
 
 	void StringifyVisitor::visit(const FunctionDeclarationNode& node)

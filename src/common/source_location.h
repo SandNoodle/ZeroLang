@@ -27,7 +27,7 @@ namespace soul
 			return std::tie(row, column) <=> std::tie(other.row, other.column);
 		}
 
-		explicit constexpr operator std::string() const { return std::format("{}:{}", row, column); }
+		explicit operator std::string() const { return std::format("{}:{}", row, column); }
 	};
 
 	template <typename T>

@@ -7,6 +7,7 @@
 #include "ast/nodes/error.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
+#include "ast/nodes/function_call.h"
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
@@ -16,6 +17,7 @@
 #include "ast/nodes/variable_declaration.h"
 
 #include <algorithm>
+#include <format>
 #include <unordered_map>
 
 namespace soul::parser
@@ -302,6 +304,43 @@ namespace soul::parser
 		                           BlockNode::create(std::move(statements)));
 	}
 
+	ASTNode::Dependency Parser::parse_function_call(ASTNode::Dependency dependency)
+	{
+		// <function_call> ::= <identifier> [ '(' <parameter_declaration>, ... ')' ]
+
+		// <identifier>
+		const auto* literal = dynamic_cast<LiteralNode*>(dependency.get());
+		if (!literal) {
+			const auto previous_token = peek(-1);
+			return create_error(std::format("expected function name identifier, but got: '{}'",
+			                                std::string(previous_token ? previous_token->data : "__ERROR__")));
+		}
+
+		// [Optional] '(' <parameter_list> ')'
+		ASTNode::Dependencies parameters{};
+		if (!require(Token::Type::SymbolParenLeft)) {
+			return create_error(std::format("expected '{}', but got: '{}'",
+			                                Token::name(Token::Type::SymbolParenLeft),
+			                                std::string(current_token_or_default().data)));
+		}
+
+		const bool parenthesis_next = current_token_or_default().type == Token::Type::SymbolParenRight;
+		if (!parenthesis_next) {
+			do {
+				// <expression>
+				parameters.emplace_back(parse_expression());
+			} while (match(Token::Type::SymbolComma));
+		}
+
+		if (!require(Token::Type::SymbolParenRight)) {
+			return create_error(std::format("expected '{}', but got: '{}'",
+			                                Token::name(Token::Type::SymbolParenRight),
+			                                std::string(current_token_or_default().data)));
+		}
+
+		return FunctionCallNode::create(std::string(literal->value.get<std::string>()), std::move(parameters));
+	}
+
 	ASTNode::Dependency Parser::parse_function_declaration()
 	{
 		// <function_declaration> ::= <keyword_fn> <identifier> [ <parameter_declaration>, ... ] '::' <identifier>
@@ -537,7 +576,7 @@ namespace soul::parser
 
 	ASTNode::Dependency Parser::parse_variable_declaration()
 	{
-		// <variable_declaration> ::= <keyword_let> [ <keyword_mut> ] <identifier> ':' <identifier> '=' <expression> ';'
+		// <variable_declaration> ::= <keyword_let> [ <keyword_mut> ] <identifier> ':' <identifier> '=' <expression>
 
 		// <keyword_let>
 		if (!require(Token::Type::KeywordLet)) {
@@ -580,13 +619,6 @@ namespace soul::parser
 		// <expression>
 		auto expression = parse_expression();
 
-		// ';'
-		if (!require(Token::Type::SymbolSemicolon)) {
-			return create_error(std::format("expected '{}', but got: '{}'",
-			                                Token::name(Token::Type::SymbolSemicolon),
-			                                std::string(current_token_or_default().data)));
-		}
-
 		return VariableDeclarationNode::create(
 			std::string(name_identifier->data), std::string(type_identifier->data), std::move(expression), is_mutable);
 	}
@@ -626,7 +658,7 @@ namespace soul::parser
 
 	ASTNode::Dependencies Parser::parse_block_statement()
 	{
-		// <block_statement> ::= '{' [ <statement> ... ] '}'
+		// <block_statement> ::= '{' [ <statement> ';' ... ] '}'
 
 		ASTNode::Dependencies statements{};
 		if (!require(Token::Type::SymbolBraceLeft)) {
@@ -642,6 +674,16 @@ namespace soul::parser
 			}
 
 			statements.emplace_back(parse_statement());
+
+			if (current_token_or_default().type != Token::Type::SymbolBraceRight) {
+				// ';'
+				if (!require(Token::Type::SymbolSemicolon)) {
+					statements.emplace_back(create_error(std::format("expected '{}', but got: '{}'",
+					                                                 Token::name(Token::Type::SymbolSemicolon),
+					                                                 std::string(current_token_or_default().data))));
+					return statements;
+				}
+			}
 		}
 
 		const auto previous_token = peek(-1);
@@ -750,6 +792,10 @@ namespace soul::parser
 
 	Parser::PrecedenceRule Parser::precedence_rule(Token::Type type) const noexcept
 	{
+		if (type == Token::Type::SymbolParenLeft) {
+			return { Precedence::Call, nullptr, &Parser::parse_function_call, nullptr };
+		}
+
 		if (std::ranges::contains(k_literal_types, type)) {
 			return { Precedence::None, &Parser::parse_literal, nullptr, nullptr };
 		}

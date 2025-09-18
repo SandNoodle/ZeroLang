@@ -6,6 +6,7 @@
 #include "ast/nodes/error.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
+#include "ast/nodes/function_call.h"
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
@@ -30,6 +31,7 @@ namespace soul::ast::visitors
 	void CopyVisitor::visit(const nodes::ErrorNode& node) { _current_clone = clone(node); }
 	void CopyVisitor::visit(const nodes::ForLoopNode& node) { _current_clone = clone(node); }
 	void CopyVisitor::visit(const nodes::ForeachLoopNode& node) { _current_clone = clone(node); }
+	void CopyVisitor::visit(const nodes::FunctionCallNode& node) { _current_clone = clone(node); }
 	void CopyVisitor::visit(const nodes::FunctionDeclarationNode& node) { _current_clone = clone(node); }
 	void CopyVisitor::visit(const nodes::IfNode& node) { _current_clone = clone(node); }
 	void CopyVisitor::visit(const nodes::LiteralNode& node) { _current_clone = clone(node); }
@@ -85,6 +87,14 @@ namespace soul::ast::visitors
 		auto in_expression{ clone(node.in_expression.get()) };
 		auto statements{ clone(*static_cast<BlockNode*>(node.statements.get())) };
 		return ForeachLoopNode::create(std::move(variable), std::move(in_expression), std::move(statements));
+	}
+
+	ASTNode::Dependency CopyVisitor::clone(const nodes::FunctionCallNode& node)
+	{
+		auto cloned_parameters{ node.parameters
+			                    | std::views::transform([this](const auto& p) { return clone(p.get()); })
+			                    | std::ranges::to<ASTNode::Dependencies>() };
+		return FunctionCallNode::create(node.name, std::move(cloned_parameters));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::FunctionDeclarationNode& node)

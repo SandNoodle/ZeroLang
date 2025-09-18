@@ -11,6 +11,7 @@ namespace soul::ast::nodes
 	class ErrorNode;
 	class ForLoopNode;
 	class ForeachLoopNode;
+	class FunctionCallNode;
 	class FunctionDeclarationNode;
 	class IfNode;
 	class LiteralNode;
@@ -30,6 +31,7 @@ namespace soul::ast::nodes
 	                || std::same_as<T, ErrorNode>                //
 	                || std::same_as<T, ForLoopNode>              //
 	                || std::same_as<T, ForeachLoopNode>          //
+	                || std::same_as<T, FunctionCallNode>         //
 	                || std::same_as<T, FunctionDeclarationNode>  //
 	                || std::same_as<T, IfNode>                   //
 	                || std::same_as<T, LiteralNode>              //

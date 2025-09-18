@@ -31,7 +31,7 @@ namespace soul
 			return std::tie(type, data) <=> std::tie(other.type, other.data);
 		}
 
-		explicit constexpr operator std::string() const
+		explicit operator std::string() const
 		{
 			return std::format("<{}:\"{}\">", internal_name(type), data);
 		}

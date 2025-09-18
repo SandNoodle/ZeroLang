@@ -38,6 +38,7 @@ namespace soul::ast::visitors
 		void visit(const nodes::ErrorNode&) override;
 		void visit(const nodes::ForLoopNode&) override;
 		void visit(const nodes::ForeachLoopNode&) override;
+		void visit(const nodes::FunctionCallNode&) override;
 		void visit(const nodes::FunctionDeclarationNode&) override;
 		void visit(const nodes::IfNode&) override;
 		void visit(const nodes::LiteralNode&) override;

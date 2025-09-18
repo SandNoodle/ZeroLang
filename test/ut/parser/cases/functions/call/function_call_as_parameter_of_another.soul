@@ -1,0 +1,1 @@
+first_function(1 < second_function(), "some_param", 3.14)

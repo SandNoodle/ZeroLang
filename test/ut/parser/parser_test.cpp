@@ -95,7 +95,7 @@ namespace soul::parser::ut
 		const auto input = read_file(param.script_path);
 		ASSERT_TRUE(input.has_value()) << "failed to read: " << param.script_path;
 
-		const auto tokens      = Lexer::tokenize(*input);
+		const auto tokens      = Lexer::tokenize(*input);  // NOLINT(bugprone-unchecked-optional-access)
 		const auto result_tree = Parser::parse("test_module", tokens);
 
 		StringifyVisitor stringify;
@@ -113,7 +113,7 @@ namespace soul::parser::ut
 			}
 
 		const auto expected_output = read_file(param.expected_output_path);
-		ASSERT_TRUE(expected_output) << "failed to read: " << param.expected_output_path;
-		ASSERT_EQ(stringify.string(), *expected_output);
+		ASSERT_TRUE(expected_output.has_value()) << "failed to read: " << param.expected_output_path;
+		ASSERT_EQ(expected_output.value(), stringify.string());  // NOLINT(bugprone-unchecked-optional-access)
 	}
 }  // namespace soul::parser::ut

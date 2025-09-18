@@ -5,6 +5,7 @@
 #include "ast/nodes/cast.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
+#include "ast/nodes/function_call.h"
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
@@ -42,7 +43,7 @@ namespace soul::ast::visitors
 
 	void DefaultTraverseVisitor::visit(const CastNode& node) { accept(node.expression.get()); }
 
-	void DefaultTraverseVisitor::visit(const ErrorNode& node) { /* Can't traverse further. */ }
+	void DefaultTraverseVisitor::visit([[maybe_unused]] const ErrorNode& node) { /* Can't traverse further. */ }
 
 	void DefaultTraverseVisitor::visit(const ForLoopNode& node)
 	{
@@ -57,6 +58,13 @@ namespace soul::ast::visitors
 		accept(node.variable.get());
 		accept(node.in_expression.get());
 		accept(node.statements.get());
+	}
+
+	void DefaultTraverseVisitor::visit(const FunctionCallNode& node)
+	{
+		for (auto& param : node.parameters) {
+			accept(param.get());
+		}
 	}
 
 	void DefaultTraverseVisitor::visit(const FunctionDeclarationNode& node)
@@ -74,7 +82,7 @@ namespace soul::ast::visitors
 		accept(node.else_statements.get());
 	}
 
-	void DefaultTraverseVisitor::visit(const LiteralNode& node) { /* Can't traverse further. */ }
+	void DefaultTraverseVisitor::visit([[maybe_unused]] const LiteralNode& node) { /* Can't traverse further. */ }
 
 	void DefaultTraverseVisitor::visit(const ModuleNode& node)
 	{
@@ -100,6 +108,7 @@ namespace soul::ast::visitors
 	void DefaultTraverseVisitor::visit(ErrorNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(ForLoopNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(ForeachLoopNode& node) { visit(std::as_const(node)); }
+	void DefaultTraverseVisitor::visit(FunctionCallNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(FunctionDeclarationNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(IfNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(LiteralNode& node) { visit(std::as_const(node)); }

@@ -46,6 +46,7 @@ namespace soul::parser
 		ast::ASTNode::Dependency parse_binary(ast::ASTNode::Dependency lhs);
 		ast::ASTNode::Dependency parse_cast();
 		ast::ASTNode::Dependency parse_for_loop();
+		ast::ASTNode::Dependency parse_function_call(ast::ASTNode::Dependency dependency);
 		ast::ASTNode::Dependency parse_function_declaration();
 		ast::ASTNode::Dependency parse_if();
 		ast::ASTNode::Dependency parse_literal();

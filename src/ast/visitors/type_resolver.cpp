@@ -6,6 +6,7 @@
 #include "ast/nodes/error.h"
 #include "ast/nodes/for_loop.h"
 #include "ast/nodes/foreach_loop.h"
+#include "ast/nodes/function_call.h"
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
@@ -142,6 +143,21 @@ namespace soul::ast::visitors
 		}
 
 		_current_clone->type = PrimitiveType::Kind::Void;
+	}
+
+	void TypeResolverVisitor::visit(const nodes::FunctionCallNode& node)
+	{
+		CopyVisitor::visit(node);
+
+		auto& function_call = as<FunctionCallNode>();
+		auto  want_types    = function_call.parameters
+		                | std::views::transform([](const auto& parameter) -> types::Type { return parameter->type; });
+		const auto function_declaration = get_function_declaration(node.name, want_types);
+		if (!function_declaration.has_value()) {
+			_current_clone = ErrorNode::create(std::format("cannot call non-existing function '{}'", node.name));
+			return;
+		}
+		_current_clone->type = function_declaration->return_type;
 	}
 
 	void TypeResolverVisitor::visit(const FunctionDeclarationNode& node)
