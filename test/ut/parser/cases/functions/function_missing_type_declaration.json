@@ -1,1 +1,10 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"error","message":"expected type separator '::', but got: '{'"}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "error",
+      "message": "expected type separator '::', but got: '{'"
+    }
+  ]
+}

@@ -104,7 +104,7 @@ namespace soul::parser::ut
 		static constexpr bool k_regenerate_cases = false;
 		if constexpr (k_regenerate_cases) try {
 				std::filesystem::remove(param.expected_output_path);
-				std::ofstream file(param.expected_output_path);
+				std::ofstream file(param.expected_output_path, std::ios::binary);
 				file << stringify.string();
 				file.close();
 				GTEST_FAIL() << "Please turn off the `k_regenerate_cases` flag.";
@@ -113,7 +113,7 @@ namespace soul::parser::ut
 			}
 
 		const auto expected_output = read_file(param.expected_output_path);
-		ASSERT_TRUE(expected_output.has_value()) << "failed to read: " << param.expected_output_path;
+		ASSERT_TRUE(expected_output) << "failed to read: " << param.expected_output_path;
 		ASSERT_EQ(stringify.string(), *expected_output);
 	}
 }  // namespace soul::parser::ut

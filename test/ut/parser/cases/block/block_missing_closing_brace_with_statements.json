@@ -1,1 +1,26 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"scope_block","statements":[{"type":"variable_declaration","name":"my_variable","type_identifier":"f64","is_mutable":false,"expression":{"value":"3.12142"}},{"type":"error","message":"expected '}', but got: 'special_eof'"}]}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "scope_block",
+      "statements": [
+        {
+          "type": "variable_declaration",
+          "name": "my_variable",
+          "type_identifier": "f64",
+          "is_mutable": "false",
+          "expression": {
+            "type": "literal",
+            "literal_type": "literal_type_float32",
+            "value": "3.12142"
+          }
+        },
+        {
+          "type": "error",
+          "message": "expected '}', but got: 'special_eof'"
+        }
+      ]
+    }
+  ]
+}

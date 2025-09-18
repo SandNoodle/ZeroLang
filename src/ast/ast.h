@@ -46,6 +46,7 @@ namespace soul::ast
 		virtual ~ASTNode() = default;
 
 		static std::string_view name(const Operator op) noexcept;
+		static std::string_view internal_name(const Operator op) noexcept;
 		static Operator         as_operator(Token::Type) noexcept;
 	};
 

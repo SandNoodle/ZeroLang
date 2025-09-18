@@ -1,1 +1,17 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"variable_declaration","name":"my_cheeseburger","type_identifier":"i32","is_mutable":true,"expression":{"value":"69420"}}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "variable_declaration",
+      "name": "my_cheeseburger",
+      "type_identifier": "i32",
+      "is_mutable": "true",
+      "expression": {
+        "type": "literal",
+        "literal_type": "literal_type_int32",
+        "value": "69420"
+      }
+    }
+  ]
+}

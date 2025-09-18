@@ -1,1 +1,21 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"variable_declaration","name":"my_variable","type_identifier":"i32","is_mutable":false,"expression":{"type":"cast","type_identifier":"i32","expression":{"value":"1.23"}}}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "variable_declaration",
+      "name": "my_variable",
+      "type_identifier": "i32",
+      "is_mutable": "false",
+      "expression": {
+        "type": "cast",
+        "type_identifier": "i32",
+        "expression": {
+          "type": "literal",
+          "literal_type": "literal_type_float32",
+          "value": "1.23"
+        }
+      }
+    }
+  ]
+}

@@ -41,6 +41,8 @@ namespace soul::ast::nodes
 		 * @param value
 		 * @return
 		 */
-		static Dependency create(Value value, Type literal_type = Type::Unknown);
+		static Dependency create(Value value, Type literal_type);
+
+		static std::string_view internal_name(const Type type) noexcept;
 	};
 }  // namespace soul::ast::nodes

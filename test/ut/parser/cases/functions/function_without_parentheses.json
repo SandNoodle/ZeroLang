@@ -1,1 +1,16 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"function_declaration","name":"empty_function","return_type":"void","parameters":[],"statements":{"type":"scope_block","statements":[]}}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "function_declaration",
+      "name": "empty_function",
+      "type_identifier": "void",
+      "parameters": [],
+      "statements": {
+        "type": "scope_block",
+        "statements": []
+      }
+    }
+  ]
+}

@@ -1,1 +1,52 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"for_loop","initialization":{"type":"variable_declaration","name":"foo","type_identifier":"i32","is_mutable":false,"expression":{"value":"33"}},"condition":{"type":"binary","lhs":{"value":"foo"},"operator":"<","rhs":{"value":"some_size"}},"update":{"type":"binary","lhs":{"value":"some_expression_here"},"operator":"+","rhs":{"value":"2"}},"statements":{"type":"scope_block","statements":[]}}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "for_loop",
+      "initialization": {
+        "type": "variable_declaration",
+        "name": "foo",
+        "type_identifier": "i32",
+        "is_mutable": "false",
+        "expression": {
+          "type": "literal",
+          "literal_type": "literal_type_int32",
+          "value": "33"
+        }
+      },
+      "condition": {
+        "type": "binary",
+        "operator": "operator_less",
+        "lhs": {
+          "type": "literal",
+          "literal_type": "literal_type_identifier",
+          "value": "foo"
+        },
+        "rhs": {
+          "type": "literal",
+          "literal_type": "literal_type_identifier",
+          "value": "some_size"
+        }
+      },
+      "update": {
+        "type": "binary",
+        "operator": "operator_add",
+        "lhs": {
+          "type": "literal",
+          "literal_type": "literal_type_identifier",
+          "value": "some_expression_here"
+        },
+        "rhs": {
+          "type": "literal",
+          "literal_type": "literal_type_int32",
+          "value": "2"
+        }
+      },
+      "statements": {
+        "type": "scope_block",
+        "statements": []
+      }
+    }
+  ]
+}

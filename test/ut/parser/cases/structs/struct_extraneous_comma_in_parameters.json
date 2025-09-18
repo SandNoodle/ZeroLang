@@ -1,1 +1,26 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"struct_declaration","name":"extraneous_comma","parameters":[{"type":"variable_declaration","name":"first_variable","type_identifier":"i32","is_mutable":false,"expression":"__nullptr__"},{"type":"variable_declaration","name":"this_one_has_comma_but_shouldnt","type_identifier":"f32","is_mutable":false,"expression":"__nullptr__"}]}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "struct_declaration",
+      "name": "extraneous_comma",
+      "parameters": [
+        {
+          "type": "variable_declaration",
+          "name": "first_variable",
+          "type_identifier": "i32",
+          "is_mutable": "false",
+          "expression": null
+        },
+        {
+          "type": "variable_declaration",
+          "name": "this_one_has_comma_but_shouldnt",
+          "type_identifier": "f32",
+          "is_mutable": "false",
+          "expression": null
+        }
+      ]
+    }
+  ]
+}

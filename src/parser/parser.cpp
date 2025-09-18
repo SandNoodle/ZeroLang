@@ -615,7 +615,7 @@ namespace soul::parser
 				                                std::string(current_token_or_default().data)));
 			}
 		} else {
-			condition = LiteralNode::create(Value{ true });
+			condition = LiteralNode::create(Value{ true }, LiteralNode::Type::Boolean);
 		}
 
 		// <block_statement>

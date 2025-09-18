@@ -14,15 +14,11 @@
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
 
-#include <format>
+#include <ranges>
 
 namespace soul::ast::visitors
 {
 	using namespace soul::ast::nodes;
-
-	// TODO: Prettify the JSON?
-
-	static constexpr auto k_unnamed = "__unnamed__";
 
 	StringifyVisitor::StringifyVisitor() {}
 
@@ -31,152 +27,173 @@ namespace soul::ast::visitors
 	void StringifyVisitor::accept(const ASTNode::Reference node)
 	{
 		if (!node) {
-			_ss << "\"__nullptr__\"";
+			_ss << "null";
 			return;
 		}
-		_ss << '{';
+
+		_indent_level += k_indent_amount;
+		_ss << "{\n";
+
 		node->accept(*this);
-		_ss << '}';
+
+		_indent_level -= k_indent_amount;
+		_ss << std::format("\n{}}}", std::string(_indent_level, ' '));
 	}
 
 	void StringifyVisitor::visit(const BinaryNode& node)
 	{
-		_ss << "\"type\":\"binary\",";
-		_ss << "\"lhs\":";
-		accept(node.lhs.get());
-		_ss << ',';
-		_ss << "\"operator\":\"" << ASTNode::name(node.op) << "\",";
-		_ss << "\"rhs\":";
-		accept(node.rhs.get());
+		encode("type", "binary");
+		encode("operator", ASTNode::internal_name(node.op));
+		encode("lhs", node.lhs.get());
+		encode("rhs", node.rhs.get(), false);
 	}
 
 	void StringifyVisitor::visit(const nodes::BlockNode& node)
 	{
-		_ss << "\"type\":\"scope_block\",";
-		_ss << "\"statements\":[";
-		for (size_t index = 0; index < node.statements.size(); ++index) {
-			accept(node.statements[index].get());
-			if (index != node.statements.size() - 1) {
-				_ss << ',';
-			}
-		}
-		_ss << "]";
+		encode("type", "scope_block");
+		encode("statements",
+		       node.statements | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
+		           | std::ranges::to<ASTNode::References>(),
+		       false);
 	}
 
 	void StringifyVisitor::visit(const CastNode& node)
 	{
-		_ss << "\"type\":\"cast\"";
-		_ss << ",\"type_identifier\":\"" << (!node.type_identifier.empty() ? node.type_identifier : k_unnamed) << "\"";
-		_ss << ",\"expression\":";
-		accept(node.expression.get());
+		encode("type", "cast");
+		encode("type_identifier", node.type_identifier);
+		encode("expression", node.expression.get(), false);
 	}
 
 	void StringifyVisitor::visit(const ErrorNode& node)
 	{
-		_ss << "\"type\":\"error\",";
-		_ss << "\"message\":\"" << node.message << "\"";
+		encode("type", "error");
+		encode("message", node.message, false);
 	}
 
 	void StringifyVisitor::visit(const ForLoopNode& node)
 	{
-		_ss << "\"type\":\"for_loop\",";
-		_ss << "\"initialization\":";
-		accept(node.initialization.get());
-		_ss << ",\"condition\":";
-		accept(node.condition.get());
-		_ss << ",\"update\":";
-		accept(node.update.get());
-		_ss << ",\"statements\":";
-		accept(node.statements.get());
+		encode("type", "for_loop");
+		encode("initialization", node.initialization.get());
+		encode("condition", node.condition.get());
+		encode("update", node.update.get());
+		encode("statements", node.statements.get(), false);
 	}
 
 	void StringifyVisitor::visit(const ForeachLoopNode& node)
 	{
-		_ss << "\"type\":\"foreach_loop\",";
-		_ss << "\"variable\":";
-		accept(node.variable.get());
-		_ss << ",\"in_expression\":";
-		accept(node.in_expression.get());
-		_ss << ",\"statements\":";
-		accept(node.statements.get());
+		encode("type", "foreach_loop");
+		encode("variable", node.variable.get());
+		encode("in_expression", node.in_expression.get());
+		encode("statements", node.statements.get(), false);
 	}
 
 	void StringifyVisitor::visit(const FunctionDeclarationNode& node)
 	{
-		_ss << "\"type\":\"function_declaration\",";
-		_ss << "\"name\":\"" << (!node.name.empty() ? node.name : k_unnamed) << "\",";
-		_ss << "\"return_type\":\"" << (!node.type_identifier.empty() ? node.type_identifier : k_unnamed) << "\",";
-		_ss << "\"parameters\":[";
-		for (size_t index = 0; index < node.parameters.size(); ++index) {
-			accept(node.parameters[index].get());
-			if (index != node.parameters.size() - 1) {
-				_ss << ',';
-			}
-		}
-		_ss << "],";
-		_ss << "\"statements\":";
-		accept(node.statements.get());
+		encode("type", "function_declaration");
+		encode("name", node.name);
+		encode("type_identifier", node.type_identifier);
+		encode("parameters", node.parameters | std::views::transform([](const auto& e) -> ASTNode::Reference {
+								 return e.get();
+							 }) | std::ranges::to<ASTNode::References>());
+		encode("statements", node.statements.get(), false);
 	}
 
 	void StringifyVisitor::visit(const IfNode& node)
 	{
-		_ss << "\"type\":\"if\",";
-		_ss << "\"expression\":";
-		accept(node.condition.get());
-		_ss << ",\"if_statements\":";
-		accept(node.if_statements.get());
-		_ss << ",\"else_statements\":";
-		accept(node.else_statements.get());
+		encode("type", "if");
+		encode("expression", node.condition.get());
+		encode("if_statements", node.if_statements.get());
+		encode("else_statements", node.else_statements.get(), false);
 	}
 
-	void StringifyVisitor::visit(const LiteralNode& node) { _ss << std::format("\"value\":\"{}\"", std::string(node)); }
+	void StringifyVisitor::visit(const LiteralNode& node)
+	{
+		encode("type", "literal");
+		encode("literal_type", LiteralNode::internal_name(node.literal_type));
+		encode("value", std::string(node), false);
+	}
 
 	void StringifyVisitor::visit(const ModuleNode& node)
 	{
-		_ss << "\"type\":\"module_declaration\",";
-		_ss << "\"name\":\"" << (!node.name.empty() ? node.name : k_unnamed) << "\",";
-		_ss << "\"statements\":[";
-		for (size_t index = 0; index < node.statements.size(); ++index) {
-			accept(node.statements[index].get());
-			if (index != node.statements.size() - 1) {
-				_ss << ",";
-			}
-		}
-		_ss << "]";
+		encode("type", "module_declaration");
+		encode("name", node.name);
+		encode("statements",
+		       node.statements | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
+		           | std::ranges::to<ASTNode::References>(),
+		       false);
 	}
 
 	void StringifyVisitor::visit(const StructDeclarationNode& node)
 	{
-		_ss << "\"type\":\"struct_declaration\",";
-		_ss << "\"name\":\"" << (!node.name.empty() ? node.name : k_unnamed) << "\",";
-		_ss << "\"parameters\":[";
-		for (size_t index = 0; index < node.parameters.size(); ++index) {
-			accept(node.parameters[index].get());
-			if (index != node.parameters.size() - 1) {
-				_ss << ",";
-			}
-		}
-		_ss << "]";
+		encode("type", "struct_declaration");
+		encode("name", node.name);
+		encode("parameters",
+		       node.parameters | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
+		           | std::ranges::to<ASTNode::References>(),
+		       false);
 	}
 
 	void StringifyVisitor::visit(const UnaryNode& node)
 	{
-		_ss << "\"type\":\"unary\",";
-		_ss << "\"operator\":\"" << ASTNode::name(node.op) << "\",";
-		_ss << "\"expression\":";
-		accept(node.expression.get());
+		encode("type", "unary");
+		encode("operator", ASTNode::internal_name(node.op));
+		encode("expression", node.expression.get(), false);
 	}
 
 	void StringifyVisitor::visit(const VariableDeclarationNode& node)
 	{
-		_ss << "\"type\":\"variable_declaration\",";
-		_ss << "\"name\":\"" << (!node.name.empty() ? node.name : k_unnamed) << "\",";
-		_ss << "\"type_identifier\":\"" << (!node.type_identifier.empty() ? node.type_identifier : k_unnamed) << "\",";
-		_ss << "\"is_mutable\":" << std::boolalpha << node.is_mutable << ",";
-		_ss << "\"expression\":";
-		accept(node.expression.get());
+		encode("type", "variable_declaration");
+		encode("name", node.name);
+		encode("type_identifier", node.type_identifier);
+		encode("is_mutable", node.is_mutable ? "true" : "false");
+		encode("expression", node.expression.get(), false);
 	}
 
-#undef PRINT_TYPE
+	std::string StringifyVisitor::current_indent() const { return std::string(_indent_level, ' '); }
 
+	void StringifyVisitor::encode(std::string_view key, std::string_view value, bool add_trailing_comma)
+	{
+		_ss << current_indent();
+		_ss << std::format("\"{}\": \"{}\"", key, !value.empty() ? value : k_unnamed);
+		if (add_trailing_comma) {
+			_ss << ",\n";
+		}
+	}
+
+	void StringifyVisitor::encode(std::string_view key, const ASTNode::Reference node, bool add_trailing_comma)
+	{
+		_ss << current_indent();
+		_ss << std::format("\"{}\": ", key);
+		accept(node);
+		if (add_trailing_comma) {
+			_ss << ",\n";
+		}
+	}
+
+	void StringifyVisitor::encode(std::string_view key, const ASTNode::References& parameters, bool add_trailing_comma)
+	{
+		_ss << current_indent();
+
+		if (parameters.empty()) {
+			_ss << std::format("\"{}\": []", key);
+		} else {
+			_indent_level += k_indent_amount;
+
+			_ss << std::format("\"{}\": [\n", key);
+			_ss << current_indent();
+			for (std::size_t index = 0; index < parameters.size(); ++index) {
+				accept(parameters[index]);
+				if (index != parameters.size() - 1) {
+					_ss << std::format(",\n{}", current_indent());
+				}
+			}
+
+			_indent_level -= k_indent_amount;
+			_ss << std::format("\n{}]", current_indent());
+		}
+
+		if (add_trailing_comma) {
+			_ss << ",\n";
+		}
+	}
 }  // namespace soul::ast::visitors

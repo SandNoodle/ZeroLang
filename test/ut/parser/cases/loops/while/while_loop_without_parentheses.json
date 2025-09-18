@@ -1,1 +1,20 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"for_loop","initialization":"__nullptr__","condition":{"value":"true"},"update":"__nullptr__","statements":{"type":"scope_block","statements":[]}}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "for_loop",
+      "initialization": null,
+      "condition": {
+        "type": "literal",
+        "literal_type": "literal_type_boolean",
+        "value": "true"
+      },
+      "update": null,
+      "statements": {
+        "type": "scope_block",
+        "statements": []
+      }
+    }
+  ]
+}

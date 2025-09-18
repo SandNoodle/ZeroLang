@@ -32,6 +32,34 @@ namespace soul::ast
 		return k_operators.at(op);
 	}
 
+	std::string_view ASTNode::internal_name(const Operator op) noexcept
+	{
+		using namespace std::string_view_literals;
+		static const std::unordered_map<ASTNode::Operator, std::string_view> k_operators = {
+			{ Operator::Unknown,      "__unknown__"sv            },
+			{ Operator::Add,          "operator_add"sv           },
+			{ Operator::Sub,          "operator_sub"sv           },
+			{ Operator::Mul,          "operator_mul"sv           },
+			{ Operator::Div,          "operator_div"sv           },
+			{ Operator::Mod,          "operator_mod"sv           },
+			{ Operator::Increment,    "operator_increment"sv     },
+			{ Operator::Decrement,    "operator_decrement"sv     },
+			{ Operator::Equal,        "operator_equal"sv         },
+			{ Operator::NotEqual,     "operator_not_equal"sv     },
+			{ Operator::Greater,      "operator_greater"sv       },
+			{ Operator::GreaterEqual, "operator_greater_equal"sv },
+			{ Operator::Less,         "operator_less"sv          },
+			{ Operator::LessEqual,    "operator_less_equal"sv    },
+			{ Operator::LogicalNot,   "operator_logical_not"sv   },
+			{ Operator::LogicalAnd,   "operator_logical_and"sv   },
+			{ Operator::LogicalOr,    "operator_logical_or"sv    },
+		};
+		if (!k_operators.contains(op)) [[unlikely]] {
+			return k_operators.at(Operator::Unknown);
+		}
+		return k_operators.at(op);
+	}
+
 	ASTNode::Operator ASTNode::as_operator(Token::Type type) noexcept
 	{
 		static const std::unordered_map<Token::Type, Operator> k_operators = {

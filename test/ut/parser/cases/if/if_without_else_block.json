@@ -1,1 +1,34 @@
-{"type":"module_declaration","name":"test_module","statements":[{"type":"if","expression":{"value":"true"},"if_statements":{"type":"scope_block","statements":[{"type":"variable_declaration","name":"some_var","type_identifier":"bool","is_mutable":false,"expression":{"value":"true"}}]},"else_statements":{"type":"scope_block","statements":[]}}]}
+{
+  "type": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "type": "if",
+      "expression": {
+        "type": "literal",
+        "literal_type": "literal_type_boolean",
+        "value": "true"
+      },
+      "if_statements": {
+        "type": "scope_block",
+        "statements": [
+          {
+            "type": "variable_declaration",
+            "name": "some_var",
+            "type_identifier": "bool",
+            "is_mutable": "false",
+            "expression": {
+              "type": "literal",
+              "literal_type": "literal_type_boolean",
+              "value": "true"
+            }
+          }
+        ]
+      },
+      "else_statements": {
+        "type": "scope_block",
+        "statements": []
+      }
+    }
+  ]
+}
