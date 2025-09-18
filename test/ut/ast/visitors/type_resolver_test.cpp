@@ -1,3 +1,5 @@
+#include "ast/visitors/type_resolver.h"
+
 #include <gtest/gtest.h>
 
 #include "ast/nodes/binary.h"
@@ -13,7 +15,7 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
-#include "ast/visitors/type_resolver.h"
+#include "ast/visitors/error_collector.h"
 
 #include <string_view>
 #include <unordered_map>
@@ -34,7 +36,14 @@ namespace soul::ast::visitors::ut
 
 			auto type_discoverer_root = type_discoverer_visitor.cloned();
 
-			// TODO: Check if it does not contain errors.
+			ErrorCollectorVisitor error_collector{};
+			error_collector.accept(type_discoverer_root.get());
+			if (!error_collector.is_valid()) {
+				for (const auto& [depth, error] : error_collector.errors()) {
+					std::cerr << std::format("[{}]: {}\n", depth, error->message);
+				}
+				return nullptr;
+			}
 
 			TypeResolverVisitor type_resolver_visitor{ type_discoverer_visitor.discovered_types() };
 			type_resolver_visitor.accept(type_discoverer_root.get());
