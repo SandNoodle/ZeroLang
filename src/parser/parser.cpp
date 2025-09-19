@@ -399,6 +399,30 @@ namespace soul::parser
 		                                       BlockNode::create(std::move(statements)));
 	}
 
+	ast::ASTNode::Dependency Parser::parse_grouping()
+	{
+		// <grouping_expression> ::= '(' <expression> ')'
+
+		// '('
+		if (!require(Token::Type::SymbolParenLeft)) {
+			return create_error(std::format("expected '{}', but got: '{}'",
+			                                Token::name(Token::Type::SymbolParenLeft),
+			                                std::string(current_token_or_default().data)));
+		}
+
+		// <expression>
+		auto expression = parse_expression();
+
+		// ')'
+		if (!require(Token::Type::SymbolParenRight)) {
+			return create_error(std::format("expected '{}', but got: '{}'",
+			                                Token::name(Token::Type::SymbolParenRight),
+			                                std::string(current_token_or_default().data)));
+		}
+
+		return expression;
+	}
+
 	ASTNode::Dependency Parser::parse_if()
 	{
 		// <if_statement> ::= <keyword_if> '(' <expression> ')' <block_statement> [ <keyword_else> <block_statement> ]
@@ -793,7 +817,7 @@ namespace soul::parser
 	Parser::PrecedenceRule Parser::precedence_rule(Token::Type type) const noexcept
 	{
 		if (type == Token::Type::SymbolParenLeft) {
-			return { Precedence::Call, nullptr, &Parser::parse_function_call, nullptr };
+			return { Precedence::Call, &Parser::parse_grouping, &Parser::parse_function_call, nullptr };
 		}
 
 		if (std::ranges::contains(k_literal_types, type)) {
