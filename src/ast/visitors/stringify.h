@@ -51,6 +51,9 @@ namespace soul::ast::visitors
 		std::string current_indent() const;
 		void        encode(std::string_view key, std::string_view value, bool add_trailing_comma = true);
 		void        encode(std::string_view key, const ASTNode::Reference node, bool add_trailing_comma = true);
-		void        encode(std::string_view key, const ASTNode::References& parameters, bool add_trailing_comma = true);
+		template <std::ranges::forward_range T>
+		void encode(std::string_view key, const T& parameters, bool add_trailing_comma = true)
+			requires(std::same_as<ASTNode::Dependency, std::ranges::range_value_t<T>>);
 	};
 }  // namespace soul::ast::visitors
+#include "ast/visitors/stringify.inl"

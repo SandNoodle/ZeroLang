@@ -52,10 +52,7 @@ namespace soul::ast::visitors
 	void StringifyVisitor::visit(const nodes::BlockNode& node)
 	{
 		encode("type", "scope_block");
-		encode("statements",
-		       node.statements | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
-		           | std::ranges::to<ASTNode::References>(),
-		       false);
+		encode("statements", node.statements, false);
 	}
 
 	void StringifyVisitor::visit(const CastNode& node)
@@ -92,10 +89,7 @@ namespace soul::ast::visitors
 	{
 		encode("type", "function_call");
 		encode("name", node.name);
-		encode("parameters",
-		       node.parameters | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
-		           | std::ranges::to<ASTNode::References>(),
-		       false);
+		encode("parameters", node.parameters, false);
 	}
 
 	void StringifyVisitor::visit(const FunctionDeclarationNode& node)
@@ -103,9 +97,7 @@ namespace soul::ast::visitors
 		encode("type", "function_declaration");
 		encode("name", node.name);
 		encode("type_identifier", node.type_identifier);
-		encode("parameters", node.parameters | std::views::transform([](const auto& e) -> ASTNode::Reference {
-								 return e.get();
-							 }) | std::ranges::to<ASTNode::References>());
+		encode("parameters", node.parameters);
 		encode("statements", node.statements.get(), false);
 	}
 
@@ -128,20 +120,14 @@ namespace soul::ast::visitors
 	{
 		encode("type", "module_declaration");
 		encode("name", node.name);
-		encode("statements",
-		       node.statements | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
-		           | std::ranges::to<ASTNode::References>(),
-		       false);
+		encode("statements", node.statements, false);
 	}
 
 	void StringifyVisitor::visit(const StructDeclarationNode& node)
 	{
 		encode("type", "struct_declaration");
 		encode("name", node.name);
-		encode("parameters",
-		       node.parameters | std::views::transform([](const auto& e) -> ASTNode::Reference { return e.get(); })
-		           | std::ranges::to<ASTNode::References>(),
-		       false);
+		encode("parameters", node.parameters, false);
 	}
 
 	void StringifyVisitor::visit(const UnaryNode& node)
@@ -176,33 +162,6 @@ namespace soul::ast::visitors
 		_ss << current_indent();
 		_ss << std::format("\"{}\": ", key);
 		accept(node);
-		if (add_trailing_comma) {
-			_ss << ",\n";
-		}
-	}
-
-	void StringifyVisitor::encode(std::string_view key, const ASTNode::References& parameters, bool add_trailing_comma)
-	{
-		_ss << current_indent();
-
-		if (parameters.empty()) {
-			_ss << std::format("\"{}\": []", key);
-		} else {
-			_indent_level += k_indent_amount;
-
-			_ss << std::format("\"{}\": [\n", key);
-			_ss << current_indent();
-			for (std::size_t index = 0; index < parameters.size(); ++index) {
-				accept(parameters[index]);
-				if (index != parameters.size() - 1) {
-					_ss << std::format(",\n{}", current_indent());
-				}
-			}
-
-			_indent_level -= k_indent_amount;
-			_ss << std::format("\n{}]", current_indent());
-		}
-
 		if (add_trailing_comma) {
 			_ss << ",\n";
 		}

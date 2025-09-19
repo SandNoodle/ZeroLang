@@ -58,9 +58,7 @@ namespace soul::ast::visitors
 
 	ASTNode::ScopeBlock CopyVisitor::clone(const nodes::BlockNode& node)
 	{
-		auto cloned_statements{ node.statements
-			                    | std::views::transform([this](const auto& s) { return clone(s.get()); })
-			                    | std::ranges::to<ASTNode::Dependencies>() };
+		auto cloned_statements{ clone(node.statements) };
 		return BlockNode::create(std::move(cloned_statements));
 	}
 
@@ -91,17 +89,12 @@ namespace soul::ast::visitors
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::FunctionCallNode& node)
 	{
-		auto cloned_parameters{ node.parameters
-			                    | std::views::transform([this](const auto& p) { return clone(p.get()); })
-			                    | std::ranges::to<ASTNode::Dependencies>() };
-		return FunctionCallNode::create(node.name, std::move(cloned_parameters));
+		return FunctionCallNode::create(node.name, clone(node.parameters));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::FunctionDeclarationNode& node)
 	{
-		auto cloned_parameters{ node.parameters
-			                    | std::views::transform([this](const auto& p) { return clone(p.get()); })
-			                    | std::ranges::to<ASTNode::Dependencies>() };
+		auto cloned_parameters{ clone(node.parameters) };
 		auto statements{ clone(*static_cast<BlockNode*>(node.statements.get())) };
 		return FunctionDeclarationNode::create(
 			node.name, node.type_identifier, std::move(cloned_parameters), std::move(statements));
@@ -122,18 +115,12 @@ namespace soul::ast::visitors
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::ModuleNode& node)
 	{
-		auto cloned_statements{ node.statements
-			                    | std::views::transform([this](const auto& s) { return clone(s.get()); })
-			                    | std::ranges::to<ASTNode::Dependencies>() };
-		return ModuleNode::create(node.name, std::move(cloned_statements));
+		return ModuleNode::create(node.name, clone(node.statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::StructDeclarationNode& node)
 	{
-		auto cloned_parameters{ node.parameters
-			                    | std::views::transform([this](const auto& p) { return clone(p.get()); })
-			                    | std::ranges::to<ASTNode::Dependencies>() };
-		return StructDeclarationNode::create(node.name, std::move(cloned_parameters));
+		return StructDeclarationNode::create(node.name, clone(node.parameters));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::UnaryNode& node)

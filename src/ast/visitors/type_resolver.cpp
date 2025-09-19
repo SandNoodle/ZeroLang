@@ -194,10 +194,10 @@ namespace soul::ast::visitors
 		_current_clone->type = get_type_or_default(node.type_identifier);
 		_functions_in_module.emplace_back(
 			node.name,
-			FunctionDeclaration{ .input_types = want_types | std::ranges::to<std::vector<types::Type>>(),
-		                         .return_type = function_declaration.type
-
-		    });
+			FunctionDeclaration{
+				.input_types = std::vector<types::Type>{ want_types.begin(), want_types.end() },
+				.return_type = function_declaration.type
+        });
 	}
 
 	void TypeResolverVisitor::visit(const IfNode& node)

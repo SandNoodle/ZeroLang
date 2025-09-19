@@ -43,21 +43,30 @@ namespace soul::ast::visitors
 		void visit(const nodes::UnaryNode&) override;
 		void visit(const nodes::VariableDeclarationNode&) override;
 
-		ASTNode::Dependency clone(const ASTNode::Reference node);
-		ASTNode::Dependency clone(const nodes::BinaryNode&);
-		ASTNode::ScopeBlock clone(const nodes::BlockNode&);
-		ASTNode::Dependency clone(const nodes::CastNode&);
-		ASTNode::Dependency clone(const nodes::ErrorNode&);
-		ASTNode::Dependency clone(const nodes::ForLoopNode&);
-		ASTNode::Dependency clone(const nodes::ForeachLoopNode&);
-		ASTNode::Dependency clone(const nodes::FunctionCallNode&);
-		ASTNode::Dependency clone(const nodes::FunctionDeclarationNode&);
-		ASTNode::Dependency clone(const nodes::IfNode&);
-		ASTNode::Dependency clone(const nodes::LiteralNode&);
-		ASTNode::Dependency clone(const nodes::ModuleNode&);
-		ASTNode::Dependency clone(const nodes::StructDeclarationNode&);
-		ASTNode::Dependency clone(const nodes::UnaryNode&);
-		ASTNode::Dependency clone(const nodes::VariableDeclarationNode&);
+		ASTNode::Dependency   clone(const ASTNode::Reference node);
+		ASTNode::Dependency   clone(const nodes::BinaryNode&);
+		ASTNode::ScopeBlock   clone(const nodes::BlockNode&);
+		ASTNode::Dependency   clone(const nodes::CastNode&);
+		ASTNode::Dependency   clone(const nodes::ErrorNode&);
+		ASTNode::Dependency   clone(const nodes::ForLoopNode&);
+		ASTNode::Dependency   clone(const nodes::ForeachLoopNode&);
+		ASTNode::Dependency   clone(const nodes::FunctionCallNode&);
+		ASTNode::Dependency   clone(const nodes::FunctionDeclarationNode&);
+		ASTNode::Dependency   clone(const nodes::IfNode&);
+		ASTNode::Dependency   clone(const nodes::LiteralNode&);
+		ASTNode::Dependency   clone(const nodes::ModuleNode&);
+		ASTNode::Dependency   clone(const nodes::StructDeclarationNode&);
+		ASTNode::Dependency   clone(const nodes::UnaryNode&);
+		ASTNode::Dependency   clone(const nodes::VariableDeclarationNode&);
+		ASTNode::Dependencies clone(const std::ranges::forward_range auto& elements)
+		{
+			ASTNode::Dependencies cloned{};
+			cloned.reserve(elements.size());
+			for (const auto& element : elements) {
+				cloned.emplace_back(clone(element.get()));
+			}
+			return cloned;
+		}
 
 		/**
 		 * @brief Returns the underlying node.
