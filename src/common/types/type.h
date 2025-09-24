@@ -21,7 +21,7 @@ namespace soul::types
 	                || std::same_as<T, StructType>     //
 		;
 
-	std::weak_ordering operator<=>(const Type& lhs, const Type& rhs);
+	constexpr std::weak_ordering operator<=>(const Type& lhs, const Type& rhs);
 
 	/**
 	 * @brief Class that represents a specific type in the language's type system.
@@ -36,16 +36,16 @@ namespace soul::types
 		Variant _type = PrimitiveType::Kind::Unknown;
 
 		public:
-		Type() noexcept            = default;
-		Type(const Type&) noexcept = default;
-		Type(Type&&) noexcept      = default;
-		explicit Type(Variant&& type) noexcept;
-		Type(PrimitiveType::Kind primitive_type);
+		constexpr Type() noexcept            = default;
+		constexpr Type(const Type&) noexcept = default;
+		constexpr Type(Type&&) noexcept      = default;
+		explicit constexpr Type(Variant&& type) noexcept : _type(std::move(type)) {}
+		constexpr Type(PrimitiveType::Kind type) : _type(PrimitiveType(type)) {}
 
-		Type&    operator=(const Type&) noexcept        = default;
-		Type&    operator=(Type&&) noexcept             = default;
-		bool     operator==(const Type&) const noexcept = default;
-		explicit operator std::string() const;
+		Type&          operator=(const Type&) noexcept        = default;
+		Type&          operator=(Type&&) noexcept             = default;
+		constexpr bool operator==(const Type&) const noexcept = default;
+		explicit       operator std::string() const;
 
 		/**
 		 * @brief Verifies if a Type is of a given TypeKind's type.
@@ -69,7 +69,12 @@ namespace soul::types
 			return std::get<T>(_type);
 		}
 
-		friend std::ostream&      operator<<(std::ostream& os, const Type& type);
-		friend std::weak_ordering operator<=>(const Type&, const Type&);
+		friend std::ostream&                operator<<(std::ostream& os, const Type& type);
+		friend constexpr std::weak_ordering operator<=>(const Type&, const Type&);
 	};
+
+	constexpr std::weak_ordering operator<=>(const Type& lhs, const Type& rhs)
+	{
+		return std::tie(lhs._type) <=> std::tie(rhs._type);
+	}
 }  // namespace soul::types

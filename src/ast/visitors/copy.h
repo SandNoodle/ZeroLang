@@ -17,8 +17,6 @@ namespace soul::ast::visitors
 		ASTNode::Dependency _current_clone{};
 
 		public:
-		CopyVisitor();
-
 		/** @brief Returns the cloned (sub-) tree. */
 		ASTNode::Dependency cloned() noexcept;
 

@@ -30,7 +30,7 @@ namespace soul::types
 		Kind type = Kind::Unknown;
 
 		public:
-		PrimitiveType(Kind type = Kind::Unknown) : type(type) {}
+		constexpr PrimitiveType(Kind type = Kind::Unknown) : type(type) {}
 
 		bool               operator==(const PrimitiveType&) const noexcept = default;
 		std::weak_ordering operator<=>(const PrimitiveType&) const         = default;

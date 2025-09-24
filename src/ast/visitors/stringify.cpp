@@ -105,7 +105,7 @@ namespace soul::ast::visitors
 	{
 		encode("type", "if");
 		encode("expression", node.condition.get());
-		encode("if_statements", node.if_statements.get());
+		encode("then_statements", node.then_statements.get());
 		encode("else_statements", node.else_statements.get(), false);
 	}
 

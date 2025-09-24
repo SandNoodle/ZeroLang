@@ -78,7 +78,7 @@ namespace soul::ast::visitors
 	void DefaultTraverseVisitor::visit(const IfNode& node)
 	{
 		accept(node.condition.get());
-		accept(node.if_statements.get());
+		accept(node.then_statements.get());
 		accept(node.else_statements.get());
 	}
 

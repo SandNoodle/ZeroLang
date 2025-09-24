@@ -9,7 +9,7 @@
         "literal_type": "literal_type_boolean",
         "value": "true"
       },
-      "if_statements": {
+      "then_statements": {
         "type": "scope_block",
         "statements": [
           {

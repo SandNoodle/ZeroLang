@@ -13,20 +13,20 @@ namespace soul::ast::nodes
 	{
 		public:
 		Dependency condition;
-		ScopeBlock if_statements;
+		ScopeBlock then_statements;
 		ScopeBlock else_statements;
 
 		public:
-		explicit IfNode(Dependency condition, ScopeBlock if_statements, ScopeBlock else_statements = {}) noexcept;
+		explicit IfNode(Dependency condition, ScopeBlock then_statements, ScopeBlock else_statements = {}) noexcept;
 		~IfNode() override = default;
 
 		/**
 		 * @brief
 		 * @param condition
-		 * @param if_statements
+		 * @param then_statements
 		 * @param else_statements [Optional]
 		 */
-		static Dependency create(Dependency condition, ScopeBlock if_statements, ScopeBlock else_statements = {});
+		static Dependency create(Dependency condition, ScopeBlock then_statements, ScopeBlock else_statements = {});
 	};
 
 }  // namespace soul::ast::nodes

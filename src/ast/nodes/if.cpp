@@ -3,15 +3,15 @@
 namespace soul::ast::nodes
 {
 
-	IfNode::IfNode(Dependency condition, ScopeBlock if_statements, ScopeBlock else_statements) noexcept
+	IfNode::IfNode(Dependency condition, ScopeBlock then_statements, ScopeBlock else_statements) noexcept
 		: condition(std::move(condition)),
-		  if_statements(std::move(if_statements)),
+		  then_statements(std::move(then_statements)),
 		  else_statements(std::move(else_statements))
 	{
 	}
 
-	IfNode::Dependency IfNode::create(Dependency condition, ScopeBlock if_statements, ScopeBlock else_statements)
+	IfNode::Dependency IfNode::create(Dependency condition, ScopeBlock then_statements, ScopeBlock else_statements)
 	{
-		return std::make_unique<IfNode>(std::move(condition), std::move(if_statements), std::move(else_statements));
+		return std::make_unique<IfNode>(std::move(condition), std::move(then_statements), std::move(else_statements));
 	}
 }  // namespace soul::ast::nodes

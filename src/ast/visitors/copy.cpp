@@ -21,8 +21,6 @@ namespace soul::ast::visitors
 {
 	using namespace ast::nodes;
 
-	CopyVisitor::CopyVisitor() {}
-
 	ASTNode::Dependency CopyVisitor::cloned() noexcept { return std::move(_current_clone); }
 
 	void CopyVisitor::visit(const nodes::BinaryNode& node) { _current_clone = clone(node); }
@@ -58,8 +56,7 @@ namespace soul::ast::visitors
 
 	ASTNode::ScopeBlock CopyVisitor::clone(const nodes::BlockNode& node)
 	{
-		auto cloned_statements{ clone(node.statements) };
-		return BlockNode::create(std::move(cloned_statements));
+		return BlockNode::create(clone(node.statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::CastNode& node)
@@ -103,9 +100,9 @@ namespace soul::ast::visitors
 	ASTNode::Dependency CopyVisitor::clone(const nodes::IfNode& node)
 	{
 		auto condition{ clone(node.condition.get()) };
-		auto if_statements{ clone(*static_cast<BlockNode*>(node.if_statements.get())) };
+		auto then_statements{ clone(*static_cast<BlockNode*>(node.then_statements.get())) };
 		auto else_statements{ clone(*static_cast<BlockNode*>(node.else_statements.get())) };
-		return IfNode::create(std::move(condition), std::move(if_statements), std::move(else_statements));
+		return IfNode::create(std::move(condition), std::move(then_statements), std::move(else_statements));
 	}
 
 	ASTNode::Dependency CopyVisitor::clone(const nodes::LiteralNode& node)
