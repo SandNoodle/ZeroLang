@@ -3,20 +3,13 @@
 #include "common/types/type.h"
 #include "common/value.h"
 #include "core/types.h"
+#include "ir/instruction_fwd.h"
 
 #include <array>
-#include <type_traits>
 
 namespace soul::ir
 {
 	class BasicBlock;
-	struct Instruction;
-
-	/**
-	 * @brief InstructionKind is a concept, which holds true for any class that inherits from an Instruction class.
-	 */
-	template <typename T>
-	concept InstructionKind = std::derived_from<T, Instruction>;
 
 	/**
 	 * @brief Represents a single Instruction in the language's Intermediate Representation.
@@ -77,7 +70,7 @@ namespace soul::ir
 		virtual ~Unreachable() override = default;
 
 		constexpr bool operator==(const Unreachable& other) const noexcept  = default;
-		auto           operator<=>(const Unreachable& other) const noexcept = default;
+		constexpr auto operator<=>(const Unreachable& other) const noexcept = default;
 	};
 
 	/**
@@ -90,7 +83,7 @@ namespace soul::ir
 		virtual ~Noop() override = default;
 
 		constexpr bool operator==(const Noop& other) const noexcept  = default;
-		auto           operator<=>(const Noop& other) const noexcept = default;
+		constexpr auto operator<=>(const Noop& other) const noexcept = default;
 	};
 
 	/**
@@ -103,7 +96,7 @@ namespace soul::ir
 		virtual ~Cast() override = default;
 
 		constexpr bool operator==(const Cast& other) const noexcept  = default;
-		auto           operator<=>(const Cast& other) const noexcept = default;
+		constexpr auto operator<=>(const Cast& other) const noexcept = default;
 	};
 
 	/**
@@ -135,7 +128,7 @@ namespace soul::ir
 		virtual ~Jump() override = default;
 
 		constexpr bool operator==(const Jump& other) const noexcept  = default;
-		auto           operator<=>(const Jump& other) const noexcept = default;
+		constexpr auto operator<=>(const Jump& other) const noexcept = default;
 	};
 
 	/**
@@ -152,7 +145,7 @@ namespace soul::ir
 		constexpr JumpIf(Instruction* condition, BasicBlock* then_block, BasicBlock* else_block);
 
 		constexpr bool operator==(const JumpIf& other) const noexcept  = default;
-		auto           operator<=>(const JumpIf& other) const noexcept = default;
+		constexpr auto operator<=>(const JumpIf& other) const noexcept = default;
 	};
 
 	/**
@@ -165,36 +158,8 @@ namespace soul::ir
 		virtual ~Not() override = default;
 
 		constexpr bool operator==(const Not& other) const noexcept  = default;
-		auto           operator<=>(const Not& other) const noexcept = default;
+		constexpr auto operator<=>(const Not& other) const noexcept = default;
 	};
-
-	/**
-	 * @brief Arithmetic instructions: performs an arithmetic operation on two expressions.
-	 */
-#define SOUL_ARITHMETIC_INSTRUCTIONS \
-	SOUL_INSTRUCTION(Add)            \
-	SOUL_INSTRUCTION(Sub)            \
-	SOUL_INSTRUCTION(Mul)            \
-	SOUL_INSTRUCTION(Div)            \
-	SOUL_INSTRUCTION(Mod)
-
-	/**
-	 * @brief Comparison instructions: compare two expressions; returns boolean result.
-	 */
-#define SOUL_COMPARISON_INSTRUCTIONS \
-	SOUL_INSTRUCTION(Equal)          \
-	SOUL_INSTRUCTION(NotEqual)       \
-	SOUL_INSTRUCTION(Greater)        \
-	SOUL_INSTRUCTION(GreaterEqual)   \
-	SOUL_INSTRUCTION(Less)           \
-	SOUL_INSTRUCTION(LessEqual)
-
-	/**
-	 * @brief Logical instructions: perform boolean arithmetic on two expressions; returns boolean result.
-	 */
-#define SOUL_LOGICAL_INSTRUCTIONS \
-	SOUL_INSTRUCTION(And)         \
-	SOUL_INSTRUCTION(Or)
 
 #define SOUL_INSTRUCTION(name)                                                  \
 	struct name final : public Instruction                                      \
@@ -206,7 +171,7 @@ namespace soul::ir
 		}                                                                       \
 		virtual ~name() override                                     = default; \
 		constexpr bool operator==(const name& other) const noexcept  = default; \
-		auto           operator<=>(const name& other) const noexcept = default; \
+		constexpr auto operator<=>(const name& other) const noexcept = default; \
 	};
 	SOUL_ARITHMETIC_INSTRUCTIONS
 #undef SOUL_INSTRUCTION
@@ -221,14 +186,10 @@ namespace soul::ir
 		}                                                                                                        \
 		virtual ~name() override                                     = default;                                  \
 		constexpr bool operator==(const name& other) const noexcept  = default;                                  \
-		auto           operator<=>(const name& other) const noexcept = default;                                  \
+		constexpr auto operator<=>(const name& other) const noexcept = default;                                  \
 	};
 	SOUL_COMPARISON_INSTRUCTIONS
 	SOUL_LOGICAL_INSTRUCTIONS
 #undef SOUL_INSTRUCTION
-
-#undef SOUL_ARITHMETIC_INSTRUCTIONS
-#undef SOUL_COMPARISON_INSTRUCTIONS
-#undef SOUL_LOGICAL_INSTRUCTIONS
 }  // namespace soul::ir
 #include "ir/instruction.inl"

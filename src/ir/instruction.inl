@@ -9,13 +9,13 @@ namespace soul::ir
 	template <InstructionKind T>
 	constexpr auto Instruction::as() const noexcept -> const T&
 	{
-		return dynamic_cast<T&>(*this);
+		return dynamic_cast<const T&>(*this);
 	}
 
 	template <InstructionKind T>
 	constexpr auto Instruction::as() noexcept -> T&
 	{
-		return dynamic_cast<const T&>(*this);
+		return dynamic_cast<T&>(*this);
 	}
 
 	constexpr auto Instruction::no_args() noexcept -> Arguments { return Arguments{ nullptr, nullptr }; }
