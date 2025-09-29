@@ -1,0 +1,1 @@
+let variable : str = function_called_here("some_value")
