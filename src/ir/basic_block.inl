@@ -1,3 +1,4 @@
+#pragma once
 namespace soul::ir
 {
 	constexpr BasicBlock::BasicBlock(Label label) : _label(label) {}

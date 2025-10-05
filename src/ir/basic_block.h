@@ -35,10 +35,10 @@ namespace soul::ir
 		constexpr BasicBlock(BasicBlock&&) noexcept = default;
 		constexpr ~BasicBlock()                     = default;
 
-		BasicBlock&    operator=(const BasicBlock&)                        = delete;
-		BasicBlock&    operator=(BasicBlock&&) noexcept                    = default;
-		constexpr bool operator==(const BasicBlock& other) const noexcept  = default;
-		constexpr auto operator<=>(const BasicBlock& other) const noexcept = default;
+		constexpr BasicBlock& operator=(const BasicBlock&)                        = delete;
+		constexpr BasicBlock& operator=(BasicBlock&&) noexcept                    = default;
+		constexpr bool        operator==(const BasicBlock& other) const noexcept  = default;
+		constexpr auto        operator<=>(const BasicBlock& other) const noexcept = default;
 
 		[[nodiscard]] constexpr Label               label() const noexcept;
 		[[nodiscard]] constexpr const Instructions& instructions() const noexcept;

@@ -1,3 +1,4 @@
+#pragma once
 namespace soul::ast::visitors
 {
 	template <std::ranges::forward_range T>
