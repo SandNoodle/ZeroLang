@@ -15,7 +15,7 @@ namespace soul::ir
 	 * @brief Represents a single Instruction in the language's Intermediate Representation.
 	 * @detials Represented in Static Single-Assignment (SSA) Three-Address Code (TAC) form.
 	 */
-	struct [[gnu::packed]] Instruction
+	struct Instruction
 	{
 		public:
 		using Version   = u32;
@@ -146,6 +146,38 @@ namespace soul::ir
 
 		constexpr bool operator==(const JumpIf& other) const noexcept  = default;
 		constexpr auto operator<=>(const JumpIf& other) const noexcept = default;
+	};
+
+	/**
+	 * @brief Phi instruction: performs a read operation and returns the current value of its 'shadow variable', i.e.
+	 * reads the current value that was set by its correlated Upsilon instruction.
+	 * @see https://gist.github.com/pizlonator/cf1e72b8600b1437dda8153ea3fdb963
+	 */
+	struct Phi final : public Instruction
+	{
+		public:
+		constexpr Phi(types::Type type);
+
+		constexpr bool operator==(const Phi& other) const noexcept  = default;
+		constexpr auto operator<=>(const Phi& other) const noexcept = default;
+	};
+
+	/**
+	 * @brief Upsilon instruction: performs a write operation (stores a value) into a 'shadow variable' of a given
+	 * phi node, i.e. stores a value that will be used by a correlated Phi instruction.
+	 * @see https://gist.github.com/pizlonator/cf1e72b8600b1437dda8153ea3fdb963
+	 */
+	struct Upsilon final : public Instruction
+	{
+		public:
+		Instruction* phi;
+
+		public:
+		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+		constexpr Upsilon(Instruction* value, Instruction* phi);
+
+		constexpr bool operator==(const Upsilon& other) const noexcept  = default;
+		constexpr auto operator<=>(const Upsilon& other) const noexcept = default;
 	};
 
 	/**

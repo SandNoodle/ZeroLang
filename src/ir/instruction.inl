@@ -57,6 +57,13 @@ namespace soul::ir
 	{
 	}
 
+	constexpr Phi::Phi(types::Type type) : Instruction(std::move(type), Instruction::no_args()) {}
+
+	constexpr Upsilon::Upsilon(Instruction* value, Instruction* phi)
+		: Instruction(types::Type{ types::PrimitiveType::Kind::Void }, Instruction::single_arg(value)), phi(phi)
+	{
+	}
+
 	constexpr Not::Not(Instruction* arg)
 		: Instruction(types::Type{ types::PrimitiveType::Kind::Boolean }, Instruction::single_arg(arg))
 	{
