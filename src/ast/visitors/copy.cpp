@@ -14,6 +14,7 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/nodes/while.h"
 
 #include <ranges>
 
@@ -37,6 +38,7 @@ namespace soul::ast::visitors
 	void CopyVisitor::visit(const nodes::StructDeclarationNode& node) { _current_clone = clone(node); }
 	void CopyVisitor::visit(const nodes::UnaryNode& node) { _current_clone = clone(node); }
 	void CopyVisitor::visit(const nodes::VariableDeclarationNode& node) { _current_clone = clone(node); }
+	void CopyVisitor::visit(const nodes::WhileNode& node) { _current_clone = clone(node); }
 
 	ASTNode::Dependency CopyVisitor::clone(const ASTNode::Reference node)
 	{
@@ -129,5 +131,12 @@ namespace soul::ast::visitors
 	{
 		return VariableDeclarationNode::create(
 			node.name, node.type_identifier, clone(node.expression.get()), node.is_mutable);
+	}
+
+	ASTNode::Dependency CopyVisitor::clone(const nodes::WhileNode& node)
+	{
+		auto condition{ clone(node.condition.get()) };
+		auto statements{ clone(*static_cast<BlockNode*>(node.statements.get())) };
+		return WhileNode::create(std::move(condition), std::move(statements));
 	}
 }  // namespace soul::ast::visitors

@@ -34,6 +34,7 @@ namespace soul::ast::visitors
 		virtual constexpr void visit(const nodes::StructDeclarationNode&) {}
 		virtual constexpr void visit(const nodes::UnaryNode&) {}
 		virtual constexpr void visit(const nodes::VariableDeclarationNode&) {}
+		virtual constexpr void visit(const nodes::WhileNode&) {}
 
 		virtual constexpr void visit(nodes::BinaryNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::BlockNode& node) { visit(std::as_const(node)); }
@@ -49,5 +50,6 @@ namespace soul::ast::visitors
 		virtual constexpr void visit(nodes::StructDeclarationNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::UnaryNode& node) { visit(std::as_const(node)); }
 		virtual constexpr void visit(nodes::VariableDeclarationNode& node) { visit(std::as_const(node)); }
+		virtual constexpr void visit(nodes::WhileNode& node) { visit(std::as_const(node)); }
 	};
 }  // namespace soul::ast::visitors

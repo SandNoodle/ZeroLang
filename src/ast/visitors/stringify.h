@@ -46,6 +46,7 @@ namespace soul::ast::visitors
 		void visit(const nodes::StructDeclarationNode&) override;
 		void visit(const nodes::UnaryNode&) override;
 		void visit(const nodes::VariableDeclarationNode&) override;
+		void visit(const nodes::WhileNode&) override;
 
 		private:
 		std::string current_indent() const;

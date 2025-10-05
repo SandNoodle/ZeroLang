@@ -19,6 +19,7 @@ namespace soul::ast::nodes
 	class StructDeclarationNode;
 	class UnaryNode;
 	class VariableDeclarationNode;
+	class WhileNode;
 
 	/**
 	 * @brief NodeKind is a concept that specifies (and is satisfied by) nodes that can be represented in the
@@ -39,5 +40,6 @@ namespace soul::ast::nodes
 	                || std::same_as<T, StructDeclarationNode>    //
 	                || std::same_as<T, UnaryNode>                //
 	                || std::same_as<T, VariableDeclarationNode>  //
+	                || std::same_as<T, WhileNode>                //
 		;
 }  // namespace soul::ast::nodes

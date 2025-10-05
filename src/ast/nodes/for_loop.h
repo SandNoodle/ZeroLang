@@ -5,7 +5,6 @@
 
 namespace soul::ast::nodes
 {
-
 	/**
 	 * @brief Represents any conditional 'ForLoop' expression statement
 	 * in the Abstract Syntax Tree (AST), such as `for` or `while` loops.

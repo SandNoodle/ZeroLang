@@ -14,6 +14,7 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/nodes/while.h"
 
 #include <ranges>
 
@@ -144,6 +145,13 @@ namespace soul::ast::visitors
 		encode("type_identifier", node.type_identifier);
 		encode("is_mutable", node.is_mutable ? "true" : "false");
 		encode("expression", node.expression.get(), false);
+	}
+
+	void StringifyVisitor::visit(const WhileNode& node)
+	{
+		encode("type", "while_loop");
+		encode("condition", node.condition.get());
+		encode("statements", node.statements.get(), false);
 	}
 
 	std::string StringifyVisitor::current_indent() const { return std::string(_indent_level, ' '); }

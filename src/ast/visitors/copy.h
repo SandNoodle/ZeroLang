@@ -40,6 +40,7 @@ namespace soul::ast::visitors
 		void visit(const nodes::StructDeclarationNode&) override;
 		void visit(const nodes::UnaryNode&) override;
 		void visit(const nodes::VariableDeclarationNode&) override;
+		void visit(const nodes::WhileNode&) override;
 
 		ASTNode::Dependency   clone(const ASTNode::Reference node);
 		ASTNode::Dependency   clone(const nodes::BinaryNode&);
@@ -56,6 +57,7 @@ namespace soul::ast::visitors
 		ASTNode::Dependency   clone(const nodes::StructDeclarationNode&);
 		ASTNode::Dependency   clone(const nodes::UnaryNode&);
 		ASTNode::Dependency   clone(const nodes::VariableDeclarationNode&);
+		ASTNode::Dependency   clone(const nodes::WhileNode&);
 		ASTNode::Dependencies clone(const std::ranges::forward_range auto& elements)
 		{
 			ASTNode::Dependencies cloned{};

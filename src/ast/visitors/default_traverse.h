@@ -34,6 +34,7 @@ namespace soul::ast::visitors
 		virtual void visit(const nodes::StructDeclarationNode&) override;
 		virtual void visit(const nodes::UnaryNode&) override;
 		virtual void visit(const nodes::VariableDeclarationNode&) override;
+		virtual void visit(const nodes::WhileNode&) override;
 
 		virtual void visit(nodes::BinaryNode&) override;
 		virtual void visit(nodes::BlockNode&) override;
@@ -49,6 +50,7 @@ namespace soul::ast::visitors
 		virtual void visit(nodes::StructDeclarationNode&) override;
 		virtual void visit(nodes::UnaryNode&) override;
 		virtual void visit(nodes::VariableDeclarationNode&) override;
+		virtual void visit(nodes::WhileNode&) override;
 
 		/**
 		 * @brief Verifies if a Node is of a given (node) type.

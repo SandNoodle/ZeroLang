@@ -13,6 +13,7 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/nodes/while.h"
 
 #include <utility>
 
@@ -102,6 +103,12 @@ namespace soul::ast::visitors
 
 	void DefaultTraverseVisitor::visit(const VariableDeclarationNode& node) { accept(node.expression.get()); }
 
+	void DefaultTraverseVisitor::visit(const WhileNode& node)
+	{
+		accept(node.condition.get());
+		accept(node.statements.get());
+	}
+
 	void DefaultTraverseVisitor::visit(BinaryNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(BlockNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(CastNode& node) { visit(std::as_const(node)); }
@@ -116,4 +123,5 @@ namespace soul::ast::visitors
 	void DefaultTraverseVisitor::visit(StructDeclarationNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(UnaryNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(VariableDeclarationNode& node) { visit(std::as_const(node)); }
+	void DefaultTraverseVisitor::visit(WhileNode& node) { visit(std::as_const(node)); }
 }  // namespace soul::ast::visitors
