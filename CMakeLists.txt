@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 project(ScriptingLanguage VERSION 0.1 LANGUAGES CXX)
 
 # ----- [ Globals ] -----
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # ----- [ Options ] -----
