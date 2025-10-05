@@ -34,7 +34,7 @@ namespace soul::lexer
 		Token            create_token(Token::Type type, std::string_view data);
 		Token            scan_token();
 
-		CodePoint::ValueType peek_at(std::size_t n);
+		CodePoint::ValueType peek_at(std::size_t n) const;
 		CodePoint::ValueType advance();
 
 		template <std::predicate<CodePoint::ValueType> Predicate>

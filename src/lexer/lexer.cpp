@@ -203,7 +203,7 @@ namespace soul::lexer
 		return create_token(Token::Type::SpecialError, k_error_message);
 	}
 
-	CodePoint::ValueType Lexer::peek_at(std::size_t n)
+	CodePoint::ValueType Lexer::peek_at(std::size_t n) const
 	{
 		if (_offset_current + n >= _script.size()) {
 			return CodePoint::k_eof;
@@ -213,15 +213,12 @@ namespace soul::lexer
 
 	CodePoint::ValueType Lexer::advance()
 	{
-		if (_offset_current >= _script.size()) {
-			return CodePoint::k_eof;
-		}
-		if (CodePoint::is_newline(_script[_offset_current])) {
-			_current_location.row++;
+		if (CodePoint::is_newline(_script[_offset_current++])) {
+			++_current_location.row;
 			_current_location.column = 0;
 		} else {
-			_current_location.column++;
+			++_current_location.column;
 		}
-		return _script[++_offset_current];
+		return peek_at(0);
 	}
 };  // namespace soul::lexer
