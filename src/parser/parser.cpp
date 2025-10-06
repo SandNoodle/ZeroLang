@@ -15,6 +15,7 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/nodes/while.h"
 
 #include <algorithm>
 #include <format>
@@ -689,7 +690,7 @@ namespace soul::parser
 		// <block_statement>
 		auto statements = parse_block_statement();
 
-		return ForLoopNode::create(nullptr, std::move(condition), nullptr, BlockNode::create(std::move(statements)));
+		return WhileNode::create(std::move(condition), BlockNode::create(std::move(statements)));
 	}
 
 	ASTNode::Dependencies Parser::parse_block_statement()
