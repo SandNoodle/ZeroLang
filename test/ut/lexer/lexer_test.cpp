@@ -71,7 +71,7 @@ namespace soul::lexer::ut
 	TEST_F(LexerTest, SpecialCharacters)
 	{
 		static constexpr auto k_input_string
-			= "& && ! != { } [ ] ^ : :: , . = == > >= < <= - -= -- % ( ) | || + += ++ ? ; / /= * *="sv;
+			= "& && ! != { } [ ] ^ : :: , . = == > >= < <= - -= -- % %= ( ) | || + += ++ ? ; / /= * *="sv;
 		const auto result_tokens = Lexer::tokenize(k_input_string);
 
 		static constexpr std::array k_expected_tokens = {
@@ -98,19 +98,20 @@ namespace soul::lexer::ut
 			Token(Token::Type::SymbolMinusEqual, "-="sv, SourceLocation{ 1, 46 }),
 			Token(Token::Type::SymbolMinusMinus, "--"sv, SourceLocation{ 1, 49 }),
 			Token(Token::Type::SymbolPercent, "%"sv, SourceLocation{ 1, 52 }),
-			Token(Token::Type::SymbolParenLeft, "("sv, SourceLocation{ 1, 54 }),
-			Token(Token::Type::SymbolParenRight, ")"sv, SourceLocation{ 1, 56 }),
-			Token(Token::Type::SymbolPipe, "|"sv, SourceLocation{ 1, 58 }),
-			Token(Token::Type::SymbolPipePipe, "||"sv, SourceLocation{ 1, 60 }),
-			Token(Token::Type::SymbolPlus, "+"sv, SourceLocation{ 1, 63 }),
-			Token(Token::Type::SymbolPlusEqual, "+="sv, SourceLocation{ 1, 65 }),
-			Token(Token::Type::SymbolPlusPlus, "++"sv, SourceLocation{ 1, 68 }),
-			Token(Token::Type::SymbolQuestionMark, "?"sv, SourceLocation{ 1, 71 }),
-			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 1, 73 }),
-			Token(Token::Type::SymbolSlash, "/"sv, SourceLocation{ 1, 75 }),
-			Token(Token::Type::SymbolSlashEqual, "/="sv, SourceLocation{ 1, 77 }),
-			Token(Token::Type::SymbolStar, "*"sv, SourceLocation{ 1, 80 }),
-			Token(Token::Type::SymbolStarEqual, "*="sv, SourceLocation{ 1, 82 }),
+			Token(Token::Type::SymbolPercentEqual, "%="sv, SourceLocation{ 1, 54 }),
+			Token(Token::Type::SymbolParenLeft, "("sv, SourceLocation{ 1, 57 }),
+			Token(Token::Type::SymbolParenRight, ")"sv, SourceLocation{ 1, 59 }),
+			Token(Token::Type::SymbolPipe, "|"sv, SourceLocation{ 1, 61 }),
+			Token(Token::Type::SymbolPipePipe, "||"sv, SourceLocation{ 1, 63 }),
+			Token(Token::Type::SymbolPlus, "+"sv, SourceLocation{ 1, 66 }),
+			Token(Token::Type::SymbolPlusEqual, "+="sv, SourceLocation{ 1, 68 }),
+			Token(Token::Type::SymbolPlusPlus, "++"sv, SourceLocation{ 1, 71 }),
+			Token(Token::Type::SymbolQuestionMark, "?"sv, SourceLocation{ 1, 74 }),
+			Token(Token::Type::SymbolSemicolon, ";"sv, SourceLocation{ 1, 76 }),
+			Token(Token::Type::SymbolSlash, "/"sv, SourceLocation{ 1, 78 }),
+			Token(Token::Type::SymbolSlashEqual, "/="sv, SourceLocation{ 1, 80 }),
+			Token(Token::Type::SymbolStar, "*"sv, SourceLocation{ 1, 83 }),
+			Token(Token::Type::SymbolStarEqual, "*="sv, SourceLocation{ 1, 85 }),
 		};
 
 		ASSERT_EQ(k_expected_tokens.size(), result_tokens.size());

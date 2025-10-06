@@ -37,6 +37,12 @@ namespace soul::ast
 		using namespace std::string_view_literals;
 		static const std::unordered_map<ASTNode::Operator, std::string_view> k_operators = {
 			{ Operator::Unknown,      "__unknown__"sv            },
+			{ Operator::Assign,       "operator_assign"sv        },
+			{ Operator::AddAssign,    "operator_add_assign"sv    },
+			{ Operator::SubAssign,    "operator_sub_assign"sv    },
+			{ Operator::MulAssign,    "operator_mul_assign"sv    },
+			{ Operator::DivAssign,    "operator_div_assign"sv    },
+			{ Operator::ModAssign,    "operator_mod_assign"sv    },
 			{ Operator::Add,          "operator_add"sv           },
 			{ Operator::Sub,          "operator_sub"sv           },
 			{ Operator::Mul,          "operator_mul"sv           },
@@ -63,6 +69,12 @@ namespace soul::ast
 	ASTNode::Operator ASTNode::as_operator(Token::Type type) noexcept
 	{
 		static const std::unordered_map<Token::Type, Operator> k_operators = {
+			{ Token::Type::SymbolEqual,              Operator::Assign       },
+			{ Token::Type::SymbolPlusEqual,          Operator::AddAssign    },
+			{ Token::Type::SymbolMinusEqual,         Operator::SubAssign    },
+			{ Token::Type::SymbolStarEqual,          Operator::MulAssign    },
+			{ Token::Type::SymbolSlashEqual,         Operator::DivAssign    },
+			{ Token::Type::SymbolPercentEqual,       Operator::ModAssign    },
 			{ Token::Type::SymbolPlus,               Operator::Add          },
 			{ Token::Type::SymbolMinus,              Operator::Sub          },
 			{ Token::Type::SymbolStar,               Operator::Mul          },

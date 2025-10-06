@@ -3,14 +3,12 @@
   "name": "test_module",
   "statements": [
     {
-      "type": "for_loop",
-      "initialization": null,
+      "type": "while_loop",
       "condition": {
         "type": "literal",
         "literal_type": "literal_type_boolean",
         "value": "true"
       },
-      "update": null,
       "statements": {
         "type": "scope_block",
         "statements": []

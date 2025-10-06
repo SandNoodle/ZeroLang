@@ -1,4 +1,4 @@
-# Exprssion should be parsed into:
+# Expression should be parsed into:
 #           MUL
 #       /        \
 #     DIV         3

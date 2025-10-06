@@ -166,7 +166,6 @@ namespace soul::lexer
 		std::ignore = advance();
 		switch (current_codepoint) {
 			// Simple cases, where there are no other characters in the sequence.
-			MATCH_ONE_CODEPOINT('%', Token::Type::SymbolPercent)
 			MATCH_ONE_CODEPOINT('(', Token::Type::SymbolParenLeft)
 			MATCH_ONE_CODEPOINT(')', Token::Type::SymbolParenRight)
 			MATCH_ONE_CODEPOINT(',', Token::Type::SymbolComma)
@@ -180,6 +179,7 @@ namespace soul::lexer
 			MATCH_ONE_CODEPOINT('}', Token::Type::SymbolBraceRight)
 
 			// Tokens which might have one other character in the sequence.
+			MATCH_TWO_CODEPOINTS('%', '=', Token::Type::SymbolPercent, Token::Type::SymbolPercentEqual)
 			MATCH_TWO_CODEPOINTS('!', '=', Token::Type::SymbolBang, Token::Type::SymbolBangEqual)
 			MATCH_TWO_CODEPOINTS('&', '&', Token::Type::SymbolAmpersand, Token::Type::SymbolAmpersandAmpersand)
 			MATCH_TWO_CODEPOINTS('*', '=', Token::Type::SymbolStar, Token::Type::SymbolStarEqual)

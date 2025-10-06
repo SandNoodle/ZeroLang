@@ -34,6 +34,10 @@ namespace soul::parser
 		                                            Token::Type::SymbolGreater,
 		                                            Token::Type::SymbolGreaterEqual };
 
+	static constexpr std::array k_assign_types
+		= { Token::Type::SymbolEqual,     Token::Type::SymbolPlusEqual,  Token::Type::SymbolMinusEqual,
+		    Token::Type::SymbolStarEqual, Token::Type::SymbolSlashEqual, Token::Type::SymbolPercentEqual };
+
 	enum class Parser::Precedence : u8
 	{
 		None,
@@ -160,6 +164,14 @@ namespace soul::parser
 			Token::Type::SymbolLessEqual,
 			Token::Type::SymbolEqualEqual,
 			Token::Type::SymbolBangEqual,
+
+			// Assignment
+			Token::Type::SymbolEqual,
+			Token::Type::SymbolPlusEqual,
+			Token::Type::SymbolMinusEqual,
+			Token::Type::SymbolStarEqual,
+			Token::Type::SymbolSlashEqual,
+			Token::Type::SymbolPercentEqual,
 
 			// Arithmetic operators
 			Token::Type::SymbolPlus,
@@ -826,6 +838,10 @@ namespace soul::parser
 
 		if (std::ranges::contains(k_compare_types, type)) {
 			return { Precedence::Compare, nullptr, &Parser::parse_binary, nullptr };
+		}
+
+		if (std::ranges::contains(k_assign_types, type)) {
+			return { Parser::Precedence::Assign, nullptr, &Parser::parse_binary, nullptr };
 		}
 
 		switch (type) {

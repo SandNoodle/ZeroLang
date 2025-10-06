@@ -70,6 +70,14 @@ namespace soul::ast
 	{
 		Unknown,
 
+		// Assignment
+		Assign,
+		AddAssign,
+		SubAssign,
+		MulAssign,
+		DivAssign,
+		ModAssign,
+
 		// Arithmetic
 		Add,
 		Sub,
