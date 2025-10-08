@@ -1,18 +1,18 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "variable_declaration",
+      "node": "variable_declaration",
       "name": "variable",
       "type_identifier": "str",
       "is_mutable": "false",
       "expression": {
-        "type": "function_call",
+        "node": "function_call",
         "name": "function_called_here",
         "parameters": [
           {
-            "type": "literal",
+            "node": "literal",
             "literal_type": "literal_type_string",
             "value": "some_value"
           }

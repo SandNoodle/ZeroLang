@@ -1,14 +1,14 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "function_declaration",
+      "node": "function_declaration",
       "name": "empty_function",
       "type_identifier": "void",
       "parameters": [],
       "statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": []
       }
     }

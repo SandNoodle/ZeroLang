@@ -1,16 +1,16 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "while_loop",
+      "node": "while_loop",
       "condition": {
-        "type": "literal",
+        "node": "literal",
         "literal_type": "literal_type_boolean",
         "value": "true"
       },
       "statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": []
       }
     }

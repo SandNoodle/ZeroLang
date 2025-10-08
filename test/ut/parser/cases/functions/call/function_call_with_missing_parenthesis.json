@@ -1,9 +1,9 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "error",
+      "node": "error",
       "message": "expected ')', but got: 'special_eof'"
     }
   ]

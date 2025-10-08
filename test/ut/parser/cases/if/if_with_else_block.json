@@ -1,24 +1,24 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "if",
+      "node": "if",
       "expression": {
-        "type": "literal",
+        "node": "literal",
         "literal_type": "literal_type_boolean",
         "value": "true"
       },
       "then_statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": [
           {
-            "type": "variable_declaration",
+            "node": "variable_declaration",
             "name": "some_var",
             "type_identifier": "bool",
             "is_mutable": "false",
             "expression": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_boolean",
               "value": "true"
             }
@@ -26,15 +26,15 @@
         ]
       },
       "else_statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": [
           {
-            "type": "variable_declaration",
+            "node": "variable_declaration",
             "name": "second_var",
             "type_identifier": "str",
             "is_mutable": "false",
             "expression": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_string",
               "value": "my_string"
             }

@@ -14,6 +14,13 @@ namespace soul::ast::visitors
 	 */
 	class StringifyVisitor final : public DefaultTraverseVisitor
 	{
+		public:
+		enum Options : u8
+		{
+			None       = 0 << 0,
+			PrintTypes = 1 << 0,
+		};
+
 		private:
 		static constexpr auto        k_unnamed       = "__unnamed__";
 		static constexpr std::size_t k_indent_amount = 2;
@@ -21,9 +28,10 @@ namespace soul::ast::visitors
 		private:
 		std::stringstream _ss;
 		std::size_t       _indent_level = 0;
+		Options           _options{};
 
 		public:
-		StringifyVisitor();
+		StringifyVisitor(Options options = Options::None);
 
 		/** @brief Returns textual representation of an AST. */
 		std::string string() const;
@@ -51,6 +59,7 @@ namespace soul::ast::visitors
 		private:
 		std::string current_indent() const;
 		void        encode(std::string_view key, std::string_view value, bool add_trailing_comma = true);
+		void        encode_type(const types::Type& type);
 		void        encode(std::string_view key, const ASTNode::Reference node, bool add_trailing_comma = true);
 		template <std::ranges::forward_range T>
 		void encode(std::string_view key, const T& parameters, bool add_trailing_comma = true)

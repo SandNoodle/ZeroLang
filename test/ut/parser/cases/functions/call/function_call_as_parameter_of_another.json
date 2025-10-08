@@ -1,32 +1,32 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "function_call",
+      "node": "function_call",
       "name": "first_function",
       "parameters": [
         {
-          "type": "binary",
+          "node": "binary",
           "operator": "operator_less",
           "lhs": {
-            "type": "literal",
+            "node": "literal",
             "literal_type": "literal_type_int32",
             "value": "1"
           },
           "rhs": {
-            "type": "function_call",
+            "node": "function_call",
             "name": "second_function",
             "parameters": []
           }
         },
         {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_string",
           "value": "some_param"
         },
         {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_float32",
           "value": "3.14"
         }

@@ -1,9 +1,9 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "struct_declaration",
+      "node": "struct_declaration",
       "name": "empty",
       "parameters": []
     }

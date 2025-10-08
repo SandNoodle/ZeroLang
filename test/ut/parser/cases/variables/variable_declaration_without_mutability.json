@@ -1,14 +1,14 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "variable_declaration",
+      "node": "variable_declaration",
       "name": "my_cheeseburger",
       "type_identifier": "i32",
       "is_mutable": "false",
       "expression": {
-        "type": "literal",
+        "node": "literal",
         "literal_type": "literal_type_int32",
         "value": "69420"
       }

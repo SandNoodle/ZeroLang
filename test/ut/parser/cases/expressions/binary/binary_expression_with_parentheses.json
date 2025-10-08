@@ -1,40 +1,40 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "variable_declaration",
+      "node": "variable_declaration",
       "name": "precedence",
       "type_identifier": "i32",
       "is_mutable": "false",
       "expression": {
-        "type": "binary",
+        "node": "binary",
         "operator": "operator_mul",
         "lhs": {
-          "type": "binary",
+          "node": "binary",
           "operator": "operator_div",
           "lhs": {
-            "type": "literal",
+            "node": "literal",
             "literal_type": "literal_type_int32",
             "value": "1"
           },
           "rhs": {
-            "type": "binary",
+            "node": "binary",
             "operator": "operator_add",
             "lhs": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_int32",
               "value": "2"
             },
             "rhs": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_int32",
               "value": "1"
             }
           }
         },
         "rhs": {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_int32",
           "value": "3"
         }

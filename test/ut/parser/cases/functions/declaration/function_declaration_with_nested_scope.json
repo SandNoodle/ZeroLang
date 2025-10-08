@@ -1,36 +1,36 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "function_declaration",
+      "node": "function_declaration",
       "name": "function_with_inner_scope",
       "type_identifier": "void",
       "parameters": [],
       "statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": [
           {
-            "type": "variable_declaration",
+            "node": "variable_declaration",
             "name": "outer_scope_variable",
             "type_identifier": "str",
             "is_mutable": "false",
             "expression": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_string",
               "value": "outer_scope"
             }
           },
           {
-            "type": "scope_block",
+            "node": "scope_block",
             "statements": [
               {
-                "type": "variable_declaration",
+                "node": "variable_declaration",
                 "name": "inner_scope_variable",
                 "type_identifier": "f32",
                 "is_mutable": "false",
                 "expression": {
-                  "type": "literal",
+                  "node": "literal",
                   "literal_type": "literal_type_float32",
                   "value": "3.14"
                 }

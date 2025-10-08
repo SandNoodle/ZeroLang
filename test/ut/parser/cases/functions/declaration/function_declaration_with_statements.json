@@ -1,14 +1,14 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "function_declaration",
+      "node": "function_declaration",
       "name": "some_function",
       "type_identifier": "str",
       "parameters": [
         {
-          "type": "variable_declaration",
+          "node": "variable_declaration",
           "name": "some_param",
           "type_identifier": "i32",
           "is_mutable": "false",
@@ -16,37 +16,37 @@
         }
       ],
       "statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": [
           {
-            "type": "variable_declaration",
+            "node": "variable_declaration",
             "name": "my_variable",
             "type_identifier": "i32",
             "is_mutable": "false",
             "expression": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_int32",
               "value": "540"
             }
           },
           {
-            "type": "variable_declaration",
+            "node": "variable_declaration",
             "name": "second_variable",
             "type_identifier": "f32",
             "is_mutable": "false",
             "expression": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_float32",
               "value": "3.4"
             }
           },
           {
-            "type": "variable_declaration",
+            "node": "variable_declaration",
             "name": "strings",
             "type_identifier": "str",
             "is_mutable": "false",
             "expression": {
-              "type": "literal",
+              "node": "literal",
               "literal_type": "literal_type_string",
               "value": "that is a string"
             }

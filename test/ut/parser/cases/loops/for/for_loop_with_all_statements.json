@@ -1,50 +1,50 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "for_loop",
+      "node": "for_loop",
       "initialization": {
-        "type": "variable_declaration",
+        "node": "variable_declaration",
         "name": "foo",
         "type_identifier": "i32",
         "is_mutable": "false",
         "expression": {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_int32",
           "value": "33"
         }
       },
       "condition": {
-        "type": "binary",
+        "node": "binary",
         "operator": "operator_less",
         "lhs": {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_identifier",
           "value": "foo"
         },
         "rhs": {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_identifier",
           "value": "some_size"
         }
       },
       "update": {
-        "type": "binary",
+        "node": "binary",
         "operator": "operator_add",
         "lhs": {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_identifier",
           "value": "some_expression_here"
         },
         "rhs": {
-          "type": "literal",
+          "node": "literal",
           "literal_type": "literal_type_int32",
           "value": "2"
         }
       },
       "statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": []
       }
     }

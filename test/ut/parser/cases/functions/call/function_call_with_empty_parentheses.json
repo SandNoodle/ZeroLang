@@ -1,9 +1,9 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "function_call",
+      "node": "function_call",
       "name": "my_function",
       "parameters": []
     }

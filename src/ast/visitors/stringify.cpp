@@ -20,9 +20,10 @@
 
 namespace soul::ast::visitors
 {
+	using namespace soul::types;
 	using namespace soul::ast::nodes;
 
-	StringifyVisitor::StringifyVisitor() {}
+	StringifyVisitor::StringifyVisitor(Options options) : _options(options) {}
 
 	std::string StringifyVisitor::string() const { return _ss.str(); }
 
@@ -44,7 +45,8 @@ namespace soul::ast::visitors
 
 	void StringifyVisitor::visit(const BinaryNode& node)
 	{
-		encode("type", "binary");
+		encode("node", "binary");
+		encode_type(node.type);
 		encode("operator", ASTNode::internal_name(node.op));
 		encode("lhs", node.lhs.get());
 		encode("rhs", node.rhs.get(), false);
@@ -52,26 +54,30 @@ namespace soul::ast::visitors
 
 	void StringifyVisitor::visit(const nodes::BlockNode& node)
 	{
-		encode("type", "scope_block");
+		encode("node", "scope_block");
+		encode_type(node.type);
 		encode("statements", node.statements, false);
 	}
 
 	void StringifyVisitor::visit(const CastNode& node)
 	{
-		encode("type", "cast");
+		encode("node", "cast");
+		encode_type(node.type);
 		encode("type_identifier", node.type_identifier);
 		encode("expression", node.expression.get(), false);
 	}
 
 	void StringifyVisitor::visit(const ErrorNode& node)
 	{
-		encode("type", "error");
+		encode("node", "error");
+		encode_type(node.type);
 		encode("message", node.message, false);
 	}
 
 	void StringifyVisitor::visit(const ForLoopNode& node)
 	{
-		encode("type", "for_loop");
+		encode("node", "for_loop");
+		encode_type(node.type);
 		encode("initialization", node.initialization.get());
 		encode("condition", node.condition.get());
 		encode("update", node.update.get());
@@ -80,22 +86,25 @@ namespace soul::ast::visitors
 
 	void StringifyVisitor::visit(const ForeachLoopNode& node)
 	{
-		encode("type", "foreach_loop");
+		encode("node", "foreach_loop");
+		encode_type(node.type);
 		encode("variable", node.variable.get());
 		encode("in_expression", node.in_expression.get());
 		encode("statements", node.statements.get(), false);
 	}
 
-	void StringifyVisitor::visit(const nodes::FunctionCallNode& node)
+	void StringifyVisitor::visit(const FunctionCallNode& node)
 	{
-		encode("type", "function_call");
+		encode("node", "function_call");
+		encode_type(node.type);
 		encode("name", node.name);
 		encode("parameters", node.parameters, false);
 	}
 
 	void StringifyVisitor::visit(const FunctionDeclarationNode& node)
 	{
-		encode("type", "function_declaration");
+		encode("node", "function_declaration");
+		encode_type(node.type);
 		encode("name", node.name);
 		encode("type_identifier", node.type_identifier);
 		encode("parameters", node.parameters);
@@ -104,7 +113,8 @@ namespace soul::ast::visitors
 
 	void StringifyVisitor::visit(const IfNode& node)
 	{
-		encode("type", "if");
+		encode("node", "if");
+		encode_type(node.type);
 		encode("expression", node.condition.get());
 		encode("then_statements", node.then_statements.get());
 		encode("else_statements", node.else_statements.get(), false);
@@ -112,35 +122,40 @@ namespace soul::ast::visitors
 
 	void StringifyVisitor::visit(const LiteralNode& node)
 	{
-		encode("type", "literal");
+		encode("node", "literal");
+		encode_type(node.type);
 		encode("literal_type", LiteralNode::internal_name(node.literal_type));
 		encode("value", std::string(node), false);
 	}
 
 	void StringifyVisitor::visit(const ModuleNode& node)
 	{
-		encode("type", "module_declaration");
+		encode("node", "module_declaration");
+		encode_type(node.type);
 		encode("name", node.name);
 		encode("statements", node.statements, false);
 	}
 
 	void StringifyVisitor::visit(const StructDeclarationNode& node)
 	{
-		encode("type", "struct_declaration");
+		encode("node", "struct_declaration");
+		encode_type(node.type);
 		encode("name", node.name);
 		encode("parameters", node.parameters, false);
 	}
 
 	void StringifyVisitor::visit(const UnaryNode& node)
 	{
-		encode("type", "unary");
+		encode("node", "unary");
+		encode_type(node.type);
 		encode("operator", ASTNode::internal_name(node.op));
 		encode("expression", node.expression.get(), false);
 	}
 
 	void StringifyVisitor::visit(const VariableDeclarationNode& node)
 	{
-		encode("type", "variable_declaration");
+		encode("node", "variable_declaration");
+		encode_type(node.type);
 		encode("name", node.name);
 		encode("type_identifier", node.type_identifier);
 		encode("is_mutable", node.is_mutable ? "true" : "false");
@@ -149,7 +164,8 @@ namespace soul::ast::visitors
 
 	void StringifyVisitor::visit(const WhileNode& node)
 	{
-		encode("type", "while_loop");
+		encode("node", "while_loop");
+		encode_type(node.type);
 		encode("condition", node.condition.get());
 		encode("statements", node.statements.get(), false);
 	}
@@ -163,6 +179,15 @@ namespace soul::ast::visitors
 		if (add_trailing_comma) {
 			_ss << ",\n";
 		}
+	}
+
+	void StringifyVisitor::encode_type(const Type& type)
+	{
+		if (!(_options & Options::PrintTypes)) {
+			return;
+		}
+		_ss << current_indent();
+		_ss << std::format("\"type\": \"{}\",\n", std::string(type));
 	}
 
 	void StringifyVisitor::encode(std::string_view key, const ASTNode::Reference node, bool add_trailing_comma)

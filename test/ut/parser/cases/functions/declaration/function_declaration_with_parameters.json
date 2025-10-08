@@ -1,28 +1,28 @@
 {
-  "type": "module_declaration",
+  "node": "module_declaration",
   "name": "test_module",
   "statements": [
     {
-      "type": "function_declaration",
+      "node": "function_declaration",
       "name": "empty_function_with_parameters",
       "type_identifier": "void",
       "parameters": [
         {
-          "type": "variable_declaration",
+          "node": "variable_declaration",
           "name": "x",
           "type_identifier": "i32",
           "is_mutable": "false",
           "expression": null
         },
         {
-          "type": "variable_declaration",
+          "node": "variable_declaration",
           "name": "y",
           "type_identifier": "f32",
           "is_mutable": "false",
           "expression": null
         },
         {
-          "type": "variable_declaration",
+          "node": "variable_declaration",
           "name": "c",
           "type_identifier": "str",
           "is_mutable": "false",
@@ -30,7 +30,7 @@
         }
       ],
       "statements": {
-        "type": "scope_block",
+        "node": "scope_block",
         "statements": []
       }
     }
