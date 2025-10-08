@@ -21,6 +21,6 @@ namespace soul::ast::nodes
 		 * @param statements
 		 * @return New 'Block' expression node.
 		 */
-		static ScopeBlock create(Dependencies statements);
+		static Dependency create(Dependencies statements);
 	};
 }  // namespace soul::ast::nodes

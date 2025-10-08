@@ -34,9 +34,8 @@ namespace soul::ast
 		using Dependency   = std::unique_ptr<ASTNode>;
 		using Dependencies = std::vector<Dependency>;
 		using Reference    = ASTNode*;
-		using References   = std::vector<Reference>;
 		using Identifier   = std::string;
-		using ScopeBlock   = std::unique_ptr<nodes::BlockNode>;
+		using ScopeBlock   = Dependency;
 		enum class Operator : u8;
 
 		public:
@@ -44,6 +43,24 @@ namespace soul::ast
 
 		public:
 		virtual ~ASTNode() = default;
+
+		/** @brief Verifies if node is of a given type. */
+		template <nodes::NodeKind Node>
+		constexpr bool is() const noexcept
+		{
+			return dynamic_cast<const Node*>(this) != nullptr;
+		}
+
+		/**
+		 * @brief Returns the underlying node.
+		 * @important Does not perform any validation - assumes that ASTNode::is<T> was used first.
+		 * @tparam T Type satisfying the NodeKind concept.
+		 */
+		template <nodes::NodeKind Node>
+		constexpr Node& as() noexcept
+		{
+			return dynamic_cast<Node&>(*this);
+		}
 
 		static std::string_view name(const Operator op) noexcept;
 		static std::string_view internal_name(const Operator op) noexcept;

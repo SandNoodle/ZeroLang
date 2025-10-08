@@ -16,8 +16,10 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/nodes/while.h"
 #include "ast/visitors/error_collector.h"
 
+#include <format>
 #include <string_view>
 #include <unordered_map>
 
@@ -74,27 +76,27 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), k_arithmetic_operators.size());
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), k_arithmetic_operators.size());
 
 		for (std::size_t index = 0; index < k_arithmetic_operators.size(); ++index) {
-			const auto* as_binary = dynamic_cast<BinaryNode*>(as_module->statements[index].get());
-			ASSERT_TRUE(as_binary);
-			EXPECT_EQ(as_binary->op, k_arithmetic_operators[index]);
-			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Int64);
+			ASSERT_TRUE(as_module.statements[index]->is<BinaryNode>());
+			const auto& as_binary = as_module.statements[index]->as<BinaryNode>();
+			EXPECT_EQ(as_binary.op, k_arithmetic_operators[index]);
+			EXPECT_EQ(as_binary.type, PrimitiveType::Kind::Int64);
 
-			const auto* as_lhs = dynamic_cast<LiteralNode*>(as_binary->lhs.get());
-			ASSERT_TRUE(as_lhs);
-			EXPECT_EQ(as_lhs->value, Value{ 1L });
-			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Int64);
-			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Int64);
+			ASSERT_TRUE(as_binary.lhs->is<LiteralNode>());
+			const auto& as_lhs = as_binary.lhs->as<LiteralNode>();
+			EXPECT_EQ(as_lhs.value, Value{ 1L });
+			EXPECT_EQ(as_lhs.literal_type, LiteralNode::Type::Int64);
+			EXPECT_EQ(as_lhs.type, PrimitiveType::Kind::Int64);
 
-			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_binary->rhs.get());
-			ASSERT_TRUE(as_rhs);
-			EXPECT_EQ(as_rhs->value, Value{ 5L });
-			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Int64);
-			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Int64);
+			ASSERT_TRUE(as_binary.rhs->is<LiteralNode>());
+			const auto& as_rhs = as_binary.rhs->as<LiteralNode>();
+			EXPECT_EQ(as_rhs.value, Value{ 5L });
+			EXPECT_EQ(as_rhs.literal_type, LiteralNode::Type::Int64);
+			EXPECT_EQ(as_rhs.type, PrimitiveType::Kind::Int64);
 		}
 	}
 
@@ -118,27 +120,27 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), k_comparison_operators.size());
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), k_comparison_operators.size());
 
 		for (std::size_t index = 0; index < k_comparison_operators.size(); ++index) {
-			const auto* as_binary = dynamic_cast<BinaryNode*>(as_module->statements[index].get());
-			ASSERT_TRUE(as_binary) << index;
-			EXPECT_EQ(as_binary->op, k_comparison_operators[index]);
-			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Boolean);
+			ASSERT_TRUE(as_module.statements[index]->is<BinaryNode>());
+			const auto& as_binary = as_module.statements[index]->as<BinaryNode>();
+			EXPECT_EQ(as_binary.op, k_comparison_operators[index]);
+			EXPECT_EQ(as_binary.type, PrimitiveType::Kind::Boolean);
 
-			const auto* as_lhs = dynamic_cast<LiteralNode*>(as_binary->lhs.get());
-			ASSERT_TRUE(as_lhs);
-			EXPECT_EQ(as_lhs->value, Value{ 1.0 });
-			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Float64);
-			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Float64);
+			ASSERT_TRUE(as_binary.lhs->is<LiteralNode>());
+			const auto& as_lhs = as_binary.lhs->as<LiteralNode>();
+			EXPECT_EQ(as_lhs.value, Value{ 1.0 });
+			EXPECT_EQ(as_lhs.literal_type, LiteralNode::Type::Float64);
+			EXPECT_EQ(as_lhs.type, PrimitiveType::Kind::Float64);
 
-			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_binary->rhs.get());
-			ASSERT_TRUE(as_rhs);
-			EXPECT_EQ(as_rhs->value, Value{ 5.0 });
-			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Float64);
-			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Float64);
+			ASSERT_TRUE(as_binary.rhs->is<LiteralNode>());
+			const auto& as_rhs = as_binary.rhs->as<LiteralNode>();
+			EXPECT_EQ(as_rhs.value, Value{ 5.0 });
+			EXPECT_EQ(as_rhs.literal_type, LiteralNode::Type::Float64);
+			EXPECT_EQ(as_rhs.type, PrimitiveType::Kind::Float64);
 		}
 	}
 
@@ -160,27 +162,27 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), k_logical_operators.size());
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), k_logical_operators.size());
 
 		for (std::size_t index = 0; index < k_logical_operators.size(); ++index) {
-			const auto* as_binary = dynamic_cast<BinaryNode*>(as_module->statements[index].get());
-			ASSERT_TRUE(as_binary) << index;
-			EXPECT_EQ(as_binary->op, k_logical_operators[index]);
-			EXPECT_EQ(as_binary->type, PrimitiveType::Kind::Boolean);
+			ASSERT_TRUE(as_module.statements[index]->is<BinaryNode>());
+			const auto& as_binary = as_module.statements[index]->as<BinaryNode>();
+			EXPECT_EQ(as_binary.op, k_logical_operators[index]);
+			EXPECT_EQ(as_binary.type, PrimitiveType::Kind::Boolean);
 
-			const auto* as_lhs = dynamic_cast<LiteralNode*>(as_binary->lhs.get());
-			ASSERT_TRUE(as_lhs);
-			EXPECT_EQ(as_lhs->value, Value{ true });
-			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Boolean);
-			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Boolean);
+			ASSERT_TRUE(as_binary.lhs->is<LiteralNode>());
+			const auto& as_lhs = as_binary.lhs->as<LiteralNode>();
+			EXPECT_EQ(as_lhs.value, Value{ true });
+			EXPECT_EQ(as_lhs.literal_type, LiteralNode::Type::Boolean);
+			EXPECT_EQ(as_lhs.type, PrimitiveType::Kind::Boolean);
 
-			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_binary->rhs.get());
-			ASSERT_TRUE(as_rhs);
-			EXPECT_EQ(as_rhs->value, Value{ false });
-			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Boolean);
-			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Boolean);
+			ASSERT_TRUE(as_binary.rhs->is<LiteralNode>());
+			const auto& as_rhs = as_binary.rhs->as<LiteralNode>();
+			EXPECT_EQ(as_rhs.value, Value{ false });
+			EXPECT_EQ(as_rhs.literal_type, LiteralNode::Type::Boolean);
+			EXPECT_EQ(as_rhs.type, PrimitiveType::Kind::Boolean);
 		}
 	}
 
@@ -196,13 +198,13 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message,
+		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message,
 		          std::format("operator ('{}') does not exist for types '{}' and '{}'",
 		                      ASTNode::name(ASTNode::Operator::LogicalAnd),
 		                      std::string(Type{ PrimitiveType::Kind::String }),
@@ -227,59 +229,60 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 3);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 3);
 
-		const auto* as_before_scope_variable = dynamic_cast<VariableDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_before_scope_variable);
-		EXPECT_EQ(as_before_scope_variable->name, "before_scope");
-		EXPECT_EQ(as_before_scope_variable->type_identifier, "f32");
-		EXPECT_TRUE(as_before_scope_variable->expression);
+		ASSERT_TRUE(as_module.statements[0]->is<VariableDeclarationNode>());
+		const auto& as_before_scope_variable = as_module.statements[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_before_scope_variable.name, "before_scope");
+		EXPECT_EQ(as_before_scope_variable.type_identifier, "f32");
+		EXPECT_TRUE(as_before_scope_variable.expression);
 		{
-			const auto* as_literal = dynamic_cast<LiteralNode*>(as_before_scope_variable->expression.get());
-			ASSERT_TRUE(as_literal);
-			EXPECT_EQ(as_literal->value, Value{ 1.0 });
-			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Float32);
-			EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Float32);
+			ASSERT_TRUE(as_before_scope_variable.expression->is<LiteralNode>());
+			const auto& as_literal = as_before_scope_variable.expression->as<LiteralNode>();
+			EXPECT_EQ(as_literal.value, Value{ 1.0 });
+			EXPECT_EQ(as_literal.literal_type, LiteralNode::Type::Float32);
+			EXPECT_EQ(as_literal.type, PrimitiveType::Kind::Float32);
 		}
-		EXPECT_FALSE(as_before_scope_variable->is_mutable);
-		EXPECT_EQ(as_before_scope_variable->type, PrimitiveType::Kind::Float32);
+		EXPECT_FALSE(as_before_scope_variable.is_mutable);
+		EXPECT_EQ(as_before_scope_variable.type, PrimitiveType::Kind::Float32);
 
-		const auto* as_block = dynamic_cast<BlockNode*>(as_module->statements[1].get());
-		ASSERT_TRUE(as_block);
-		ASSERT_EQ(as_block->statements.size(), 1);
+		ASSERT_TRUE(as_module.statements[1]->is<BlockNode>());
+		const auto& as_block = as_module.statements[1]->as<BlockNode>();
+		ASSERT_EQ(as_block.statements.size(), 1);
+		EXPECT_EQ(as_block.type, PrimitiveType::Kind::Void);
 		{
-			const auto* as_in_scope_variable = dynamic_cast<VariableDeclarationNode*>(as_block->statements[0].get());
-			ASSERT_TRUE(as_in_scope_variable);
-			EXPECT_EQ(as_in_scope_variable->name, "in_scope");
-			EXPECT_EQ(as_in_scope_variable->type_identifier, "f32");
-			EXPECT_TRUE(as_in_scope_variable->expression);
+			ASSERT_TRUE(as_block.statements[0]->is<VariableDeclarationNode>());
+			const auto& as_in_scope_variable = as_block.statements[0]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_in_scope_variable.name, "in_scope");
+			EXPECT_EQ(as_in_scope_variable.type_identifier, "f32");
+			EXPECT_TRUE(as_in_scope_variable.expression);
 			{
-				const auto* as_literal = dynamic_cast<LiteralNode*>(as_in_scope_variable->expression.get());
-				ASSERT_TRUE(as_literal);
-				EXPECT_EQ(as_literal->value, Value{ "before_scope" });
-				EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Identifier);
-				EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Float32);
+				ASSERT_TRUE(as_in_scope_variable.expression->is<LiteralNode>());
+				const auto& as_literal = as_in_scope_variable.expression->as<LiteralNode>();
+				EXPECT_EQ(as_literal.value, Value{ "before_scope" });
+				EXPECT_EQ(as_literal.literal_type, LiteralNode::Type::Identifier);
+				EXPECT_EQ(as_literal.type, PrimitiveType::Kind::Float32);
 			}
-			EXPECT_FALSE(as_in_scope_variable->is_mutable);
-			EXPECT_EQ(as_in_scope_variable->type, PrimitiveType::Kind::Float32);
+			EXPECT_FALSE(as_in_scope_variable.is_mutable);
+			EXPECT_EQ(as_in_scope_variable.type, PrimitiveType::Kind::Float32);
 		}
 
-		const auto* as_after_scope_variable = dynamic_cast<VariableDeclarationNode*>(as_module->statements[2].get());
-		ASSERT_TRUE(as_after_scope_variable);
-		EXPECT_EQ(as_after_scope_variable->name, "after_scope");
-		EXPECT_EQ(as_after_scope_variable->type_identifier, "i32");
-		EXPECT_TRUE(as_after_scope_variable->expression);
+		ASSERT_TRUE(as_module.statements[2]->is<VariableDeclarationNode>());
+		const auto& as_after_scope_variable = as_module.statements[2]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_after_scope_variable.name, "after_scope");
+		EXPECT_EQ(as_after_scope_variable.type_identifier, "i32");
+		EXPECT_TRUE(as_after_scope_variable.expression);
 		{
-			const auto* as_literal = dynamic_cast<LiteralNode*>(as_after_scope_variable->expression.get());
-			ASSERT_TRUE(as_literal);
-			EXPECT_EQ(as_literal->value, Value{ 5 });
-			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Int32);
-			EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Int32);
+			ASSERT_TRUE(as_after_scope_variable.expression->is<LiteralNode>());
+			const auto& as_literal = as_after_scope_variable.expression->as<LiteralNode>();
+			EXPECT_EQ(as_literal.value, Value{ 5 });
+			EXPECT_EQ(as_literal.literal_type, LiteralNode::Type::Int32);
+			EXPECT_EQ(as_literal.type, PrimitiveType::Kind::Int32);
 		}
-		EXPECT_FALSE(as_after_scope_variable->is_mutable);
-		EXPECT_EQ(as_after_scope_variable->type, PrimitiveType::Kind::Int32);
+		EXPECT_FALSE(as_after_scope_variable.is_mutable);
+		EXPECT_EQ(as_after_scope_variable.type, PrimitiveType::Kind::Int32);
 	}
 
 	TEST_F(TypeResolverTest, Cast_BasicType)
@@ -292,20 +295,20 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_cast = dynamic_cast<CastNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_cast);
-		EXPECT_EQ(as_cast->type_identifier, "i32");
-		EXPECT_EQ(as_cast->type, PrimitiveType::Kind::Int32);
+		ASSERT_TRUE(as_module.statements[0]->is<CastNode>());
+		const auto& as_cast = as_module.statements[0]->as<CastNode>();
+		EXPECT_EQ(as_cast.type_identifier, "i32");
+		EXPECT_EQ(as_cast.type, PrimitiveType::Kind::Int32);
 
-		const auto* as_literal = dynamic_cast<LiteralNode*>(as_cast->expression.get());
-		ASSERT_TRUE(as_literal);
-		EXPECT_EQ(as_literal->value, Value{ 128L });
-		EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Int64);
-		EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Int64);
+		ASSERT_TRUE(as_cast.expression->is<LiteralNode>());
+		const auto& as_literal = as_cast.expression->as<LiteralNode>();
+		EXPECT_EQ(as_literal.value, Value{ 128L });
+		EXPECT_EQ(as_literal.literal_type, LiteralNode::Type::Int64);
+		EXPECT_EQ(as_literal.type, PrimitiveType::Kind::Int64);
 	}
 
 	TEST_F(TypeResolverTest, Cast_Impossible)
@@ -318,13 +321,13 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message,
+		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message,
 		          std::format("cannot cast from type '{}' to '{}'",
 		                      std::string(Type{ PrimitiveType::Kind::Int64 }),
 		                      std::string(Type{ PrimitiveType::Kind::Char })));
@@ -356,63 +359,69 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_for_loop = dynamic_cast<ForLoopNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_for_loop);
+		ASSERT_TRUE(as_module.statements[0]->is<ForLoopNode>());
+		const auto& as_for_loop = as_module.statements[0]->as<ForLoopNode>();
 
-		const auto* as_initialization = dynamic_cast<VariableDeclarationNode*>(as_for_loop->initialization.get());
-		ASSERT_TRUE(as_initialization);
-		EXPECT_EQ(as_initialization->type, PrimitiveType::Kind::Int32);
-		EXPECT_EQ(as_initialization->name, "index");
-		EXPECT_EQ(as_initialization->type_identifier, "i32");
-		EXPECT_TRUE(as_initialization->is_mutable);
-		ASSERT_TRUE(as_initialization->expression);
+		ASSERT_TRUE(as_for_loop.initialization->is<VariableDeclarationNode>());
+		const auto& as_initialization = as_for_loop.initialization->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_initialization.type, PrimitiveType::Kind::Int32);
+		EXPECT_EQ(as_initialization.name, "index");
+		EXPECT_EQ(as_initialization.type_identifier, "i32");
+		EXPECT_TRUE(as_initialization.is_mutable);
+		ASSERT_TRUE(as_initialization.expression);
 		{
-			const auto* as_value = dynamic_cast<LiteralNode*>(as_initialization->expression.get());
-			ASSERT_TRUE(as_value);
-			EXPECT_EQ(as_value->type, PrimitiveType::Kind::Int32);
-			EXPECT_EQ(as_value->value, Value{ 0 });
-			EXPECT_EQ(as_value->literal_type, LiteralNode::Type::Int32);
+			ASSERT_TRUE(as_initialization.expression->is<LiteralNode>());
+			const auto& as_value = as_initialization.expression->as<LiteralNode>();
+			EXPECT_EQ(as_value.type, PrimitiveType::Kind::Int32);
+			EXPECT_EQ(as_value.value, Value{ 0 });
+			EXPECT_EQ(as_value.literal_type, LiteralNode::Type::Int32);
 		}
 
-		const auto* as_condition = dynamic_cast<BinaryNode*>(as_for_loop->condition.get());
-		ASSERT_TRUE(as_condition);
-		EXPECT_EQ(as_condition->type, PrimitiveType::Kind::Boolean);
+		ASSERT_TRUE(as_for_loop.condition->is<BinaryNode>());
+		const auto& as_condition = as_for_loop.condition->as<BinaryNode>();
+		EXPECT_EQ(as_condition.type, PrimitiveType::Kind::Boolean);
 		{
-			EXPECT_EQ(as_condition->op, ASTNode::Operator::Less);
+			EXPECT_EQ(as_condition.op, ASTNode::Operator::Less);
 
-			const auto* as_lhs = dynamic_cast<LiteralNode*>(as_condition->lhs.get());
-			ASSERT_TRUE(as_lhs);
-			EXPECT_EQ(as_lhs->type, PrimitiveType::Kind::Int32);
-			EXPECT_EQ(as_lhs->value, Value{ "index" });
-			EXPECT_EQ(as_lhs->literal_type, LiteralNode::Type::Identifier);
+			ASSERT_TRUE(as_condition.lhs->is<LiteralNode>());
+			const auto& as_lhs = as_condition.lhs->as<LiteralNode>();
+			EXPECT_EQ(as_lhs.type, PrimitiveType::Kind::Int32);
+			EXPECT_EQ(as_lhs.value, Value{ "index" });
+			EXPECT_EQ(as_lhs.literal_type, LiteralNode::Type::Identifier);
 
-			const auto* as_rhs = dynamic_cast<LiteralNode*>(as_condition->rhs.get());
-			ASSERT_TRUE(as_rhs);
-			EXPECT_EQ(as_rhs->type, PrimitiveType::Kind::Int32);
-			EXPECT_EQ(as_rhs->value, Value{ 10 });
-			EXPECT_EQ(as_rhs->literal_type, LiteralNode::Type::Int32);
+			ASSERT_TRUE(as_condition.rhs->is<LiteralNode>());
+			const auto& as_rhs = as_condition.rhs->as<LiteralNode>();
+			EXPECT_EQ(as_rhs.type, PrimitiveType::Kind::Int32);
+			EXPECT_EQ(as_rhs.value, Value{ 10 });
+			EXPECT_EQ(as_rhs.literal_type, LiteralNode::Type::Int32);
 		}
 
-		const auto* as_update = dynamic_cast<UnaryNode*>(as_for_loop->update.get());
-		ASSERT_TRUE(as_update);
-		EXPECT_EQ(as_update->type, PrimitiveType::Kind::Int32);
+		ASSERT_TRUE(as_for_loop.update->is<UnaryNode>());
+		const auto& as_update = as_for_loop.update->as<UnaryNode>();
+		EXPECT_EQ(as_update.type, PrimitiveType::Kind::Int32);
+		EXPECT_EQ(as_update.op, ASTNode::Operator::Increment);
 		{
-			EXPECT_EQ(as_update->op, ASTNode::Operator::Increment);
-
-			const auto* as_value = dynamic_cast<LiteralNode*>(as_update->expression.get());
-			ASSERT_TRUE(as_value);
-			EXPECT_EQ(as_value->type, PrimitiveType::Kind::Int32);
-			EXPECT_EQ(as_value->value, Value{ "index" });
-			EXPECT_EQ(as_value->literal_type, LiteralNode::Type::Identifier);
+			ASSERT_TRUE(as_update.expression->is<LiteralNode>());
+			const auto& as_value = as_update.expression->as<LiteralNode>();
+			EXPECT_EQ(as_value.type, PrimitiveType::Kind::Int32);
+			EXPECT_EQ(as_value.value, Value{ "index" });
+			EXPECT_EQ(as_value.literal_type, LiteralNode::Type::Identifier);
 		}
 
-		const auto* as_statements = dynamic_cast<BlockNode*>(as_for_loop->statements.get());
-		ASSERT_TRUE(as_statements);
-		ASSERT_EQ(as_statements->statements.size(), 1);
+		ASSERT_TRUE(as_for_loop.statements->is<BlockNode>());
+		const auto& as_statements = as_for_loop.statements->as<BlockNode>();
+		ASSERT_EQ(as_statements.statements.size(), 1);
+		EXPECT_EQ(as_statements.type, PrimitiveType::Kind::Void);
+
+		ASSERT_TRUE(as_statements.statements[0]->is<LiteralNode>());
+		const auto& as_statement = as_statements.statements[0]->as<LiteralNode>();
+		EXPECT_EQ(as_statement.type, PrimitiveType::Kind::String);
+		EXPECT_EQ(as_statement.value, Value{ "my_string" });
+		EXPECT_EQ(as_statement.literal_type, LiteralNode::Type::String);
 	}
 
 	TEST_F(TypeResolverTest, ForLoop_ConditionNotBool)
@@ -429,13 +438,13 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message,
+		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message,
 		          std::format("condition in for loop statement must be convertible to a '{}' type",
 		                      std::string(Type{ PrimitiveType::Kind::Boolean })));
 	}
@@ -461,13 +470,13 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, std::format("cannot call non-existing function '{}'", k_function_name));
+		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, std::format("cannot call non-existing function '{}'", k_function_name));
 	}
 
 	TEST_F(TypeResolverTest, FunctionCallNode_NonExistingFunction)
@@ -480,13 +489,13 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, "cannot call non-existing function 'non_existing'");
+		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, "cannot call non-existing function 'non_existing'");
 	}
 
 	TEST_F(TypeResolverTest, FunctionCallNode_ParametersDoNotMatch)
@@ -512,29 +521,28 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 2);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
 
-		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_function_declaration);
-		EXPECT_EQ(as_function_declaration->name, k_function_name);
-		EXPECT_EQ(as_function_declaration->type_identifier, "f32");
-		EXPECT_EQ(as_function_declaration->parameters.size(), 1);
-		EXPECT_TRUE(as_function_declaration->statements->statements.empty());
+		ASSERT_TRUE(as_module.statements[0]->is<FunctionDeclarationNode>());
+		const auto& as_function_declaration = as_module.statements[0]->as<FunctionDeclarationNode>();
+		EXPECT_EQ(as_function_declaration.name, k_function_name);
+		EXPECT_EQ(as_function_declaration.type_identifier, "f32");
+		EXPECT_EQ(as_function_declaration.parameters.size(), 1);
+		EXPECT_TRUE(as_function_declaration.statements->as<BlockNode>().statements.empty());
 		{
-			const auto* as_parameter
-				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
-			ASSERT_TRUE(as_parameter);
-			EXPECT_EQ(as_parameter->name, "a");
-			EXPECT_EQ(as_parameter->type_identifier, "str");
-			EXPECT_FALSE(as_parameter->expression);
-			EXPECT_FALSE(as_parameter->is_mutable);
+			ASSERT_TRUE(as_function_declaration.parameters[0]->is<VariableDeclarationNode>());
+			const auto& as_parameter = as_function_declaration.parameters[0]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_parameter.name, "a");
+			EXPECT_EQ(as_parameter.type_identifier, "str");
+			EXPECT_FALSE(as_parameter.expression);
+			EXPECT_FALSE(as_parameter.is_mutable);
 		}
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[1].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, std::format("cannot call non-existing function '{}'", k_function_name));
+		ASSERT_TRUE(as_module.statements[1]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[1]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, std::format("cannot call non-existing function '{}'", k_function_name));
 	}
 
 	TEST_F(TypeResolverTest, FunctionDeclarationNode)
@@ -560,64 +568,61 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_function_declaration);
-		EXPECT_EQ(as_function_declaration->name, "my_function");
-		EXPECT_EQ(as_function_declaration->type_identifier, "str");
-		ASSERT_EQ(as_function_declaration->parameters.size(), 3);
+		ASSERT_TRUE(as_module.statements[0]->is<FunctionDeclarationNode>());
+		const auto& as_function_declaration = as_module.statements[0]->as<FunctionDeclarationNode>();
+		EXPECT_EQ(as_function_declaration.name, "my_function");
+		EXPECT_EQ(as_function_declaration.type_identifier, "str");
+		ASSERT_EQ(as_function_declaration.parameters.size(), 3);
 		{
-			const auto* as_variable_declaration
-				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
-			ASSERT_TRUE(as_variable_declaration);
-			EXPECT_EQ(as_variable_declaration->name, "a");
-			EXPECT_EQ(as_variable_declaration->type_identifier, "i32");
-			EXPECT_FALSE(as_variable_declaration->expression);
-			EXPECT_FALSE(as_variable_declaration->is_mutable);
-			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Int32);
+			ASSERT_TRUE(as_function_declaration.parameters[0]->is<VariableDeclarationNode>());
+			const auto& as_variable_declaration = as_function_declaration.parameters[0]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_variable_declaration.name, "a");
+			EXPECT_EQ(as_variable_declaration.type_identifier, "i32");
+			EXPECT_FALSE(as_variable_declaration.expression);
+			EXPECT_FALSE(as_variable_declaration.is_mutable);
+			EXPECT_EQ(as_variable_declaration.type, PrimitiveType::Kind::Int32);
 		}
 		{
-			const auto* as_variable_declaration
-				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[1].get());
-			ASSERT_TRUE(as_variable_declaration);
-			EXPECT_EQ(as_variable_declaration->name, "b");
-			EXPECT_EQ(as_variable_declaration->type_identifier, "f64");
-			EXPECT_FALSE(as_variable_declaration->expression);
-			EXPECT_FALSE(as_variable_declaration->is_mutable);
-			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float64);
+			ASSERT_TRUE(as_function_declaration.parameters[1]->is<VariableDeclarationNode>());
+			const auto& as_variable_declaration = as_function_declaration.parameters[1]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_variable_declaration.name, "b");
+			EXPECT_EQ(as_variable_declaration.type_identifier, "f64");
+			EXPECT_FALSE(as_variable_declaration.expression);
+			EXPECT_FALSE(as_variable_declaration.is_mutable);
+			EXPECT_EQ(as_variable_declaration.type, PrimitiveType::Kind::Float64);
 		}
 		{
-			const auto* as_variable_declaration
-				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[2].get());
-			ASSERT_TRUE(as_variable_declaration);
-			EXPECT_EQ(as_variable_declaration->name, "c");
-			EXPECT_EQ(as_variable_declaration->type_identifier, "chr");
-			EXPECT_FALSE(as_variable_declaration->expression);
-			EXPECT_FALSE(as_variable_declaration->is_mutable);
-			EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Char);
+			ASSERT_TRUE(as_function_declaration.parameters[2]->is<VariableDeclarationNode>());
+			const auto& as_variable_declaration = as_function_declaration.parameters[2]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_variable_declaration.name, "c");
+			EXPECT_EQ(as_variable_declaration.type_identifier, "chr");
+			EXPECT_FALSE(as_variable_declaration.expression);
+			EXPECT_FALSE(as_variable_declaration.is_mutable);
+			EXPECT_EQ(as_variable_declaration.type, PrimitiveType::Kind::Char);
 		}
-		const auto* as_statements = dynamic_cast<BlockNode*>(as_function_declaration->statements.get());
-		ASSERT_TRUE(as_statements);
-		ASSERT_EQ(as_statements->statements.size(), 1);
+		ASSERT_TRUE(as_function_declaration.statements->is<BlockNode>());
+		const auto& as_statements = as_function_declaration.statements->as<BlockNode>();
+		ASSERT_EQ(as_statements.statements.size(), 1);
+		EXPECT_EQ(as_statements.type, PrimitiveType::Kind::Void);
 
-		const auto* as_variable_declaration
-			= dynamic_cast<VariableDeclarationNode*>(as_statements->statements[0].get());
-		ASSERT_TRUE(as_variable_declaration);
-		EXPECT_EQ(as_variable_declaration->name, "d");
-		EXPECT_EQ(as_variable_declaration->type_identifier, "chr");
-		EXPECT_TRUE(as_variable_declaration->expression);
+		ASSERT_TRUE(as_statements.statements[0]->is<VariableDeclarationNode>());
+		const auto& as_variable_declaration = as_statements.statements[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_variable_declaration.name, "d");
+		EXPECT_EQ(as_variable_declaration.type_identifier, "chr");
+		EXPECT_TRUE(as_variable_declaration.expression);
 		{
-			const auto* as_literal = dynamic_cast<LiteralNode*>(as_variable_declaration->expression.get());
-			ASSERT_TRUE(as_literal);
-			EXPECT_EQ(as_literal->value, Value{ "c" });
-			EXPECT_EQ(as_literal->literal_type, LiteralNode::Type::Identifier);
-			EXPECT_EQ(as_literal->type, PrimitiveType::Kind::Char);
+			ASSERT_TRUE(as_variable_declaration.expression->is<LiteralNode>());
+			const auto& as_literal = as_variable_declaration.expression->as<LiteralNode>();
+			EXPECT_EQ(as_literal.value, Value{ "c" });
+			EXPECT_EQ(as_literal.literal_type, LiteralNode::Type::Identifier);
+			EXPECT_EQ(as_literal.type, PrimitiveType::Kind::Char);
 		}
-		EXPECT_FALSE(as_variable_declaration->is_mutable);
-		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Char);
+		EXPECT_FALSE(as_variable_declaration.is_mutable);
+		EXPECT_EQ(as_variable_declaration.type, PrimitiveType::Kind::Char);
 	}
 
 	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousParameter)
@@ -638,24 +643,24 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_function_declaration);
-		ASSERT_EQ(as_function_declaration->parameters.size(), 2);
+		ASSERT_TRUE(as_module.statements[0]->is<FunctionDeclarationNode>());
+		const auto& as_function_declaration = as_module.statements[0]->as<FunctionDeclarationNode>();
+		ASSERT_EQ(as_function_declaration.parameters.size(), 2);
 
-		const auto* as_parameter = dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
-		ASSERT_TRUE(as_parameter);
-		EXPECT_EQ(as_parameter->name, "a");
-		EXPECT_EQ(as_parameter->type_identifier, "i32");
-		EXPECT_FALSE(as_parameter->expression);
-		EXPECT_FALSE(as_parameter->is_mutable);
+		ASSERT_TRUE(as_function_declaration.parameters[0]->is<VariableDeclarationNode>());
+		const auto& as_parameter = as_function_declaration.parameters[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_parameter.name, "a");
+		EXPECT_EQ(as_parameter.type_identifier, "i32");
+		EXPECT_FALSE(as_parameter.expression);
+		EXPECT_FALSE(as_parameter.is_mutable);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_function_declaration->parameters[1].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, "variable declaration 'a' shadows previous one");
+		ASSERT_TRUE(as_function_declaration.parameters[1]->is<ErrorNode>());
+		const auto& as_error = as_function_declaration.parameters[1]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, "variable declaration 'a' shadows previous one");
 	}
 
 	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShadowsPreviousOne)
@@ -676,21 +681,21 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 2);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
 
-		const auto* as_function_declaration = dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_function_declaration);
-		EXPECT_EQ(as_function_declaration->name, k_function_name);
-		EXPECT_EQ(as_function_declaration->type_identifier, "i32");
-		EXPECT_EQ(as_function_declaration->parameters.size(), 0);
-		EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
-		EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
+		ASSERT_TRUE(as_module.statements[0]->is<FunctionDeclarationNode>());
+		const auto& as_function_declaration = as_module.statements[0]->as<FunctionDeclarationNode>();
+		EXPECT_EQ(as_function_declaration.name, k_function_name);
+		EXPECT_EQ(as_function_declaration.type_identifier, "i32");
+		EXPECT_EQ(as_function_declaration.parameters.size(), 0);
+		EXPECT_EQ(as_function_declaration.statements->as<BlockNode>().statements.size(), 0);
+		EXPECT_EQ(as_function_declaration.type, PrimitiveType::Kind::Int32);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[1].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, std::format("function declaration '{}' shadows previous one", k_function_name));
+		ASSERT_TRUE(as_module.statements[1]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[1]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, std::format("function declaration '{}' shadows previous one", k_function_name));
 	}
 
 	TEST_F(TypeResolverTest, FunctionDeclarationNode_ShouldntShadowWithDifferentArguments)
@@ -723,47 +728,43 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 2);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
 
 		{
-			const auto* as_function_declaration
-				= dynamic_cast<FunctionDeclarationNode*>(as_module->statements[0].get());
-			ASSERT_TRUE(as_function_declaration);
-			EXPECT_EQ(as_function_declaration->name, k_function_name);
-			EXPECT_EQ(as_function_declaration->type_identifier, "i32");
-			EXPECT_EQ(as_function_declaration->parameters.size(), 1);
-			EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
-			EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
+			ASSERT_TRUE(as_module.statements[0]->is<FunctionDeclarationNode>());
+			const auto& as_function_declaration = as_module.statements[0]->as<FunctionDeclarationNode>();
+			EXPECT_EQ(as_function_declaration.name, k_function_name);
+			EXPECT_EQ(as_function_declaration.type_identifier, "i32");
+			EXPECT_EQ(as_function_declaration.parameters.size(), 1);
+			EXPECT_EQ(as_function_declaration.statements->as<BlockNode>().statements.size(), 0);
+			EXPECT_EQ(as_function_declaration.type, PrimitiveType::Kind::Int32);
 
-			const auto* as_parameter
-				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
-			ASSERT_TRUE(as_parameter);
-			EXPECT_EQ(as_parameter->name, "a");
-			EXPECT_EQ(as_parameter->type_identifier, "i32");
-			EXPECT_FALSE(as_parameter->expression);
-			EXPECT_FALSE(as_parameter->is_mutable);
-			EXPECT_EQ(as_parameter->type, PrimitiveType::Kind::Int32);
+			ASSERT_TRUE(as_function_declaration.parameters[0]->is<VariableDeclarationNode>());
+			const auto& as_parameter = as_function_declaration.parameters[0]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_parameter.name, "a");
+			EXPECT_EQ(as_parameter.type_identifier, "i32");
+			EXPECT_FALSE(as_parameter.expression);
+			EXPECT_FALSE(as_parameter.is_mutable);
+			EXPECT_EQ(as_parameter.type, PrimitiveType::Kind::Int32);
 		}
 		{
-			const auto* as_function_declaration
-				= dynamic_cast<FunctionDeclarationNode*>(as_module->statements[1].get());
-			ASSERT_TRUE(as_function_declaration);
-			EXPECT_EQ(as_function_declaration->name, k_function_name);
-			EXPECT_EQ(as_function_declaration->type_identifier, "i32");
-			EXPECT_EQ(as_function_declaration->parameters.size(), 1);
-			EXPECT_EQ(as_function_declaration->statements->statements.size(), 0);
-			EXPECT_EQ(as_function_declaration->type, PrimitiveType::Kind::Int32);
+			ASSERT_TRUE(as_module.statements[1]->is<FunctionDeclarationNode>());
+			const auto& as_function_declaration = as_module.statements[1]->as<FunctionDeclarationNode>();
+			EXPECT_EQ(as_function_declaration.name, k_function_name);
+			EXPECT_EQ(as_function_declaration.type_identifier, "i32");
+			EXPECT_EQ(as_function_declaration.parameters.size(), 1);
+			EXPECT_EQ(as_function_declaration.statements->as<BlockNode>().statements.size(), 0);
+			EXPECT_EQ(as_function_declaration.type, PrimitiveType::Kind::Int32);
 
-			const auto* as_parameter
-				= dynamic_cast<VariableDeclarationNode*>(as_function_declaration->parameters[0].get());
-			ASSERT_TRUE(as_parameter);
-			EXPECT_EQ(as_parameter->name, "a");
-			EXPECT_EQ(as_parameter->type_identifier, "f32");
-			EXPECT_FALSE(as_parameter->expression);
-			EXPECT_FALSE(as_parameter->is_mutable);
-			EXPECT_EQ(as_parameter->type, PrimitiveType::Kind::Float32);
+			ASSERT_TRUE(as_function_declaration.parameters[0]->is<VariableDeclarationNode>());
+			const auto& as_parameter = as_function_declaration.parameters[0]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_parameter.name, "a");
+			EXPECT_EQ(as_parameter.type_identifier, "f32");
+			EXPECT_FALSE(as_parameter.expression);
+			EXPECT_FALSE(as_parameter.is_mutable);
+			EXPECT_EQ(as_parameter.type, PrimitiveType::Kind::Float32);
 		}
 	}
 
@@ -809,17 +810,17 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), k_literal_types.size() + 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), k_literal_types.size() + 1);
 
-		const auto* as_variable_declaration = dynamic_cast<VariableDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_variable_declaration);
-		EXPECT_EQ(as_variable_declaration->name, "index");
-		EXPECT_EQ(as_variable_declaration->type_identifier, "f32");
-		EXPECT_FALSE(as_variable_declaration->expression);
-		EXPECT_FALSE(as_variable_declaration->is_mutable);
-		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float32);
+		ASSERT_TRUE(as_module.statements[0]->is<VariableDeclarationNode>());
+		const auto& as_variable_declaration = as_module.statements[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_variable_declaration.name, "index");
+		EXPECT_EQ(as_variable_declaration.type_identifier, "f32");
+		EXPECT_FALSE(as_variable_declaration.expression);
+		EXPECT_FALSE(as_variable_declaration.is_mutable);
+		EXPECT_EQ(as_variable_declaration.type, PrimitiveType::Kind::Float32);
 
 		static const std::unordered_map<LiteralNode::Type, PrimitiveType::Kind> k_expected_types = {
 			{ LiteralNode::Type::Unknown,    PrimitiveType::Kind::Unknown                                         },
@@ -835,11 +836,11 @@ namespace soul::ast::visitors::ut
 		for (std::size_t index = 0; index < k_literal_types.size(); ++index) {
 			const auto literal_type = k_literal_types[index];
 
-			const auto* as_literal = dynamic_cast<LiteralNode*>(as_module->statements[index + 1].get());
-			ASSERT_TRUE(as_literal);
-			EXPECT_EQ(as_literal->value, get_value(literal_type));
-			EXPECT_EQ(as_literal->literal_type, literal_type);
-			EXPECT_EQ(as_literal->type, k_expected_types.at(literal_type));
+			ASSERT_TRUE(as_module.statements[index + 1]->is<LiteralNode>());
+			const auto& as_literal = as_module.statements[index + 1]->as<LiteralNode>();
+			EXPECT_EQ(as_literal.type, k_expected_types.at(literal_type));
+			EXPECT_EQ(as_literal.value, get_value(literal_type));
+			EXPECT_EQ(as_literal.literal_type, literal_type);
 		}
 	}
 
@@ -854,13 +855,13 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, std::format("use of undeclared identifier '{}'", k_variable_name));
+		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, std::format("use of undeclared identifier '{}'", k_variable_name));
 	}
 
 	TEST_F(TypeResolverTest, StructDeclarationNode)
@@ -878,9 +879,9 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
 		const auto expected_type = Type{ StructType{ {
 			PrimitiveType::Kind::Int32,
@@ -888,37 +889,34 @@ namespace soul::ast::visitors::ut
 			PrimitiveType::Kind::Boolean,
 		} } };
 
-		const auto* as_struct_declaration = dynamic_cast<StructDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_struct_declaration);
-		EXPECT_EQ(as_struct_declaration->name, "my_struct");
-		EXPECT_EQ(as_struct_declaration->type, expected_type);
-		ASSERT_EQ(as_struct_declaration->parameters.size(), 3);
+		ASSERT_TRUE(as_module.statements[0]->is<StructDeclarationNode>());
+		const auto& as_struct_declaration = as_module.statements[0]->as<StructDeclarationNode>();
+		EXPECT_EQ(as_struct_declaration.name, "my_struct");
+		EXPECT_EQ(as_struct_declaration.type, expected_type);
+		ASSERT_EQ(as_struct_declaration.parameters.size(), 3);
 		{
-			const auto* as_parameter
-				= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[0].get());
-			ASSERT_TRUE(as_parameter);
-			EXPECT_EQ(as_parameter->name, "a");
-			EXPECT_EQ(as_parameter->type_identifier, "i32");
-			EXPECT_FALSE(as_parameter->expression);
-			EXPECT_FALSE(as_parameter->is_mutable);
+			ASSERT_TRUE(as_struct_declaration.parameters[0]->is<VariableDeclarationNode>());
+			const auto& as_parameter = as_struct_declaration.parameters[0]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_parameter.name, "a");
+			EXPECT_EQ(as_parameter.type_identifier, "i32");
+			EXPECT_FALSE(as_parameter.expression);
+			EXPECT_FALSE(as_parameter.is_mutable);
 		}
 		{
-			const auto* as_parameter
-				= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[1].get());
-			ASSERT_TRUE(as_parameter);
-			EXPECT_EQ(as_parameter->name, "b");
-			EXPECT_EQ(as_parameter->type_identifier, "f32");
-			EXPECT_FALSE(as_parameter->expression);
-			EXPECT_FALSE(as_parameter->is_mutable);
+			ASSERT_TRUE(as_struct_declaration.parameters[1]->is<VariableDeclarationNode>());
+			const auto& as_parameter = as_struct_declaration.parameters[1]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_parameter.name, "b");
+			EXPECT_EQ(as_parameter.type_identifier, "f32");
+			EXPECT_FALSE(as_parameter.expression);
+			EXPECT_FALSE(as_parameter.is_mutable);
 		}
 		{
-			const auto* as_parameter
-				= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[2].get());
-			ASSERT_TRUE(as_parameter);
-			EXPECT_EQ(as_parameter->name, "c");
-			EXPECT_EQ(as_parameter->type_identifier, "bool");
-			EXPECT_FALSE(as_parameter->expression);
-			EXPECT_FALSE(as_parameter->is_mutable);
+			ASSERT_TRUE(as_struct_declaration.parameters[2]->is<VariableDeclarationNode>());
+			const auto& as_parameter = as_struct_declaration.parameters[2]->as<VariableDeclarationNode>();
+			EXPECT_EQ(as_parameter.name, "c");
+			EXPECT_EQ(as_parameter.type_identifier, "bool");
+			EXPECT_FALSE(as_parameter.expression);
+			EXPECT_FALSE(as_parameter.is_mutable);
 		}
 	}
 
@@ -938,21 +936,21 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), k_arithmetic_operators.size());
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), k_arithmetic_operators.size());
 
 		for (std::size_t index = 0; index < k_arithmetic_operators.size(); ++index) {
-			const auto* as_unary = dynamic_cast<UnaryNode*>(as_module->statements[index].get());
-			ASSERT_TRUE(as_unary);
-			EXPECT_EQ(as_unary->op, k_arithmetic_operators[index]);
-			EXPECT_EQ(as_unary->type, PrimitiveType::Kind::Int64);
+			ASSERT_TRUE(as_module.statements[index]->is<UnaryNode>());
+			const auto& as_unary = as_module.statements[index]->as<UnaryNode>();
+			EXPECT_EQ(as_unary.op, k_arithmetic_operators[index]);
+			EXPECT_EQ(as_unary.type, PrimitiveType::Kind::Int64);
 
-			const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expression.get());
-			ASSERT_TRUE(as_expression);
-			EXPECT_EQ(as_expression->value, Value{ 1L });
-			EXPECT_EQ(as_expression->literal_type, LiteralNode::Type::Int64);
-			EXPECT_EQ(as_expression->type, PrimitiveType::Kind::Int64);
+			ASSERT_TRUE(as_unary.expression->is<LiteralNode>());
+			const auto& as_expression = as_unary.expression->as<LiteralNode>();
+			EXPECT_EQ(as_expression.value, Value{ 1L });
+			EXPECT_EQ(as_expression.literal_type, LiteralNode::Type::Int64);
+			EXPECT_EQ(as_expression.type, PrimitiveType::Kind::Int64);
 		}
 	}
 
@@ -966,20 +964,20 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_unary = dynamic_cast<UnaryNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_unary);
-		EXPECT_EQ(as_unary->op, ASTNode::Operator::LogicalNot);
-		EXPECT_EQ(as_unary->type, PrimitiveType::Kind::Boolean);
+		ASSERT_TRUE(as_module.statements[0]->is<UnaryNode>());
+		const auto& as_unary = as_module.statements[0]->as<UnaryNode>();
+		EXPECT_EQ(as_unary.op, ASTNode::Operator::LogicalNot);
+		EXPECT_EQ(as_unary.type, PrimitiveType::Kind::Boolean);
 
-		const auto* as_expression = dynamic_cast<LiteralNode*>(as_unary->expression.get());
-		ASSERT_TRUE(as_expression);
-		EXPECT_EQ(as_expression->value, Value{ true });
-		EXPECT_EQ(as_expression->literal_type, LiteralNode::Type::Boolean);
-		EXPECT_EQ(as_expression->type, PrimitiveType::Kind::Boolean);
+		ASSERT_TRUE(as_unary.expression->is<LiteralNode>());
+		const auto& as_expression = as_unary.expression->as<LiteralNode>();
+		EXPECT_EQ(as_expression.value, Value{ true });
+		EXPECT_EQ(as_expression.literal_type, LiteralNode::Type::Boolean);
+		EXPECT_EQ(as_expression.type, PrimitiveType::Kind::Boolean);
 	}
 
 	TEST_F(TypeResolverTest, UnaryNode_NoOverload)
@@ -992,13 +990,13 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 1);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message,
+		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message,
 		          std::format("operator ('{}') does not exist for type '{}'",
 		                      ASTNode::name(ASTNode::Operator::LogicalNot),
 		                      std::string(Type{ PrimitiveType::Kind::String })));
@@ -1020,21 +1018,21 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 2);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
 
-		const auto* as_variable_declaration = dynamic_cast<VariableDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_variable_declaration);
-		EXPECT_EQ(as_variable_declaration->name, k_variable_name);
-		EXPECT_EQ(as_variable_declaration->type_identifier, "f32");
-		EXPECT_FALSE(as_variable_declaration->expression);
-		EXPECT_TRUE(as_variable_declaration->is_mutable);
-		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float32);
+		ASSERT_TRUE(as_module.statements[0]->is<VariableDeclarationNode>());
+		const auto& as_variable_declaration = as_module.statements[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_variable_declaration.name, k_variable_name);
+		EXPECT_EQ(as_variable_declaration.type_identifier, "f32");
+		EXPECT_FALSE(as_variable_declaration.expression);
+		EXPECT_TRUE(as_variable_declaration.is_mutable);
+		EXPECT_EQ(as_variable_declaration.type, PrimitiveType::Kind::Float32);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_module->statements[1].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, std::format("variable declaration '{}' shadows previous one", k_variable_name));
+		ASSERT_TRUE(as_module.statements[1]->is<ErrorNode>());
+		const auto& as_error = as_module.statements[1]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, std::format("variable declaration '{}' shadows previous one", k_variable_name));
 	}
 
 	TEST_F(TypeResolverTest, VariableDeclaration_ShadowsOuterScopeOne)
@@ -1056,25 +1054,26 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 2);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
 
-		const auto* as_variable_declaration = dynamic_cast<VariableDeclarationNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_variable_declaration);
-		EXPECT_EQ(as_variable_declaration->name, k_variable_name);
-		EXPECT_EQ(as_variable_declaration->type_identifier, "f32");
-		EXPECT_FALSE(as_variable_declaration->expression);
-		EXPECT_TRUE(as_variable_declaration->is_mutable);
-		EXPECT_EQ(as_variable_declaration->type, PrimitiveType::Kind::Float32);
+		ASSERT_TRUE(as_module.statements[0]->is<VariableDeclarationNode>());
+		const auto& as_variable_declaration = as_module.statements[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_variable_declaration.name, k_variable_name);
+		EXPECT_EQ(as_variable_declaration.type_identifier, "f32");
+		EXPECT_FALSE(as_variable_declaration.expression);
+		EXPECT_TRUE(as_variable_declaration.is_mutable);
+		EXPECT_EQ(as_variable_declaration.type, PrimitiveType::Kind::Float32);
 
-		const auto* as_inner_scope = dynamic_cast<BlockNode*>(as_module->statements[1].get());
-		ASSERT_TRUE(as_inner_scope);
-		ASSERT_EQ(as_inner_scope->statements.size(), 1);
+		ASSERT_TRUE(as_module.statements[1]->is<BlockNode>());
+		const auto& as_inner_scope = as_module.statements[1]->as<BlockNode>();
+		ASSERT_EQ(as_inner_scope.statements.size(), 1);
+		EXPECT_EQ(as_inner_scope.type, PrimitiveType::Kind::Void);
 
-		const auto* as_error = dynamic_cast<ErrorNode*>(as_inner_scope->statements[0].get());
-		ASSERT_TRUE(as_error);
-		EXPECT_EQ(as_error->message, std::format("variable declaration '{}' shadows previous one", k_variable_name));
+		ASSERT_TRUE(as_inner_scope.statements[0]->is<ErrorNode>());
+		const auto& as_error = as_inner_scope.statements[0]->as<ErrorNode>();
+		EXPECT_EQ(as_error.message, std::format("variable declaration '{}' shadows previous one", k_variable_name));
 	}
 
 	TEST_F(TypeResolverTest, VariableDeclaration_ShouldntShadowPreviousInnerScope)
@@ -1096,29 +1095,68 @@ namespace soul::ast::visitors::ut
 		auto result_module = resolve(expected_module.get());
 
 		EXPECT_NE(expected_module.get(), result_module.get());
-		const auto* as_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_module);
-		ASSERT_EQ(as_module->statements.size(), 2);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
 
-		const auto* as_inner_scope = dynamic_cast<BlockNode*>(as_module->statements[0].get());
-		ASSERT_TRUE(as_inner_scope);
-		ASSERT_EQ(as_inner_scope->statements.size(), 1);
+		ASSERT_TRUE(as_module.statements[0]->is<BlockNode>());
+		const auto& as_inner_scope = as_module.statements[0]->as<BlockNode>();
+		ASSERT_EQ(as_inner_scope.statements.size(), 1);
+		EXPECT_EQ(as_inner_scope.type, PrimitiveType::Kind::Void);
 
-		const auto* as_inner_variable = dynamic_cast<VariableDeclarationNode*>(as_inner_scope->statements[0].get());
-		ASSERT_TRUE(as_inner_variable);
-		ASSERT_TRUE(as_inner_variable);
-		EXPECT_EQ(as_inner_variable->name, k_variable_name);
-		EXPECT_EQ(as_inner_variable->type_identifier, "i32");
-		EXPECT_FALSE(as_inner_variable->expression);
-		EXPECT_FALSE(as_inner_variable->is_mutable);
-		EXPECT_EQ(as_inner_variable->type, PrimitiveType::Kind::Int32);
+		ASSERT_TRUE(as_inner_scope.statements[0]->is<VariableDeclarationNode>());
+		const auto& as_inner_variable = as_inner_scope.statements[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_inner_variable.name, k_variable_name);
+		EXPECT_EQ(as_inner_variable.type_identifier, "i32");
+		EXPECT_FALSE(as_inner_variable.expression);
+		EXPECT_FALSE(as_inner_variable.is_mutable);
+		EXPECT_EQ(as_inner_variable.type, PrimitiveType::Kind::Int32);
 
-		const auto* as_outer_variable = dynamic_cast<VariableDeclarationNode*>(as_module->statements[1].get());
-		ASSERT_TRUE(as_outer_variable);
-		EXPECT_EQ(as_outer_variable->name, k_variable_name);
-		EXPECT_EQ(as_outer_variable->type_identifier, "f32");
-		EXPECT_FALSE(as_outer_variable->expression);
-		EXPECT_TRUE(as_outer_variable->is_mutable);
-		EXPECT_EQ(as_outer_variable->type, PrimitiveType::Kind::Float32);
+		ASSERT_TRUE(as_module.statements[1]->is<VariableDeclarationNode>());
+		const auto& as_outer_variable = as_module.statements[1]->as<VariableDeclarationNode>();
+		EXPECT_EQ(as_outer_variable.name, k_variable_name);
+		EXPECT_EQ(as_outer_variable.type_identifier, "f32");
+		EXPECT_FALSE(as_outer_variable.expression);
+		EXPECT_TRUE(as_outer_variable.is_mutable);
+		EXPECT_EQ(as_outer_variable.type, PrimitiveType::Kind::Float32);
+	}
+
+	TEST_F(TypeResolverTest, While)
+	{
+		auto while_condition = LiteralNode::create(Value{ true }, LiteralNode::Type::Boolean);
+
+		auto while_statements = ASTNode::Dependencies{};
+		while_statements.emplace_back(LiteralNode::create(Value{ 3.14 }, LiteralNode::Type::Float64));
+
+		auto while_loop = WhileNode::create(std::move(while_condition), BlockNode::create(std::move(while_statements)));
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.push_back(std::move(while_loop));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 1);
+
+		ASSERT_TRUE(as_module.statements[0]->is<WhileNode>());
+		const auto& as_while = as_module.statements[0]->as<WhileNode>();
+
+		ASSERT_TRUE(as_while.condition->is<LiteralNode>());
+		const auto& as_condition = as_while.condition->as<LiteralNode>();
+		EXPECT_EQ(as_condition.type, PrimitiveType::Kind::Boolean);
+
+		ASSERT_TRUE(as_while.statements->is<BlockNode>());
+		const auto& as_statements = as_while.statements->as<BlockNode>();
+		ASSERT_EQ(as_statements.statements.size(), 1);
+		EXPECT_EQ(as_statements.type, PrimitiveType::Kind::Void);
+
+		ASSERT_TRUE(as_statements.statements[0]->is<LiteralNode>());
+		const auto& as_statement = as_statements.statements[0]->as<LiteralNode>();
+		EXPECT_EQ(as_statement.value, Value{ 3.14 });
+		EXPECT_EQ(as_statement.literal_type, LiteralNode::Type::Float64);
+		EXPECT_EQ(as_statement.type, PrimitiveType::Kind::Float64);
 	}
 }  // namespace soul::ast::visitors::ut

@@ -322,8 +322,7 @@ namespace soul::parser
 		// <function_call> ::= <identifier> [ '(' <parameter_declaration>, ... ')' ]
 
 		// <identifier>
-		const auto* literal = dynamic_cast<LiteralNode*>(dependency.get());
-		if (!literal) {
+		if (!dependency->is<LiteralNode>()) {
 			const auto previous_token = peek(-1);
 			return create_error(std::format("expected function name identifier, but got: '{}'",
 			                                std::string(previous_token ? previous_token->data : "__ERROR__")));
@@ -351,7 +350,8 @@ namespace soul::parser
 			                                std::string(current_token_or_default().data)));
 		}
 
-		return FunctionCallNode::create(std::string(literal->value.get<std::string>()), std::move(parameters));
+		return FunctionCallNode::create(std::string(dependency->as<LiteralNode>().value.get<std::string>()),
+		                                std::move(parameters));
 	}
 
 	ASTNode::Dependency Parser::parse_function_declaration()

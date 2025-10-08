@@ -51,16 +51,5 @@ namespace soul::ast::visitors
 		virtual void visit(nodes::UnaryNode&) override;
 		virtual void visit(nodes::VariableDeclarationNode&) override;
 		virtual void visit(nodes::WhileNode&) override;
-
-		/**
-		 * @brief Verifies if a Node is of a given (node) type.
-		 * @tparam T Type that satisfies the
-		 * @return \p true if it is, \b false otherwise.
-		 */
-		template <nodes::NodeKind T>
-		constexpr bool is(ASTNode::Reference node) const noexcept
-		{
-			return dynamic_cast<T*>(node) != nullptr;
-		}
 	};
 }  // namespace soul::ast::visitors

@@ -14,6 +14,7 @@
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
+#include "ast/nodes/while.h"
 #include "common/types/type.h"
 
 #include <format>
@@ -31,15 +32,15 @@ namespace soul::ast::visitors
 	void TypeResolverVisitor::visit(const BinaryNode& node)
 	{
 		CopyVisitor::visit(node);
+		auto& binary_node = _current_clone->as<BinaryNode>();
 
-		auto& binary_node = as<BinaryNode>();
 		if (!node.lhs) {
 			binary_node.lhs = ErrorNode::create("[INTERNAL] BinaryNode does not contain LHS expression (nullptr)");
 		}
 		if (!node.rhs) {
 			binary_node.rhs = ErrorNode::create("[INTERNAL] BinaryNode does not contain RHS expression (nullptr)");
 		}
-		if (dynamic_cast<ErrorNode*>(binary_node.lhs.get()) && dynamic_cast<ErrorNode*>(binary_node.rhs.get())) {
+		if (binary_node.lhs->is<ErrorNode>() || binary_node.rhs->is<ErrorNode>()) {
 			return;
 		}
 
@@ -77,7 +78,7 @@ namespace soul::ast::visitors
 			_current_clone = ErrorNode::create("[INTERNAL] CastNode does not contain an expression (nullptr)");
 		}
 
-		const auto& cast_node = as<CastNode>();
+		const auto& cast_node = _current_clone->as<CastNode>();
 		const auto  from_type = cast_node.expression->type;
 		const auto  to_type   = get_type_or_default(cast_node.type_identifier);
 		if (get_cast_type(from_type, to_type) == CastNode::Type::Impossible) {
@@ -92,8 +93,8 @@ namespace soul::ast::visitors
 	void TypeResolverVisitor::visit(const ForLoopNode& node)
 	{
 		CopyVisitor::visit(node);
+		const auto& for_loop = _current_clone->as<ForLoopNode>();
 
-		const auto& for_loop = as<ForLoopNode>();
 		if (for_loop.condition) {
 			const bool is_condition_bool_coercible
 				= get_cast_type(for_loop.condition->type, PrimitiveType::Kind::Boolean) != CastNode::Type::Impossible;
@@ -111,8 +112,8 @@ namespace soul::ast::visitors
 	void TypeResolverVisitor::visit(const ForeachLoopNode& node)
 	{
 		CopyVisitor::visit(node);
+		auto& foreach_node = _current_clone->as<ForeachLoopNode>();
 
-		auto& foreach_node = as<ForeachLoopNode>();
 		if (!node.variable) {
 			foreach_node.variable
 				= ErrorNode::create("[INTERNAL] ForeachLoopNode does not contain variable expression (nullptr)");
@@ -121,8 +122,7 @@ namespace soul::ast::visitors
 			foreach_node.in_expression
 				= ErrorNode::create("[INTERNAL] ForeachLoopNode does not contain in_expression expression (nullptr)");
 		}
-		if (dynamic_cast<ErrorNode*>(foreach_node.variable.get())
-		    && dynamic_cast<ErrorNode*>(foreach_node.in_expression.get())) {
+		if (foreach_node.variable->is<ErrorNode>() || foreach_node.in_expression->is<ErrorNode>()) {
 			return;
 		}
 
@@ -149,8 +149,8 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
-		auto& function_call = as<FunctionCallNode>();
-		auto  want_types    = function_call.parameters
+		const auto& function_call = _current_clone->as<FunctionCallNode>();
+		auto        want_types    = function_call.parameters
 		                | std::views::transform([](const auto& parameter) -> types::Type { return parameter->type; });
 		const auto function_declaration = get_function_declaration(node.name, want_types);
 		if (!function_declaration.has_value()) {
@@ -168,7 +168,7 @@ namespace soul::ast::visitors
 
 		CopyVisitor::visit(node);
 
-		auto& function_declaration = as<FunctionDeclarationNode>();
+		auto& function_declaration = _current_clone->as<FunctionDeclarationNode>();
 		auto  want_types           = function_declaration.parameters
 		                | std::views::transform([](const auto& parameter) -> types::Type { return parameter->type; });
 		if (get_function_declaration(node.name, want_types)) {
@@ -179,10 +179,10 @@ namespace soul::ast::visitors
 
 		for (std::size_t index = 0; index < function_declaration.parameters.size(); ++index) {
 			const auto* parameter = function_declaration.parameters[index].get();
-			if (dynamic_cast<const ErrorNode*>(parameter)) {
+			if (parameter->is<ErrorNode>()) {
 				return;
 			}
-			if (!dynamic_cast<const VariableDeclarationNode*>(parameter)) {
+			if (!parameter->is<VariableDeclarationNode>()) {
 				function_declaration.parameters[index]
 					= ErrorNode::create(std::format("[INTERNAL] FunctionDeclarationNode contains "
 				                                    "non-VariableDeclarationNode in the parameter list (at {})",
@@ -204,7 +204,7 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
-		const auto& if_node = as<IfNode>();
+		const auto& if_node = _current_clone->as<IfNode>();
 		const bool  is_condition_bool_coercible
 			= get_cast_type(if_node.condition->type, PrimitiveType::Kind::Boolean) != CastNode::Type::Impossible;
 		if (!is_condition_bool_coercible) {
@@ -269,7 +269,7 @@ namespace soul::ast::visitors
 	{
 		CopyVisitor::visit(node);
 
-		const auto& unary_node = as<UnaryNode>();
+		const auto& unary_node = _current_clone->as<UnaryNode>();
 		if (!unary_node.expression) {
 			_current_clone = ErrorNode::create("[INTERNAL] UnaryNode does not contain expression (nullptr)");
 			return;
@@ -297,6 +297,24 @@ namespace soul::ast::visitors
 
 		_current_clone->type = get_type_or_default(node.type_identifier);
 		_variables_in_scope.emplace_back(std::make_pair(node.name, _current_clone->type));
+	}
+
+	void TypeResolverVisitor::visit(const WhileNode& node)
+	{
+		CopyVisitor::visit(node);
+		const auto& while_loop = _current_clone->as<WhileNode>();
+
+		if (while_loop.condition) {
+			const bool is_condition_bool_coercible
+				= get_cast_type(while_loop.condition->type, PrimitiveType::Kind::Boolean) != CastNode::Type::Impossible;
+			if (!is_condition_bool_coercible) {
+				_current_clone = ErrorNode::create(
+					std::format("condition in while loop statement must be convertible to a '{}' type",
+				                std::string(Type{ PrimitiveType::Kind::Boolean })));
+				return;
+			}
+		}
+		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
 	CastNode::Type get_cast_type(const Type& from_type, const Type& to_type)

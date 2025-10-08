@@ -22,24 +22,24 @@ namespace soul::ast::visitors
 		}
 
 		CopyVisitor::visit(node);
-		auto& struct_declaration = as<StructDeclarationNode>();
+		auto& struct_declaration = _current_clone->as<StructDeclarationNode>();
 
 		StructType::ContainedTypes contained_types{};
 		contained_types.reserve(node.parameters.size());
 		for (std::size_t index = 0; index < node.parameters.size(); ++index) {
-			const auto* param = dynamic_cast<VariableDeclarationNode*>(node.parameters[index].get());
-			if (!param) {
+			if (!node.parameters[index]->is<VariableDeclarationNode>()) {
 				struct_declaration.parameters[index] = ErrorNode::create(std::format(
 					"[INTERNAL] cannot resolve type for '{}', because parameter is not of valid (node) type",
 					node.name));
 				continue;
 			}
-			if (!_registered_types.contains(param->type_identifier)) {
+			const auto& param = node.parameters[index]->as<VariableDeclarationNode>();
+			if (!_registered_types.contains(param.type_identifier)) {
 				struct_declaration.parameters[index] = ErrorNode::create(
-					std::format("cannot resolve type '{}', because no such type exists", param->type_identifier));
+					std::format("cannot resolve type '{}', because no such type exists", param.type_identifier));
 				continue;
 			}
-			contained_types.push_back(_registered_types.at(param->type_identifier));
+			contained_types.push_back(_registered_types.at(param.type_identifier));
 		}
 		_registered_types[node.name] = Type{ StructType{ std::move(contained_types) } };
 	}

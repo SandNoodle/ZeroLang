@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/nodes/nodes_fwd.h"
 #include "ast/visitors/default_traverse.h"
 
 #include <cassert>
@@ -66,18 +67,6 @@ namespace soul::ast::visitors
 				cloned.emplace_back(clone(element.get()));
 			}
 			return cloned;
-		}
-
-		/**
-		 * @brief Returns the underlying node.
-		 * @important Does not perform any validation - assumes that DefaultTraverseVisitor::is<T> was used first.
-		 * @tparam T Type satisfying the NodeKind concept.
-		 */
-		template <nodes::NodeKind T>
-		constexpr T& as()
-		{
-			assert(dynamic_cast<T*>(_current_clone.get()));
-			return dynamic_cast<T&>(*_current_clone);
 		}
 	};
 }  // namespace soul::ast::visitors

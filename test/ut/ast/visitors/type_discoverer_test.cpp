@@ -111,41 +111,38 @@ namespace soul::ast::visitors::ut
 		StringifyVisitor stringify_result{};
 		stringify_result.accept(result_module.get());
 
-		const auto* as_result_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_result_module);
-		ASSERT_EQ(as_result_module->statements.size(), 2);
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_result_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_result_module.statements.size(), 2);
 
-		const auto* as_struct_declaration = dynamic_cast<StructDeclarationNode*>(as_result_module->statements[0].get());
-		ASSERT_TRUE(as_struct_declaration);
-		ASSERT_EQ(as_struct_declaration->parameters.size(), 3);
+		ASSERT_TRUE(as_result_module.statements[0]->is<StructDeclarationNode>());
+		const auto& as_struct_declaration = as_result_module.statements[0]->as<StructDeclarationNode>();
+		ASSERT_EQ(as_struct_declaration.parameters.size(), 3);
 
-		const auto* first_parameter
-			= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[0].get());
-		ASSERT_TRUE(first_parameter);
-		EXPECT_EQ(first_parameter->name, "my_int");
-		EXPECT_EQ(first_parameter->type_identifier, "i32");
-		EXPECT_FALSE(first_parameter->expression);
-		EXPECT_FALSE(first_parameter->is_mutable);
+		ASSERT_TRUE(as_struct_declaration.parameters[0]->is<VariableDeclarationNode>());
+		const auto& first_parameter = as_struct_declaration.parameters[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(first_parameter.name, "my_int");
+		EXPECT_EQ(first_parameter.type_identifier, "i32");
+		EXPECT_FALSE(first_parameter.expression);
+		EXPECT_FALSE(first_parameter.is_mutable);
 
-		const auto* second_parameter
-			= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[1].get());
-		ASSERT_TRUE(second_parameter);
-		EXPECT_EQ(second_parameter->name, "my_float");
-		EXPECT_EQ(second_parameter->type_identifier, "f64");
-		EXPECT_FALSE(second_parameter->expression);
-		EXPECT_FALSE(second_parameter->is_mutable);
+		ASSERT_TRUE(as_struct_declaration.parameters[1]->is<VariableDeclarationNode>());
+		const auto& second_parameter = as_struct_declaration.parameters[1]->as<VariableDeclarationNode>();
+		EXPECT_EQ(second_parameter.name, "my_float");
+		EXPECT_EQ(second_parameter.type_identifier, "f64");
+		EXPECT_FALSE(second_parameter.expression);
+		EXPECT_FALSE(second_parameter.is_mutable);
 
-		const auto* third_parameter
-			= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[2].get());
-		ASSERT_TRUE(third_parameter);
-		EXPECT_EQ(third_parameter->name, "my_string");
-		EXPECT_EQ(third_parameter->type_identifier, "str");
-		EXPECT_FALSE(third_parameter->expression);
-		EXPECT_FALSE(third_parameter->is_mutable);
+		ASSERT_TRUE(as_struct_declaration.parameters[2]->is<VariableDeclarationNode>());
+		const auto& third_parameter = as_struct_declaration.parameters[2]->as<VariableDeclarationNode>();
+		EXPECT_EQ(third_parameter.name, "my_string");
+		EXPECT_EQ(third_parameter.type_identifier, "str");
+		EXPECT_FALSE(third_parameter.expression);
+		EXPECT_FALSE(third_parameter.is_mutable);
 
-		const auto* as_error_node = dynamic_cast<ErrorNode*>(as_result_module->statements[1].get());
-		ASSERT_TRUE(as_error_node);
-		EXPECT_EQ(as_error_node->message, std::format("redefinition of type '{}'", k_struct_name));
+		ASSERT_TRUE(as_result_module.statements[1]->is<ErrorNode>());
+		const auto& as_error_node = as_result_module.statements[1]->as<ErrorNode>();
+		EXPECT_EQ(as_error_node.message, std::format("redefinition of type '{}'", k_struct_name));
 	}
 
 	TEST_F(TypeDiscovererTest, TypeNotRegistered)
@@ -177,33 +174,31 @@ namespace soul::ast::visitors::ut
 		EXPECT_EQ(stringify_expected_before.string(), stringify_expected_after.string())
 			<< "TypeDiscovererVisitor should not modify the original AST";
 
-		const auto& result_module    = type_discoverer.cloned();
-		const auto* as_result_module = dynamic_cast<ModuleNode*>(result_module.get());
-		ASSERT_TRUE(as_result_module);
-		ASSERT_EQ(as_result_module->statements.size(), 1);
+		const auto& result_module = type_discoverer.cloned();
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_result_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_result_module.statements.size(), 1);
 
-		const auto* as_struct_declaration = dynamic_cast<StructDeclarationNode*>(as_result_module->statements[0].get());
-		ASSERT_TRUE(as_struct_declaration);
-		ASSERT_EQ(as_struct_declaration->parameters.size(), 3);
+		ASSERT_TRUE(as_result_module.statements[0]->is<StructDeclarationNode>());
+		const auto& as_struct_declaration = as_result_module.statements[0]->as<StructDeclarationNode>();
+		ASSERT_EQ(as_struct_declaration.parameters.size(), 3);
 
-		const auto* first_parameter
-			= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[0].get());
-		ASSERT_TRUE(first_parameter);
-		EXPECT_EQ(first_parameter->name, "my_int");
-		EXPECT_EQ(first_parameter->type_identifier, "i32");
-		EXPECT_FALSE(first_parameter->expression);
-		EXPECT_FALSE(first_parameter->is_mutable);
+		ASSERT_TRUE(as_struct_declaration.parameters[0]->is<VariableDeclarationNode>());
+		const auto& first_parameter = as_struct_declaration.parameters[0]->as<VariableDeclarationNode>();
+		EXPECT_EQ(first_parameter.name, "my_int");
+		EXPECT_EQ(first_parameter.type_identifier, "i32");
+		EXPECT_FALSE(first_parameter.expression);
+		EXPECT_FALSE(first_parameter.is_mutable);
 
-		const auto* second_parameter = dynamic_cast<ErrorNode*>(as_struct_declaration->parameters[1].get());
-		ASSERT_TRUE(second_parameter);
-		EXPECT_EQ(second_parameter->message, "cannot resolve type 'non_existing_type', because no such type exists");
+		ASSERT_TRUE(as_struct_declaration.parameters[1]->is<ErrorNode>());
+		const auto& second_parameter = as_struct_declaration.parameters[1]->as<ErrorNode>();
+		EXPECT_EQ(second_parameter.message, "cannot resolve type 'non_existing_type', because no such type exists");
 
-		const auto* third_parameter
-			= dynamic_cast<VariableDeclarationNode*>(as_struct_declaration->parameters[2].get());
-		ASSERT_TRUE(third_parameter);
-		EXPECT_EQ(third_parameter->name, "my_float");
-		EXPECT_EQ(third_parameter->type_identifier, "f64");
-		EXPECT_FALSE(third_parameter->expression);
-		EXPECT_FALSE(third_parameter->is_mutable);
+		ASSERT_TRUE(as_struct_declaration.parameters[2]->is<VariableDeclarationNode>());
+		const auto& third_parameter = as_struct_declaration.parameters[2]->as<VariableDeclarationNode>();
+		EXPECT_EQ(third_parameter.name, "my_float");
+		EXPECT_EQ(third_parameter.type_identifier, "f64");
+		EXPECT_FALSE(third_parameter.expression);
+		EXPECT_FALSE(third_parameter.is_mutable);
 	}
 }  // namespace soul::ast::visitors::ut
