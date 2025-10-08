@@ -15,9 +15,9 @@
 
 namespace soul::parser::ut
 {
-	using namespace ast::visitors;
-	using namespace parser;
-	using namespace lexer;
+	using namespace soul::ast::visitors;
+	using namespace soul::lexer;
+	using namespace soul::parser;
 
 	struct Case
 	{

@@ -20,7 +20,7 @@
 
 namespace soul::ast::visitors
 {
-	using namespace ast::nodes;
+	using namespace soul::ast::nodes;
 
 	ASTNode::Dependency CopyVisitor::cloned() noexcept { return std::move(_current_clone); }
 

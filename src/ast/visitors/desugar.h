@@ -17,6 +17,7 @@ namespace soul::ast::visitors
 
 		protected:
 		using CopyVisitor::visit;
+		void visit(const nodes::BinaryNode&) override;
 		void visit(const nodes::ForLoopNode&) override;
 	};
 }  // namespace soul::ast::visitors

@@ -20,8 +20,8 @@
 
 namespace soul::ast::visitors
 {
-	using namespace ast;
-	using namespace ast::nodes;
+	using namespace soul::ast;
+	using namespace soul::ast::nodes;
 
 	class CopyVisitorTest : public ::testing::Test
 	{

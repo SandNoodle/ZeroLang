@@ -25,9 +25,9 @@
 
 namespace soul::ast::visitors::ut
 {
-	using namespace ast::nodes;
+	using namespace soul::ast::nodes;
+	using namespace soul::types;
 	using namespace std::string_view_literals;
-	using namespace types;
 
 	class TypeResolverTest : public ::testing::Test
 	{

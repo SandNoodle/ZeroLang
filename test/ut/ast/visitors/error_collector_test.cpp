@@ -18,7 +18,7 @@
 
 namespace soul::ast::visitors::ut
 {
-	using namespace ast::nodes;
+	using namespace soul::ast::nodes;
 
 	class ErrorCollectorTest : public ::testing::Test
 	{

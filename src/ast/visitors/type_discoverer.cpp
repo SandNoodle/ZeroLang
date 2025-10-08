@@ -9,8 +9,8 @@
 
 namespace soul::ast::visitors
 {
-	using namespace types;
-	using namespace ast::nodes;
+	using namespace soul::ast::nodes;
+	using namespace soul::types;
 
 	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::discovered_types() noexcept { return _registered_types; }
 

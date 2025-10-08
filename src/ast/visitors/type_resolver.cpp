@@ -21,9 +21,9 @@
 
 namespace soul::ast::visitors
 {
-	using namespace ast::nodes;
-	using namespace ast;
-	using namespace types;
+	using namespace soul::ast::nodes;
+	using namespace soul::ast;
+	using namespace soul::types;
 
 	CastNode::Type get_cast_type(const Type& from_type, const Type& to_type);
 

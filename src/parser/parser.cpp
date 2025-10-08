@@ -23,8 +23,8 @@
 
 namespace soul::parser
 {
-	using namespace ast::nodes;
-	using namespace ast;
+	using namespace soul::ast::nodes;
+	using namespace soul::ast;
 
 	static constexpr std::array k_literal_types
 		= { Token::Type::LiteralFloat,  Token::Type::LiteralIdentifier, Token::Type::LiteralInteger,

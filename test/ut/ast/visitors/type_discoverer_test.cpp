@@ -11,8 +11,8 @@
 
 namespace soul::ast::visitors::ut
 {
-	using namespace types;
-	using namespace ast::nodes;
+	using namespace soul::ast::nodes;
+	using namespace soul::types;
 	using namespace std::string_view_literals;
 
 	class TypeDiscovererTest : public ::testing::Test
