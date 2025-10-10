@@ -4,6 +4,8 @@
 
 namespace soul::ir
 {
+	struct Module;
+	struct Function;
 	struct Instruction;
 
 	/**
