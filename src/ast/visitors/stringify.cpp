@@ -10,7 +10,9 @@
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
+#include "ast/nodes/loop_control.h"
 #include "ast/nodes/module.h"
+#include "ast/nodes/return.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
@@ -128,12 +130,30 @@ namespace soul::ast::visitors
 		encode("value", std::string(node), false);
 	}
 
+	void StringifyVisitor::visit(const LoopControlNode& node)
+	{
+		encode("node", "loop_control");
+		encode_type(node.type);
+		encode("control_type",
+		       node.control_type == LoopControlNode::Type::Break      ? "break"
+		       : node.control_type == LoopControlNode::Type::Continue ? "continue"
+		                                                              : k_unnamed,
+		       false);
+	}
+
 	void StringifyVisitor::visit(const ModuleNode& node)
 	{
 		encode("node", "module_declaration");
 		encode_type(node.type);
 		encode("name", node.name);
 		encode("statements", node.statements, false);
+	}
+
+	void StringifyVisitor::visit(const ReturnNode& node)
+	{
+		encode("node", "return");
+		encode_type(node.type);
+		encode("expression", node.expression.get(), false);
 	}
 
 	void StringifyVisitor::visit(const StructDeclarationNode& node)

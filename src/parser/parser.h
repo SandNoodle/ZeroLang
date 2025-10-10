@@ -51,6 +51,8 @@ namespace soul::parser
 		ast::ASTNode::Dependency parse_grouping();
 		ast::ASTNode::Dependency parse_if();
 		ast::ASTNode::Dependency parse_literal();
+		ast::ASTNode::Dependency parse_loop_control();
+		ast::ASTNode::Dependency parse_return();
 		ast::ASTNode::Dependency parse_struct_declaration();
 		ast::ASTNode::Dependency parse_unary();
 		ast::ASTNode::Dependency parse_variable_declaration();

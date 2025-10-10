@@ -30,7 +30,9 @@ namespace soul::ast::visitors
 		virtual void visit(const nodes::FunctionDeclarationNode&) override;
 		virtual void visit(const nodes::IfNode&) override;
 		virtual void visit(const nodes::LiteralNode&) override;
+		virtual void visit(const nodes::LoopControlNode&) override;
 		virtual void visit(const nodes::ModuleNode&) override;
+		virtual void visit(const nodes::ReturnNode&) override;
 		virtual void visit(const nodes::StructDeclarationNode&) override;
 		virtual void visit(const nodes::UnaryNode&) override;
 		virtual void visit(const nodes::VariableDeclarationNode&) override;
@@ -46,7 +48,9 @@ namespace soul::ast::visitors
 		virtual void visit(nodes::FunctionDeclarationNode&) override;
 		virtual void visit(nodes::IfNode&) override;
 		virtual void visit(nodes::LiteralNode&) override;
+		virtual void visit(nodes::LoopControlNode&) override;
 		virtual void visit(nodes::ModuleNode&) override;
+		virtual void visit(nodes::ReturnNode&) override;
 		virtual void visit(nodes::StructDeclarationNode&) override;
 		virtual void visit(nodes::UnaryNode&) override;
 		virtual void visit(nodes::VariableDeclarationNode&) override;

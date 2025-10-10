@@ -9,7 +9,9 @@
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
+#include "ast/nodes/loop_control.h"
 #include "ast/nodes/module.h"
+#include "ast/nodes/return.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
@@ -85,12 +87,16 @@ namespace soul::ast::visitors
 
 	void DefaultTraverseVisitor::visit([[maybe_unused]] const LiteralNode& node) { /* Can't traverse further. */ }
 
+	void DefaultTraverseVisitor::visit([[maybe_unused]] const LoopControlNode& node) { /* Can't traverse further. */ }
+
 	void DefaultTraverseVisitor::visit(const ModuleNode& node)
 	{
 		for (const auto& statement : node.statements) {
 			accept(statement.get());
 		}
 	}
+
+	void DefaultTraverseVisitor::visit(const ReturnNode& node) { accept(node.expression.get()); }
 
 	void DefaultTraverseVisitor::visit(const StructDeclarationNode& node)
 	{
@@ -119,7 +125,9 @@ namespace soul::ast::visitors
 	void DefaultTraverseVisitor::visit(FunctionDeclarationNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(IfNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(LiteralNode& node) { visit(std::as_const(node)); }
+	void DefaultTraverseVisitor::visit(LoopControlNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(ModuleNode& node) { visit(std::as_const(node)); }
+	void DefaultTraverseVisitor::visit(ReturnNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(StructDeclarationNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(UnaryNode& node) { visit(std::as_const(node)); }
 	void DefaultTraverseVisitor::visit(VariableDeclarationNode& node) { visit(std::as_const(node)); }

@@ -1,0 +1,3 @@
+fn should_return_value :: str {
+    return "my_string";
+}

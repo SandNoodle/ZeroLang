@@ -10,7 +10,9 @@
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
+#include "ast/nodes/loop_control.h"
 #include "ast/nodes/module.h"
+#include "ast/nodes/return.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
@@ -64,7 +66,11 @@ namespace soul::ast::visitors
 		                                    BlockNode::create(std::move(for_loop_statements)));
 
 		auto function_declaration_statements = ASTNode::Dependencies{};
+		function_declaration_statements.reserve(3);
 		function_declaration_statements.push_back(std::move(for_loop));
+		function_declaration_statements.emplace_back(LoopControlNode::create(LoopControlNode::Type::Continue));
+		function_declaration_statements.emplace_back(
+			ReturnNode::create(LiteralNode::create(Value{ 123 }, LiteralNode::Type::Int32)));
 		auto function_declaration_parameters = ASTNode::Dependencies{};
 		function_declaration_parameters.reserve(2);
 		function_declaration_parameters.emplace_back(VariableDeclarationNode::create("a", "i32", nullptr, false));

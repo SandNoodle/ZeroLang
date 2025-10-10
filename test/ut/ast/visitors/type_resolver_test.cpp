@@ -12,7 +12,9 @@
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
+#include "ast/nodes/loop_control.h"
 #include "ast/nodes/module.h"
+#include "ast/nodes/return.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
@@ -862,6 +864,68 @@ namespace soul::ast::visitors::ut
 		ASSERT_TRUE(as_module.statements[0]->is<ErrorNode>());
 		const auto& as_error = as_module.statements[0]->as<ErrorNode>();
 		EXPECT_EQ(as_error.message, std::format("use of undeclared identifier '{}'", k_variable_name));
+	}
+
+	TEST_F(TypeResolverTest, LoopControlNode)
+	{
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.reserve(2);
+		module_statements.emplace_back(LoopControlNode::create(LoopControlNode::Type::Break));
+		module_statements.emplace_back(LoopControlNode::create(LoopControlNode::Type::Continue));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
+
+		ASSERT_TRUE(as_module.statements[0]->is<LoopControlNode>());
+		const auto& as_break = as_module.statements[0]->as<LoopControlNode>();
+		EXPECT_EQ(as_break.control_type, LoopControlNode::Type::Break);
+		EXPECT_EQ(as_break.type, PrimitiveType::Kind::Void);
+
+		ASSERT_TRUE(as_module.statements[1]->is<LoopControlNode>());
+		const auto& as_continue = as_module.statements[1]->as<LoopControlNode>();
+		EXPECT_EQ(as_continue.control_type, LoopControlNode::Type::Continue);
+		EXPECT_EQ(as_continue.type, PrimitiveType::Kind::Void);
+	}
+
+	TEST_F(TypeResolverTest, ReturnNode)
+	{
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.emplace_back(ReturnNode::create());
+		module_statements.emplace_back(
+			ReturnNode::create(LiteralNode::create(Value{ "my_string" }, LiteralNode::Type::String)));
+		auto expected_module = ModuleNode::create("resolve_module", std::move(module_statements));
+
+		auto result_module = resolve(expected_module.get());
+
+		EXPECT_NE(expected_module.get(), result_module.get());
+		ASSERT_TRUE(result_module->is<ModuleNode>());
+		const auto& as_module = result_module->as<ModuleNode>();
+		ASSERT_EQ(as_module.statements.size(), 2);
+
+		{
+			ASSERT_TRUE(as_module.statements[0]->is<ReturnNode>());
+			const auto& as_return = as_module.statements[0]->as<ReturnNode>();
+			EXPECT_EQ(as_return.type, PrimitiveType::Kind::Void);
+			EXPECT_FALSE(as_return.expression);
+		}
+
+		{
+			ASSERT_TRUE(as_module.statements[1]->is<ReturnNode>());
+			const auto& as_return = as_module.statements[1]->as<ReturnNode>();
+			EXPECT_EQ(as_return.type, PrimitiveType::Kind::String);
+
+			ASSERT_TRUE(as_return.expression);
+			ASSERT_TRUE(as_return.expression->is<LiteralNode>());
+			const auto& as_literal = as_return.expression->as<LiteralNode>();
+			EXPECT_EQ(as_literal.value, Value{ "my_string" });
+			EXPECT_EQ(as_literal.literal_type, LiteralNode::Type::String);
+			EXPECT_EQ(as_literal.type, PrimitiveType::Kind::String);
+		}
 	}
 
 	TEST_F(TypeResolverTest, StructDeclarationNode)

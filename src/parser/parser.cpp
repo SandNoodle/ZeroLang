@@ -11,7 +11,9 @@
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
+#include "ast/nodes/loop_control.h"
 #include "ast/nodes/module.h"
+#include "ast/nodes/return.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
@@ -103,6 +105,9 @@ namespace soul::parser
 	{
 		// Statements
 		switch (current_token_or_default().type) {
+			case Token::Type::KeywordBreak:
+			case Token::Type::KeywordContinue:
+				return parse_loop_control();
 			case Token::Type::KeywordFn:
 				return parse_function_declaration();
 			case Token::Type::KeywordFor:
@@ -111,6 +116,8 @@ namespace soul::parser
 				return parse_if();
 			case Token::Type::KeywordLet:
 				return parse_variable_declaration();
+			case Token::Type::KeywordReturn:
+				return parse_return();
 			case Token::Type::KeywordStruct:
 				return parse_struct_declaration();
 			case Token::Type::KeywordWhile:
@@ -543,6 +550,44 @@ namespace soul::parser
 			value        = Value{ false };
 		}
 		return LiteralNode::create(std::move(value), literal_type);
+	}
+
+	ast::ASTNode::Dependency Parser::parse_loop_control()
+	{  // <loop_control> ::= <keyword_break> | <keyword_continue>
+
+		auto token = require(std::array{ Token::Type::KeywordBreak, Token::Type::KeywordContinue });
+		if (!token) {
+			return create_error(std::format("expected '{}' or '{}' keyword, but got: '{}'",
+			                                Token::name(Token::Type::KeywordBreak),
+			                                Token::name(Token::Type::KeywordContinue),
+			                                std::string(current_token_or_default().data)));
+		}
+
+		// <keyword_break> | <keyword_continue>
+		const auto control_type
+			= token->type == Token::Type::KeywordBreak ? LoopControlNode::Type::Break : LoopControlNode::Type::Continue;
+
+		return LoopControlNode::create(control_type);
+	}
+
+	ast::ASTNode::Dependency Parser::parse_return()
+	{
+		// <return_statement> ::= <keyword_return> [ <expression> ]
+
+		// <keyword_return>
+		if (!require(Token::Type::KeywordReturn)) {
+			return create_error(std::format("expected '{}' keyword, but got: '{}'",
+			                                Token::name(Token::Type::KeywordReturn),
+			                                std::string(current_token_or_default().data)));
+		}
+
+		// [ <expression> ]
+		ASTNode::Dependency expression = nullptr;
+		if (current_token_or_default().type != Token::Type::SymbolSemicolon) {
+			expression = parse_expression();
+		}
+
+		return ReturnNode::create(std::move(expression));
 	}
 
 	ASTNode::Dependency Parser::parse_struct_declaration()

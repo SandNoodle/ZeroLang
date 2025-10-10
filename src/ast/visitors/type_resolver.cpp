@@ -10,7 +10,9 @@
 #include "ast/nodes/function_declaration.h"
 #include "ast/nodes/if.h"
 #include "ast/nodes/literal.h"
+#include "ast/nodes/loop_control.h"
 #include "ast/nodes/module.h"
+#include "ast/nodes/return.h"
 #include "ast/nodes/struct_declaration.h"
 #include "ast/nodes/unary.h"
 #include "ast/nodes/variable_declaration.h"
@@ -70,7 +72,7 @@ namespace soul::ast::visitors
 		                          _variables_in_scope.end());
 	}
 
-	void TypeResolverVisitor::visit(const nodes::CastNode& node)
+	void TypeResolverVisitor::visit(const CastNode& node)
 	{
 		CopyVisitor::visit(node);
 
@@ -145,7 +147,7 @@ namespace soul::ast::visitors
 		_current_clone->type = PrimitiveType::Kind::Void;
 	}
 
-	void TypeResolverVisitor::visit(const nodes::FunctionCallNode& node)
+	void TypeResolverVisitor::visit(const FunctionCallNode& node)
 	{
 		CopyVisitor::visit(node);
 
@@ -251,12 +253,25 @@ namespace soul::ast::visitors
 		_current_clone->type = it->second;
 	}
 
+	void TypeResolverVisitor::visit(const LoopControlNode& node)
+	{
+		CopyVisitor::visit(node);
+		_current_clone->type = PrimitiveType::Kind::Void;
+	}
+
 	void TypeResolverVisitor::visit(const ModuleNode& node)
 	{
 		CopyVisitor::visit(node);
 
 		// NOTE: Modules are a collection of type declarations and functions, thus don't have their own type.
 		_current_clone->type = PrimitiveType::Kind::Void;
+	}
+
+	void TypeResolverVisitor::visit(const ReturnNode& node)
+	{
+		CopyVisitor::visit(node);
+		const auto& expression = _current_clone->as<ReturnNode>().expression;
+		_current_clone->type   = expression ? expression->type : PrimitiveType::Kind::Void;
 	}
 
 	void TypeResolverVisitor::visit(const StructDeclarationNode& node)

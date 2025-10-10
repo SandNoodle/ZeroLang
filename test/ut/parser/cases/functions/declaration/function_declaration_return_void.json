@@ -1,0 +1,21 @@
+{
+  "node": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "node": "function_declaration",
+      "name": "should_return_nothing",
+      "type_identifier": "void",
+      "parameters": [],
+      "statements": {
+        "node": "scope_block",
+        "statements": [
+          {
+            "node": "return",
+            "expression": null
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -50,7 +50,9 @@ namespace soul::ast::visitors
 		void visit(const nodes::FunctionDeclarationNode&) override;
 		void visit(const nodes::IfNode&) override;
 		void visit(const nodes::LiteralNode&) override;
+		void visit(const nodes::LoopControlNode&) override;
 		void visit(const nodes::ModuleNode&) override;
+		void visit(const nodes::ReturnNode&) override;
 		void visit(const nodes::StructDeclarationNode&) override;
 		void visit(const nodes::UnaryNode&) override;
 		void visit(const nodes::VariableDeclarationNode&) override;

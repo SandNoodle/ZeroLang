@@ -15,7 +15,9 @@ namespace soul::ast::nodes
 	class FunctionDeclarationNode;
 	class IfNode;
 	class LiteralNode;
+	class LoopControlNode;
 	class ModuleNode;
+	class ReturnNode;
 	class StructDeclarationNode;
 	class UnaryNode;
 	class VariableDeclarationNode;
@@ -36,7 +38,9 @@ namespace soul::ast::nodes
 	                || std::same_as<T, FunctionDeclarationNode>  //
 	                || std::same_as<T, IfNode>                   //
 	                || std::same_as<T, LiteralNode>              //
+	                || std::same_as<T, LoopControlNode>          //
 	                || std::same_as<T, ModuleNode>               //
+	                || std::same_as<T, ReturnNode>               //
 	                || std::same_as<T, StructDeclarationNode>    //
 	                || std::same_as<T, UnaryNode>                //
 	                || std::same_as<T, VariableDeclarationNode>  //

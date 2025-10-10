@@ -1,0 +1,23 @@
+{
+  "node": "module_declaration",
+  "name": "test_module",
+  "statements": [
+    {
+      "node": "while_loop",
+      "condition": {
+        "node": "literal",
+        "literal_type": "literal_type_boolean",
+        "value": "true"
+      },
+      "statements": {
+        "node": "scope_block",
+        "statements": [
+          {
+            "node": "loop_control",
+            "control_type": "break"
+          }
+        ]
+      }
+    }
+  ]
+}
