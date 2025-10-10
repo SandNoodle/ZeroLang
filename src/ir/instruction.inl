@@ -41,6 +41,13 @@ namespace soul::ir
 	{
 	}
 
+	constexpr Call::Call(types::Type return_type, std::string identifier, std::vector<Instruction*> parameters)
+		: Instruction(std::move(return_type), Instruction::no_args()),
+		  identifier(std::move(identifier)),
+		  parameters(std::move(parameters))
+	{
+	}
+
 	constexpr Const::Const(types::Type type, Value value)
 		: Instruction(std::move(type), Instruction::no_args()), value(std::move(value))
 	{

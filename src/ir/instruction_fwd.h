@@ -48,6 +48,7 @@ namespace soul::ir
 #define SOUL_ALL_INSTRUCTIONS     \
 	SOUL_INSTRUCTION(Unreachable) \
 	SOUL_INSTRUCTION(Noop)        \
+	SOUL_INSTRUCTION(Call)        \
 	SOUL_INSTRUCTION(Cast)        \
 	SOUL_INSTRUCTION(Const)       \
 	SOUL_INSTRUCTION(Jump)        \

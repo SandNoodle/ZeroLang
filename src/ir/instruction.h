@@ -100,6 +100,23 @@ namespace soul::ir
 	};
 
 	/**
+	 * @brief Call instruction: performs function call with specified parameters.
+	 */
+	struct Call final : public Instruction
+	{
+		public:
+		std::string               identifier;
+		std::vector<Instruction*> parameters;
+
+		public:
+		constexpr Call(types::Type return_type, std::string identifier, std::vector<Instruction*> parameters);
+		virtual ~Call() override = default;
+
+		constexpr bool operator==(const Call& other) const noexcept  = default;
+		constexpr auto operator<=>(const Call& other) const noexcept = default;
+	};
+
+	/**
 	 * @brief Const instruction: holds an (immediate) value of a given type.
 	 */
 	struct Const final : public Instruction

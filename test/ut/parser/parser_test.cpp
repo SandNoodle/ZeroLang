@@ -40,7 +40,7 @@ namespace soul::parser::ut
 			}
 
 			// Read the data.
-			std::string data;  // TODO: Reserve size.
+			std::string data;  // @TODO: Reserve size.
 			std::string buffer(k_read_size, '\0');
 			while (stream.read(&buffer[0], k_read_size)) {
 				data.append(buffer, 0, stream.gcount());

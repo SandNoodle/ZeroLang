@@ -14,6 +14,7 @@ namespace soul::ir
 	                                          types::Type              return_type,
 	                                          std::vector<types::Type> parameters) -> void
 	{
+		_next_instruction_version = 0;
 		_module->functions.emplace_back(
 			std::make_unique<Function>(identifier, std::move(return_type), std::move(parameters)));
 		_current_block = create_basic_block();

@@ -4,13 +4,14 @@
 #include "ir/ir.h"
 
 #include <format>
+#include <ranges>
 
 namespace soul::ir::visitors
 {
-
 	using namespace std::string_view_literals;
 
-	static constexpr auto k_nullptr = "__nullptr__"sv;
+	static constexpr auto k_nullptr   = "__nullptr__"sv;
+	static constexpr auto k_separator = ", "sv;
 
 	std::string PrintVisitor::string() const { return _ss.str(); }
 
@@ -26,7 +27,7 @@ namespace soul::ir::visitors
 			_ss << std::format("fn @{}", function->name);
 			_ss << "(";
 			for (std::size_t parameter_index = 0; parameter_index < function->parameters.size(); ++parameter_index) {
-				_ss << std::string(function->parameters[parameter_index]);
+				_ss << std::format("%{}::{}", parameter_index, std::string(function->parameters[parameter_index]));
 				if (parameter_index != function->parameters.size() - 1) {
 					_ss << ", ";
 				}
@@ -77,6 +78,17 @@ namespace soul::ir::visitors
 	void PrintVisitor::visit(const Cast& instruction)
 	{
 		_ss << std::format("Cast(%{})", instruction.args[0] ? std::to_string(instruction.args[0]->version) : k_nullptr);
+	}
+
+	void PrintVisitor::visit(const Call& instruction)
+	{
+		auto parameters{ instruction.parameters  //
+			             | std::views::transform(
+							 [](const auto& p) { return p ? p->version : Instruction::k_invalid_version; })       //
+			             | std::views::transform([](const auto version) { return std::format("%{}", version); })  //
+			             | std::views::join_with(k_separator)                                                     //
+			             | std::ranges::to<std::string>() };
+		_ss << std::format("Call(`{}`, [{}])", instruction.identifier, parameters);
 	}
 
 	void PrintVisitor::visit(const Const& instruction)
