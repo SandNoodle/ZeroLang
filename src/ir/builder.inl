@@ -58,7 +58,41 @@ namespace soul::ir
 	}
 
 	template <InstructionKind Inst, typename... Args>
+		requires(!(std::is_same_v<Inst, Upsilon> || std::is_same_v<Inst, Phi>))
 	constexpr auto IRBuilder::emit(Args&&... args) -> Instruction*
+	{
+		return emit_impl<Inst, Args...>(std::forward<Args>(args)...);
+	}
+
+	template <typename... Args>
+	constexpr auto IRBuilder::emit_upsilon(std::string_view identifier, Args&&... args) -> Instruction*
+	{
+		auto* upsilon = emit_impl<Upsilon, Args...>(std::forward<Args>(args)..., nullptr);
+		_variable_context[identifier].emplace_back(upsilon);
+		return upsilon;
+	}
+
+	template <typename... Args>
+	constexpr auto IRBuilder::emit_phi(std::string_view identifier, Args&&... args) -> Instruction*
+	{
+		auto* phi = emit_impl<Phi>(std::forward<Args>(args)...);
+
+		// Patch upsilons.
+		const auto it{ _variable_context.find(identifier) };
+		if (it == std::end(_variable_context)) [[unlikely]] {
+			return phi;
+		}
+		for (auto& upsilon : it->second) {
+			upsilon->as<Upsilon>().phi = phi;
+		}
+		it->second.clear();
+
+		return phi;
+	}
+
+	template <InstructionKind Inst, typename... Args>
+		requires(std::is_constructible_v<Inst, std::remove_cvref_t<Args>...>)
+	constexpr auto IRBuilder::emit_impl(Args&&... args) -> Instruction*
 	{
 		assert(_current_block && "_current_block was not initialized properly (nullptr)");
 		assert(_current_block->_label != BasicBlock::k_invalid_label && "_current_block is invalid (k_invalid_label)");

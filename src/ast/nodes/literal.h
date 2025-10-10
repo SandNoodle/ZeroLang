@@ -27,8 +27,8 @@ namespace soul::ast::nodes
 		};
 
 		public:
-		Value value        = {};
-		Type  literal_type = {};
+		Value value{};
+		Type  literal_type{ Type::Unknown };
 
 		public:
 		LiteralNode(Value value, Type literal_type);
@@ -37,9 +37,9 @@ namespace soul::ast::nodes
 
 		/**
 		 * @brief Constructs new Literal node.
-		 * @param type
-		 * @param value
-		 * @return
+		 * @param type Type of stored Value, i.e. identifier, string, int32, etc.
+		 * @param value Value associated with the literal.
+		 * @return New 'LiteralNode' node.
 		 */
 		static Dependency create(Value value, Type literal_type);
 

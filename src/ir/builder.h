@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <ranges>
+#include <unordered_map>
 #include <vector>
 
 namespace soul::ir
@@ -16,10 +17,15 @@ namespace soul::ir
 	class IRBuilder
 	{
 		private:
+		using VariableContext
+			= std::unordered_map<std::string_view /* identifier */, std::vector<Instruction*> /* upsilons */>;
+
+		private:
 		std::unique_ptr<Module> _module{};
 		BasicBlock*             _current_block{};
 		BasicBlock::Label       _next_block_version{ 0 };
 		Instruction::Version    _next_instruction_version{ 0 };
+		VariableContext         _variable_context{};
 
 		public:
 		constexpr IRBuilder();
@@ -52,12 +58,39 @@ namespace soul::ir
 
 		/**
 		 * @brief Constructs new Instruction and appends it to the end of the current BasicBlock.
+		 * @warning Cannot be used with Upsilon/Phi instructions -> use emit_upsilon/phi instead.
 		 * @tparam Inst Instruction to be emitted.
 		 * @tparam Args Arguments used to construct the Instruction.
 		 * @return Pointer to the instruction emitted.
 		 */
 		template <InstructionKind Inst, typename... Args>
+			requires(!(std::is_same_v<Inst, Upsilon> || std::is_same_v<Inst, Phi>))
 		constexpr Instruction* emit(Args&&... args);
+
+		/**
+		 * @brief Constructs new Upsilon instruction and appends it to the end of the current BasicBlock.
+		 * Associates the Upsilon with a given \p identifier.
+		 * @param identifier Identifier to associate with this Upsilon.
+		 * @tparam Args Arguments used to construct the Upsilon.
+		 * @return Pointer to the instruction emitted.
+		 */
+		template <typename... Args>
+		constexpr Instruction* emit_upsilon(std::string_view identifier, Args&&... args);
+
+		/**
+		 * @brief Constructs new Phi instruction and appends it to the end of the current BasicBlock.
+		 * Patches all Upsilons associated with \p identifier up until this point.
+		 * @param identifier Identifier to associate with this Phi.
+		 * @tparam Args Arguments used to construct the Phi.
+		 * @return Pointer to the instruction emitted.
+		 */
+		template <typename... Args>
+		constexpr Instruction* emit_phi(std::string_view identifier, Args&&... args);
+
+		private:
+		template <InstructionKind Inst, typename... Args>
+			requires(std::is_constructible_v<Inst, std::remove_cvref_t<Args>...>)
+		constexpr Instruction* emit_impl(Args&&... args);
 	};
 }  // namespace soul::ir
 #include "ir/builder.inl"

@@ -67,6 +67,7 @@ namespace soul::ast::visitors::ut
 			return desugar_visitor.cloned();
 		}
 
+		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 		std::pair<std::string, std::string> compare(const ASTNode::Reference expected, const ASTNode::Reference result)
 		{
 			StringifyVisitor stringify_expected{ StringifyVisitor::Options::PrintTypes };
