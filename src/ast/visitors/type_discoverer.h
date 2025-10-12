@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ast/nodes/nodes_fwd.h"
+#include "ast/ast.h"
+#include "ast/ast_fwd.h"
 #include "ast/visitors/copy.h"
 #include "common/types/types_fwd.h"
 
@@ -38,6 +39,6 @@ namespace soul::ast::visitors
 
 		protected:
 		using CopyVisitor::visit;
-		void visit(nodes::StructDeclarationNode&) override;
+		void visit(StructDeclarationNode&) override;
 	};
 }  // namespace soul::ast::visitors

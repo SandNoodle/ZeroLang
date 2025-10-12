@@ -1,16 +1,9 @@
 #include "ast/visitors/desugar.h"
 
-#include "ast/nodes/binary.h"
-#include "ast/nodes/error.h"
-#include "ast/nodes/for_loop.h"
-#include "ast/nodes/foreach_loop.h"
-#include "ast/nodes/literal.h"
-#include "ast/nodes/unary.h"
-#include "ast/nodes/while.h"
+#include <array>
 
 namespace soul::ast::visitors
 {
-	using namespace soul::ast::nodes;
 	using namespace soul::types;
 
 	void DesugarVisitor::visit(const BinaryNode& node)

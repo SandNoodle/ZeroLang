@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast/ast.h"
-#include "ast/nodes/nodes_fwd.h"
+#include "ast/ast_fwd.h"
 #include "ast/visitors/visitor.h"
 
 #include <functional>
@@ -20,40 +20,40 @@ namespace soul::ast::visitors
 		virtual void accept(ASTNode::Reference node);
 
 		protected:
-		virtual void visit(const nodes::BinaryNode&) override;
-		virtual void visit(const nodes::BlockNode&) override;
-		virtual void visit(const nodes::CastNode&) override;
-		virtual void visit(const nodes::ErrorNode&) override;
-		virtual void visit(const nodes::ForLoopNode&) override;
-		virtual void visit(const nodes::ForeachLoopNode&) override;
-		virtual void visit(const nodes::FunctionCallNode&) override;
-		virtual void visit(const nodes::FunctionDeclarationNode&) override;
-		virtual void visit(const nodes::IfNode&) override;
-		virtual void visit(const nodes::LiteralNode&) override;
-		virtual void visit(const nodes::LoopControlNode&) override;
-		virtual void visit(const nodes::ModuleNode&) override;
-		virtual void visit(const nodes::ReturnNode&) override;
-		virtual void visit(const nodes::StructDeclarationNode&) override;
-		virtual void visit(const nodes::UnaryNode&) override;
-		virtual void visit(const nodes::VariableDeclarationNode&) override;
-		virtual void visit(const nodes::WhileNode&) override;
+		virtual void visit(const BinaryNode&) override;
+		virtual void visit(const BlockNode&) override;
+		virtual void visit(const CastNode&) override;
+		virtual void visit(const ErrorNode&) override;
+		virtual void visit(const ForLoopNode&) override;
+		virtual void visit(const ForeachLoopNode&) override;
+		virtual void visit(const FunctionCallNode&) override;
+		virtual void visit(const FunctionDeclarationNode&) override;
+		virtual void visit(const IfNode&) override;
+		virtual void visit(const LiteralNode&) override;
+		virtual void visit(const LoopControlNode&) override;
+		virtual void visit(const ModuleNode&) override;
+		virtual void visit(const ReturnNode&) override;
+		virtual void visit(const StructDeclarationNode&) override;
+		virtual void visit(const UnaryNode&) override;
+		virtual void visit(const VariableDeclarationNode&) override;
+		virtual void visit(const WhileNode&) override;
 
-		virtual void visit(nodes::BinaryNode&) override;
-		virtual void visit(nodes::BlockNode&) override;
-		virtual void visit(nodes::CastNode&) override;
-		virtual void visit(nodes::ErrorNode&) override;
-		virtual void visit(nodes::ForLoopNode&) override;
-		virtual void visit(nodes::ForeachLoopNode&) override;
-		virtual void visit(nodes::FunctionCallNode&) override;
-		virtual void visit(nodes::FunctionDeclarationNode&) override;
-		virtual void visit(nodes::IfNode&) override;
-		virtual void visit(nodes::LiteralNode&) override;
-		virtual void visit(nodes::LoopControlNode&) override;
-		virtual void visit(nodes::ModuleNode&) override;
-		virtual void visit(nodes::ReturnNode&) override;
-		virtual void visit(nodes::StructDeclarationNode&) override;
-		virtual void visit(nodes::UnaryNode&) override;
-		virtual void visit(nodes::VariableDeclarationNode&) override;
-		virtual void visit(nodes::WhileNode&) override;
+		virtual void visit(BinaryNode&) override;
+		virtual void visit(BlockNode&) override;
+		virtual void visit(CastNode&) override;
+		virtual void visit(ErrorNode&) override;
+		virtual void visit(ForLoopNode&) override;
+		virtual void visit(ForeachLoopNode&) override;
+		virtual void visit(FunctionCallNode&) override;
+		virtual void visit(FunctionDeclarationNode&) override;
+		virtual void visit(IfNode&) override;
+		virtual void visit(LiteralNode&) override;
+		virtual void visit(LoopControlNode&) override;
+		virtual void visit(ModuleNode&) override;
+		virtual void visit(ReturnNode&) override;
+		virtual void visit(StructDeclarationNode&) override;
+		virtual void visit(UnaryNode&) override;
+		virtual void visit(VariableDeclarationNode&) override;
+		virtual void visit(WhileNode&) override;
 	};
 }  // namespace soul::ast::visitors

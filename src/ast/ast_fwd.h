@@ -3,7 +3,7 @@
 #include <concepts>
 #include <type_traits>
 
-namespace soul::ast::nodes
+namespace soul::ast
 {
 	class BinaryNode;
 	class BlockNode;
@@ -46,4 +46,4 @@ namespace soul::ast::nodes
 	                || std::same_as<T, VariableDeclarationNode>  //
 	                || std::same_as<T, WhileNode>                //
 		;
-}  // namespace soul::ast::nodes
+}  // namespace soul::ast

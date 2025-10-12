@@ -24,7 +24,7 @@ namespace soul::ast::visitors
 
 	const ErrorCollectorVisitor::Errors& ErrorCollectorVisitor::errors() const noexcept { return _errors; }
 
-	void ErrorCollectorVisitor::visit(const nodes::ErrorNode& node)
+	void ErrorCollectorVisitor::visit(const ErrorNode& node)
 	{
 		if (_depth_current > _depth_max) {
 			return;

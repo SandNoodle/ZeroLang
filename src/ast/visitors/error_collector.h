@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast.h"
 #include "ast/visitors/default_traverse.h"
 #include "core/types.h"
 
@@ -16,7 +17,7 @@ namespace soul::ast::visitors
 	class ErrorCollectorVisitor : public DefaultTraverseVisitor
 	{
 		public:
-		using Errors = std::vector<std::pair<std::size_t, const nodes::ErrorNode*>>;
+		using Errors = std::vector<std::pair<std::size_t, const ErrorNode*>>;
 
 		static constexpr auto k_depth_max = std::numeric_limits<std::size_t>::max();
 
@@ -43,6 +44,6 @@ namespace soul::ast::visitors
 
 		private:
 		using DefaultTraverseVisitor::visit;
-		void visit(const nodes::ErrorNode&) override;
+		void visit(const ErrorNode&) override;
 	};
 }  // namespace soul::ast::visitors

@@ -1,8 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "ast/nodes/literal.h"
-#include "ast/nodes/module.h"
-#include "ast/nodes/variable_declaration.h"
 #include "ast/visitors/stringify.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"

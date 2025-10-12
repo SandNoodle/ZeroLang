@@ -1,20 +1,17 @@
 #include "ast/visitors/type_discoverer.h"
 
-#include "ast/nodes/error.h"
-#include "ast/nodes/struct_declaration.h"
-#include "ast/nodes/variable_declaration.h"
 #include "common/types/type.h"
+#include "core/types.h"
 
 #include <ranges>
 
 namespace soul::ast::visitors
 {
-	using namespace soul::ast::nodes;
 	using namespace soul::types;
 
 	TypeDiscovererVisitor::TypeMap TypeDiscovererVisitor::discovered_types() noexcept { return _registered_types; }
 
-	void TypeDiscovererVisitor::visit(nodes::StructDeclarationNode& node)
+	void TypeDiscovererVisitor::visit(StructDeclarationNode& node)
 	{
 		if (_registered_types.contains(node.name)) {
 			_current_clone = ErrorNode::create(std::format("redefinition of type '{}'", node.name));

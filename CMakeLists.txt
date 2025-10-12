@@ -21,7 +21,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(NOT CMAKE_BUILD_TYPE IN_LIST CMAKE_CONFIGURATION_TYPES)
-	message(STATUS "Available buiild types: ${CMAKE_CONFIGURATION_TYPES}")
+	message(STATUS "Available build types: ${CMAKE_CONFIGURATION_TYPES}")
 	message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
 endif()
 

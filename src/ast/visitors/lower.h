@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ast/ast.h"
+#include "ast/ast_fwd.h"
 #include "ast/visitors/default_traverse.h"
 
 #include "ir/builder.h"
@@ -28,41 +30,41 @@ namespace soul::ast::visitors
 
 		private:
 		using DefaultTraverseVisitor::visit;
-		void visit(const nodes::BinaryNode&) override;
-		void visit(const nodes::BlockNode&) override;
-		void visit(const nodes::CastNode&) override;
-		void visit(const nodes::ErrorNode&) override;
-		void visit(const nodes::ForLoopNode&) override;
-		void visit(const nodes::ForeachLoopNode&) override;
-		void visit(const nodes::FunctionCallNode&) override;
-		void visit(const nodes::FunctionDeclarationNode&) override;
-		void visit(const nodes::IfNode&) override;
-		void visit(const nodes::LiteralNode&) override;
-		void visit(const nodes::ModuleNode&) override;
-		void visit(const nodes::StructDeclarationNode&) override;
-		void visit(const nodes::UnaryNode&) override;
-		void visit(const nodes::VariableDeclarationNode&) override;
-		void visit(const nodes::WhileNode&) override;
+		void visit(const BinaryNode&) override;
+		void visit(const BlockNode&) override;
+		void visit(const CastNode&) override;
+		void visit(const ErrorNode&) override;
+		void visit(const ForLoopNode&) override;
+		void visit(const ForeachLoopNode&) override;
+		void visit(const FunctionCallNode&) override;
+		void visit(const FunctionDeclarationNode&) override;
+		void visit(const IfNode&) override;
+		void visit(const LiteralNode&) override;
+		void visit(const ModuleNode&) override;
+		void visit(const StructDeclarationNode&) override;
+		void visit(const UnaryNode&) override;
+		void visit(const VariableDeclarationNode&) override;
+		void visit(const WhileNode&) override;
 
 		/**
 		 * @brief Visits the specified node and emits its equivalent instruction(s).
 		 * @warning Some nodes may not be visited directly and should be handled separately (see implementation).
 		 */
 		ir::Instruction* emit(const ASTNode::Reference);
-		ir::Instruction* emit(const nodes::BinaryNode&);
-		ir::Instruction* emit(const nodes::BlockNode&);
-		ir::Instruction* emit(const nodes::CastNode&);
-		ir::Instruction* emit(const nodes::ErrorNode&);
-		ir::Instruction* emit(const nodes::ForLoopNode&);
-		ir::Instruction* emit(const nodes::ForeachLoopNode&);
-		ir::Instruction* emit(const nodes::FunctionCallNode&);
-		ir::Instruction* emit(const nodes::FunctionDeclarationNode&);
-		ir::Instruction* emit(const nodes::IfNode&);
-		ir::Instruction* emit(const nodes::LiteralNode&);
-		ir::Instruction* emit(const nodes::ModuleNode&);
-		ir::Instruction* emit(const nodes::StructDeclarationNode&);
-		ir::Instruction* emit(const nodes::UnaryNode&);
-		ir::Instruction* emit(const nodes::VariableDeclarationNode&);
-		ir::Instruction* emit(const nodes::WhileNode&);
+		ir::Instruction* emit(const BinaryNode&);
+		ir::Instruction* emit(const BlockNode&);
+		ir::Instruction* emit(const CastNode&);
+		ir::Instruction* emit(const ErrorNode&);
+		ir::Instruction* emit(const ForLoopNode&);
+		ir::Instruction* emit(const ForeachLoopNode&);
+		ir::Instruction* emit(const FunctionCallNode&);
+		ir::Instruction* emit(const FunctionDeclarationNode&);
+		ir::Instruction* emit(const IfNode&);
+		ir::Instruction* emit(const LiteralNode&);
+		ir::Instruction* emit(const ModuleNode&);
+		ir::Instruction* emit(const StructDeclarationNode&);
+		ir::Instruction* emit(const UnaryNode&);
+		ir::Instruction* emit(const VariableDeclarationNode&);
+		ir::Instruction* emit(const WhileNode&);
 	};
 }  // namespace soul::ast::visitors

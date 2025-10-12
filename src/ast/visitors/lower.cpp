@@ -1,26 +1,10 @@
 #include "ast/visitors/lower.h"
 
-#include "ast/nodes/binary.h"
-#include "ast/nodes/block.h"
-#include "ast/nodes/cast.h"
-#include "ast/nodes/error.h"
-#include "ast/nodes/for_loop.h"
-#include "ast/nodes/foreach_loop.h"
-#include "ast/nodes/function_call.h"
-#include "ast/nodes/function_declaration.h"
-#include "ast/nodes/if.h"
-#include "ast/nodes/literal.h"
-#include "ast/nodes/module.h"
-#include "ast/nodes/struct_declaration.h"
-#include "ast/nodes/unary.h"
-#include "ast/nodes/variable_declaration.h"
-#include "ast/nodes/while.h"
-
+#include <array>
 #include <ranges>
 
 namespace soul::ast::visitors
 {
-	using namespace soul::ast::nodes;
 	using namespace soul::types;
 	using namespace soul::ir;
 
@@ -174,7 +158,7 @@ namespace soul::ast::visitors
 		return _current_instruction;
 	}
 
-	Instruction* LowerVisitor::emit(const nodes::BinaryNode& node)
+	Instruction* LowerVisitor::emit(const BinaryNode& node)
 	{
 		// IMPORTANT: Assignment operator is the only one which can change the meaning of LiteralNode(Identifier)s
 		// depending on which side it is present.
@@ -230,36 +214,36 @@ namespace soul::ast::visitors
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::BlockNode&)
+	ir::Instruction* LowerVisitor::emit(const BlockNode&)
 	{
 		// ERROR: should NEVER be visited directly.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::CastNode& node)
+	ir::Instruction* LowerVisitor::emit(const CastNode& node)
 	{
 		return _builder.emit<Cast>(node.type, emit(node.expression.get()));
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::ErrorNode&)
+	ir::Instruction* LowerVisitor::emit(const ErrorNode&)
 	{
 		// ERROR: IR should be in a valid state at this point.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::ForLoopNode&)
+	ir::Instruction* LowerVisitor::emit(const ForLoopNode&)
 	{
 		// ERROR: should've been replaced with WhileNode at this point.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::ForeachLoopNode&)
+	ir::Instruction* LowerVisitor::emit(const ForeachLoopNode&)
 	{
 		// ERROR: should've been replaced with ForLoop node at this point.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::FunctionCallNode& node)
+	ir::Instruction* LowerVisitor::emit(const FunctionCallNode& node)
 	{
 		std::vector<Instruction*> parameters;
 		parameters.reserve(node.parameters.size());
@@ -269,19 +253,19 @@ namespace soul::ast::visitors
 		return _builder.emit<Call>(node.type, node.name, std::move(parameters));
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::FunctionDeclarationNode&)
+	ir::Instruction* LowerVisitor::emit(const FunctionDeclarationNode&)
 	{
 		// ERROR: should NEVER be visited directly.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::IfNode&)
+	ir::Instruction* LowerVisitor::emit(const IfNode&)
 	{
 		// ERROR: should NEVER be visited directly.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::LiteralNode& node)
+	ir::Instruction* LowerVisitor::emit(const LiteralNode& node)
 	{
 		// IMPORTANT: We assume that visiting LiteralNode will always result in the READ operation for Identifiers, as
 		// any special (i.e. writing) logic will be handled beforehand.
@@ -291,19 +275,19 @@ namespace soul::ast::visitors
 		return _builder.emit<Const>(node.type, node.value);
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::ModuleNode&)
+	ir::Instruction* LowerVisitor::emit(const ModuleNode&)
 	{
 		// ERROR: should NEVER be visited directly.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::StructDeclarationNode&)
+	ir::Instruction* LowerVisitor::emit(const StructDeclarationNode&)
 	{
 		// NOTE: ERROR; at this point this node should not be present.
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::UnaryNode& node)
+	ir::Instruction* LowerVisitor::emit(const UnaryNode& node)
 	{
 		auto* expression{ emit(node.expression.get()) };
 		switch (node.op) {
@@ -317,13 +301,13 @@ namespace soul::ast::visitors
 		return _builder.emit<Unreachable>();
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::VariableDeclarationNode& node)
+	ir::Instruction* LowerVisitor::emit(const VariableDeclarationNode& node)
 	{
 		auto* value = emit(node.expression.get());
 		return _builder.emit_upsilon(node.name, value);
 	}
 
-	ir::Instruction* LowerVisitor::emit(const nodes::WhileNode&)
+	ir::Instruction* LowerVisitor::emit(const WhileNode&)
 	{
 		// ERROR: should NEVER be visited directly.
 		return _builder.emit<Unreachable>();

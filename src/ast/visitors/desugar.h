@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ast/nodes/nodes_fwd.h"
+#include "ast/ast.h"
+#include "ast/ast_fwd.h"
 #include "ast/visitors/copy.h"
-#include "common/types/types_fwd.h"
 
 namespace soul::ast::visitors
 {
@@ -17,7 +17,7 @@ namespace soul::ast::visitors
 
 		protected:
 		using CopyVisitor::visit;
-		void visit(const nodes::BinaryNode&) override;
-		void visit(const nodes::ForLoopNode&) override;
+		void visit(const BinaryNode&) override;
+		void visit(const ForLoopNode&) override;
 	};
 }  // namespace soul::ast::visitors

@@ -1,12 +1,14 @@
 #pragma once
 
-#include "ast/nodes/nodes_fwd.h"
+#include "ast/ast.h"
+#include "ast/ast_fwd.h"
 #include "ast/visitors/copy.h"
 #include "ast/visitors/type_discoverer.h"
 #include "common/types/types_fwd.h"
 
 #include <optional>
 #include <ranges>
+#include <string>
 #include <string_view>
 #include <tuple>
 #include <vector>
@@ -49,22 +51,22 @@ namespace soul::ast::visitors
 
 		protected:
 		using CopyVisitor::visit;
-		void visit(const nodes::BinaryNode&) override;
-		void visit(const nodes::BlockNode&) override;
-		void visit(const nodes::CastNode&) override;
-		void visit(const nodes::ForLoopNode&) override;
-		void visit(const nodes::ForeachLoopNode&) override;
-		void visit(const nodes::FunctionCallNode&) override;
-		void visit(const nodes::FunctionDeclarationNode&) override;
-		void visit(const nodes::IfNode&) override;
-		void visit(const nodes::LiteralNode&) override;
-		void visit(const nodes::LoopControlNode&) override;
-		void visit(const nodes::ModuleNode&) override;
-		void visit(const nodes::ReturnNode&) override;
-		void visit(const nodes::StructDeclarationNode&) override;
-		void visit(const nodes::UnaryNode&) override;
-		void visit(const nodes::VariableDeclarationNode&) override;
-		void visit(const nodes::WhileNode&) override;
+		void visit(const BinaryNode&) override;
+		void visit(const BlockNode&) override;
+		void visit(const CastNode&) override;
+		void visit(const ForLoopNode&) override;
+		void visit(const ForeachLoopNode&) override;
+		void visit(const FunctionCallNode&) override;
+		void visit(const FunctionDeclarationNode&) override;
+		void visit(const IfNode&) override;
+		void visit(const LiteralNode&) override;
+		void visit(const LoopControlNode&) override;
+		void visit(const ModuleNode&) override;
+		void visit(const ReturnNode&) override;
+		void visit(const StructDeclarationNode&) override;
+		void visit(const UnaryNode&) override;
+		void visit(const VariableDeclarationNode&) override;
+		void visit(const WhileNode&) override;
 
 		private:
 		types::Type                        get_type_or_default(std::string_view type_identifier) const noexcept;

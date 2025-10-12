@@ -2,15 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ast/nodes/binary.h"
-#include "ast/nodes/block.h"
-#include "ast/nodes/error.h"
-#include "ast/nodes/for_loop.h"
-#include "ast/nodes/literal.h"
-#include "ast/nodes/module.h"
-#include "ast/nodes/unary.h"
-#include "ast/nodes/variable_declaration.h"
-#include "ast/nodes/while.h"
+#include "ast/ast.h"
 #include "ast/visitors/error_collector.h"
 #include "ast/visitors/stringify.h"
 #include "ast/visitors/type_discoverer.h"
@@ -20,7 +12,6 @@
 
 namespace soul::ast::visitors::ut
 {
-	using namespace soul::ast::nodes;
 	using namespace soul::types;
 
 	class DesugarVisitorTest : public ::testing::Test

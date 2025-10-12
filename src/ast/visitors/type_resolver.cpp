@@ -1,29 +1,13 @@
 #include "ast/visitors/type_resolver.h"
 
-#include "ast/nodes/binary.h"
-#include "ast/nodes/block.h"
-#include "ast/nodes/cast.h"
-#include "ast/nodes/error.h"
-#include "ast/nodes/for_loop.h"
-#include "ast/nodes/foreach_loop.h"
-#include "ast/nodes/function_call.h"
-#include "ast/nodes/function_declaration.h"
-#include "ast/nodes/if.h"
-#include "ast/nodes/literal.h"
-#include "ast/nodes/loop_control.h"
-#include "ast/nodes/module.h"
-#include "ast/nodes/return.h"
-#include "ast/nodes/struct_declaration.h"
-#include "ast/nodes/unary.h"
-#include "ast/nodes/variable_declaration.h"
-#include "ast/nodes/while.h"
 #include "common/types/type.h"
+#include "core/types.h"
 
+#include <array>
 #include <format>
 
 namespace soul::ast::visitors
 {
-	using namespace soul::ast::nodes;
 	using namespace soul::ast;
 	using namespace soul::types;
 

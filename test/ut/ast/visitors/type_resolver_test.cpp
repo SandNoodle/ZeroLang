@@ -2,23 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ast/nodes/binary.h"
-#include "ast/nodes/block.h"
-#include "ast/nodes/cast.h"
-#include "ast/nodes/error.h"
-#include "ast/nodes/for_loop.h"
-#include "ast/nodes/foreach_loop.h"
-#include "ast/nodes/function_call.h"
-#include "ast/nodes/function_declaration.h"
-#include "ast/nodes/if.h"
-#include "ast/nodes/literal.h"
-#include "ast/nodes/loop_control.h"
-#include "ast/nodes/module.h"
-#include "ast/nodes/return.h"
-#include "ast/nodes/struct_declaration.h"
-#include "ast/nodes/unary.h"
-#include "ast/nodes/variable_declaration.h"
-#include "ast/nodes/while.h"
+#include "ast/ast.h"
 #include "ast/visitors/error_collector.h"
 
 #include <format>
@@ -27,7 +11,6 @@
 
 namespace soul::ast::visitors::ut
 {
-	using namespace soul::ast::nodes;
 	using namespace soul::types;
 	using namespace std::string_view_literals;
 

@@ -97,4 +97,206 @@ namespace soul::ast
 		}
 		return k_operators.at(type);
 	}
+
+	BinaryNode::BinaryNode(Dependency lhs, Dependency rhs, Operator op)
+		: op(op), lhs(std::move(lhs)), rhs(std::move(rhs))
+	{
+	}
+
+	BinaryNode::Dependency BinaryNode::create(Dependency lhs, Dependency rhs, Operator op)
+	{
+		return std::make_unique<BinaryNode>(std::move(lhs), std::move(rhs), op);
+	}
+
+	BlockNode::BlockNode(Dependencies dependencies) : statements(std::move(dependencies)) {}
+
+	BlockNode::Dependency BlockNode::create(BlockNode::Dependencies statements)
+	{
+		return std::make_unique<BlockNode>(std::move(statements));
+	}
+
+	CastNode::CastNode(Dependency expression, Identifier type_identifier)
+		: expression(std::move(expression)), type_identifier(std::move(type_identifier))
+	{
+	}
+
+	CastNode::Dependency CastNode::create(Dependency expression, Identifier type_identifier)
+	{
+		return std::make_unique<CastNode>(std::move(expression), std::move(type_identifier));
+	}
+
+	ErrorNode::ErrorNode(ErrorNode::Message message) : message(std::move(message)) {}
+
+	ASTNode::Dependency ErrorNode::create(ErrorNode::Message message)
+	{
+		return std::make_unique<ErrorNode>(std::move(message));
+	}
+
+	ForLoopNode::ForLoopNode(Dependency initialization,
+	                         Dependency condition,
+	                         Dependency update,
+	                         ScopeBlock statements) noexcept
+		: initialization(std::move(initialization)),
+		  condition(std::move(condition)),
+		  update(std::move(update)),
+		  statements(std::move(statements))
+	{
+	}
+
+	ForLoopNode::Dependency ForLoopNode::create(Dependency initialization,
+	                                            Dependency condition,
+	                                            Dependency update,
+	                                            ScopeBlock statements)
+	{
+		return std::make_unique<ForLoopNode>(
+			std::move(initialization), std::move(condition), std::move(update), std::move(statements));
+	}
+
+	ForeachLoopNode::ForeachLoopNode(Dependency variable, Dependency in_expression, ScopeBlock statements) noexcept
+		: variable(std::move(variable)), in_expression(std::move(in_expression)), statements(std::move(statements))
+	{
+	}
+
+	ForeachLoopNode::Dependency ForeachLoopNode::create(Dependency variable,
+	                                                    Dependency in_expression,
+	                                                    ScopeBlock statements)
+	{
+		return std::make_unique<ForeachLoopNode>(std::move(variable), std::move(in_expression), std::move(statements));
+	}
+
+	FunctionCallNode::FunctionCallNode(Identifier name, Dependencies parameters)
+		: name(std::move(name)), parameters(std::move(parameters))
+	{
+	}
+
+	FunctionCallNode::Dependency FunctionCallNode::create(Identifier name, Dependencies parameters)
+	{
+		return std::make_unique<FunctionCallNode>(std::move(name), std::move(parameters));
+	}
+
+	FunctionDeclarationNode::FunctionDeclarationNode(Identifier   identifier,
+	                                                 Identifier   return_type_identifier,
+	                                                 Dependencies parameters,
+	                                                 ScopeBlock   statements)
+		: name(std::move(identifier)),
+		  type_identifier(std::move(return_type_identifier)),
+		  parameters(std::move(parameters)),
+		  statements(std::move(statements))
+	{
+	}
+
+	FunctionDeclarationNode::Dependency FunctionDeclarationNode::create(Identifier   name,
+	                                                                    Identifier   return_type,
+	                                                                    Dependencies parameters,
+	                                                                    ScopeBlock   statements)
+	{
+		return std::make_unique<FunctionDeclarationNode>(
+			std::move(name), std::move(return_type), std::move(parameters), std::move(statements));
+	}
+
+	IfNode::IfNode(Dependency condition, ScopeBlock then_statements, ScopeBlock else_statements) noexcept
+		: condition(std::move(condition)),
+		  then_statements(std::move(then_statements)),
+		  else_statements(std::move(else_statements))
+	{
+	}
+
+	IfNode::Dependency IfNode::create(Dependency condition, ScopeBlock then_statements, ScopeBlock else_statements)
+	{
+		return std::make_unique<IfNode>(std::move(condition), std::move(then_statements), std::move(else_statements));
+	}
+
+	LiteralNode::LiteralNode(Value value, Type literal_type) : value(std::move(value)), literal_type(literal_type) {}
+
+	LiteralNode::Dependency LiteralNode::create(Value value, Type literal_type)
+	{
+		return std::make_unique<LiteralNode>(std::move(value), literal_type);
+	}
+
+	LiteralNode::operator std::string() const noexcept { return std::string(value); }
+
+	std::string_view LiteralNode::internal_name(const Type type) noexcept
+	{
+		using namespace std::string_view_literals;
+		static constexpr auto                             k_unknown = "__unknown__"sv;
+		static std::unordered_map<Type, std::string_view> k_types   = {
+            { Type::Unknown,    k_unknown                   },
+            { Type::Boolean,    "literal_type_boolean"sv    },
+            { Type::Char,       "literal_type_char"sv       },
+            { Type::Float32,    "literal_type_float32"sv    },
+            { Type::Float64,    "literal_type_float64"sv    },
+            { Type::Identifier, "literal_type_identifier"sv },
+            { Type::Int32,      "literal_type_int32"sv      },
+            { Type::Int64,      "literal_type_int64"sv      },
+            { Type::String,     "literal_type_string"sv     },
+		};
+		if (!k_types.contains(type)) [[unlikely]] {
+			return k_unknown;
+		}
+		return k_types.at(type);
+	}
+
+	LoopControlNode::LoopControlNode(Type control_type) noexcept : control_type(control_type) {}
+
+	LoopControlNode::Dependency LoopControlNode::create(Type control_type)
+	{
+		return std::make_unique<LoopControlNode>(control_type);
+	}
+
+	ModuleNode::ModuleNode(Identifier module_name, Dependencies statements) noexcept
+		: name(std::move(module_name)), statements(std::move(statements))
+	{
+	}
+
+	ASTNode::Dependency ModuleNode::create(Identifier module_name, Dependencies statements)
+	{
+		return std::make_unique<ModuleNode>(std::move(module_name), std::move(statements));
+	}
+
+	ReturnNode::ReturnNode(Dependency expression) : expression(std::move(expression)) {}
+
+	ReturnNode::Dependency ReturnNode::create(Dependency expression)
+	{
+		return std::make_unique<ReturnNode>(std::move(expression));
+	}
+
+	StructDeclarationNode::StructDeclarationNode(Identifier name, Dependencies parameters)
+		: name(std::move(name)), parameters(std::move(parameters))
+	{
+	}
+
+	StructDeclarationNode::Dependency StructDeclarationNode::create(Identifier name, Dependencies parameters)
+	{
+		return std::make_unique<StructDeclarationNode>(std::move(name), std::move(parameters));
+	}
+
+	UnaryNode::UnaryNode(Dependency expr, Operator op) : op(op), expression(std::move(expr)) {}
+
+	UnaryNode::Dependency UnaryNode::create(Dependency expr, Operator op)
+	{
+		return std::make_unique<UnaryNode>(std::move(expr), op);
+	}
+
+	VariableDeclarationNode::VariableDeclarationNode(Identifier name, Identifier type, Dependency expr, bool is_mutable)
+		: name(std::move(name)), type_identifier(std::move(type)), expression(std::move(expr)), is_mutable(is_mutable)
+	{
+	}
+
+	VariableDeclarationNode::Dependency VariableDeclarationNode::create(Identifier name,
+	                                                                    Identifier type,
+	                                                                    Dependency expr,
+	                                                                    bool       is_mutable)
+	{
+		return std::make_unique<VariableDeclarationNode>(std::move(name), std::move(type), std::move(expr), is_mutable);
+	}
+
+	WhileNode::WhileNode(ASTNode::Dependency condition, ASTNode::ScopeBlock statements) noexcept
+		: condition(std::move(condition)), statements(std::move(statements))
+	{
+	}
+
+	ASTNode::Dependency WhileNode::create(ASTNode::Dependency condition, ASTNode::ScopeBlock statements)
+	{
+		return std::make_unique<WhileNode>(std::move(condition), std::move(statements));
+	}
 }  // namespace soul::ast

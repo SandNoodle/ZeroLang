@@ -1,4 +1,5 @@
 #pragma once
+
 #include "common/types/overloads.h"
 
 namespace soul::ast::visitors

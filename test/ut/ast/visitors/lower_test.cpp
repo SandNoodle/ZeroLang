@@ -1,23 +1,8 @@
-
 #include "ast/visitors/lower.h"
 
 #include <gtest/gtest.h>
 
-#include "ast/nodes/binary.h"
-#include "ast/nodes/block.h"
-#include "ast/nodes/cast.h"
-#include "ast/nodes/error.h"
-#include "ast/nodes/for_loop.h"
-#include "ast/nodes/foreach_loop.h"
-#include "ast/nodes/function_call.h"
-#include "ast/nodes/function_declaration.h"
-#include "ast/nodes/if.h"
-#include "ast/nodes/literal.h"
-#include "ast/nodes/module.h"
-#include "ast/nodes/struct_declaration.h"
-#include "ast/nodes/unary.h"
-#include "ast/nodes/variable_declaration.h"
-#include "ast/nodes/while.h"
+#include "ast/ast.h"
 #include "ast/visitors/desugar.h"
 #include "ast/visitors/error_collector.h"
 #include "ast/visitors/type_discoverer.h"
@@ -30,7 +15,6 @@
 namespace soul::ast::visitors::ut
 {
 	using namespace soul::types;
-	using namespace soul::ast::nodes;
 	using namespace soul::ir;
 	using namespace soul::ir::visitors;
 
@@ -45,10 +29,10 @@ namespace soul::ast::visitors::ut
 		std::pair<std::string, std::string> compare(const Module& expected, const Module& result)
 		{
 			ir::visitors::PrintVisitor print_result{};
-			print_result.accept(expected);
+			print_result.accept(result);
 
 			ir::visitors::PrintVisitor print_expected{};
-			print_expected.accept(result);
+			print_expected.accept(expected);
 
 			return std::make_pair(std::move(print_expected.string()), std::move(print_result.string()));
 		}

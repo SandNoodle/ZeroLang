@@ -1,7 +1,8 @@
 #pragma once
 
-#include "ast/nodes/error.h"
-#include "ast/nodes/nodes_fwd.h"
+#include "ast/ast.h"
+#include "ast/ast_fwd.h"
+#include "common/types/types_fwd.h"
 #include "core/types.h"
 #include "lexer/token.h"
 
@@ -64,7 +65,7 @@ namespace soul::parser
 		/**
 		 * @brief Creates new Error node in the AST and resynchronizes the parser.
 		 */
-		ast::ASTNode::Dependency create_error(ast::nodes::ErrorNode::Message error_message);
+		ast::ASTNode::Dependency create_error(ast::ErrorNode::Message error_message);
 
 		std::optional<Token> require(Token::Type type);
 		std::optional<Token> require(std::span<const Token::Type> types);

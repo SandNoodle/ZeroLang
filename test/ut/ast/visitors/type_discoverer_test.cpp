@@ -1,17 +1,14 @@
+#include "ast/visitors/type_discoverer.h"
+
 #include <gtest/gtest.h>
 
-#include "ast/nodes/error.h"
-#include "ast/nodes/module.h"
-#include "ast/nodes/struct_declaration.h"
-#include "ast/nodes/variable_declaration.h"
+#include "ast/ast.h"
 #include "ast/visitors/stringify.h"
-#include "ast/visitors/type_discoverer.h"
 
 #include <format>
 
 namespace soul::ast::visitors::ut
 {
-	using namespace soul::ast::nodes;
 	using namespace soul::types;
 	using namespace std::string_view_literals;
 

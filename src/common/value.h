@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ast/ast.h"
 #include "core/types.h"
 
 #include <concepts>
@@ -45,7 +44,7 @@ namespace soul
 		Value&                operator=(Value&&) noexcept             = default;
 		bool                  operator==(const Value&) const noexcept = default;
 		std::partial_ordering operator<=>(const Value& other) const noexcept;
-		explicit              operator std::string() const noexcept;
+		explicit              operator std::string() const;
 
 		/**
 		 * @brief Verifies if Value of a given ValueKind type.

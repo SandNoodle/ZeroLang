@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ast/nodes/nodes_fwd.h"
+#include "ast/ast.h"
+#include "ast/ast_fwd.h"
 #include "ast/visitors/default_traverse.h"
 
 #include <cassert>
@@ -27,42 +28,42 @@ namespace soul::ast::visitors
 
 		protected:
 		using DefaultTraverseVisitor::visit;
-		void visit(const nodes::BinaryNode&) override;
-		void visit(const nodes::BlockNode&) override;
-		void visit(const nodes::CastNode&) override;
-		void visit(const nodes::ErrorNode&) override;
-		void visit(const nodes::ForLoopNode&) override;
-		void visit(const nodes::ForeachLoopNode&) override;
-		void visit(const nodes::FunctionCallNode&) override;
-		void visit(const nodes::FunctionDeclarationNode&) override;
-		void visit(const nodes::IfNode&) override;
-		void visit(const nodes::LiteralNode&) override;
-		void visit(const nodes::LoopControlNode&) override;
-		void visit(const nodes::ModuleNode&) override;
-		void visit(const nodes::ReturnNode&) override;
-		void visit(const nodes::StructDeclarationNode&) override;
-		void visit(const nodes::UnaryNode&) override;
-		void visit(const nodes::VariableDeclarationNode&) override;
-		void visit(const nodes::WhileNode&) override;
+		void visit(const BinaryNode&) override;
+		void visit(const BlockNode&) override;
+		void visit(const CastNode&) override;
+		void visit(const ErrorNode&) override;
+		void visit(const ForLoopNode&) override;
+		void visit(const ForeachLoopNode&) override;
+		void visit(const FunctionCallNode&) override;
+		void visit(const FunctionDeclarationNode&) override;
+		void visit(const IfNode&) override;
+		void visit(const LiteralNode&) override;
+		void visit(const LoopControlNode&) override;
+		void visit(const ModuleNode&) override;
+		void visit(const ReturnNode&) override;
+		void visit(const StructDeclarationNode&) override;
+		void visit(const UnaryNode&) override;
+		void visit(const VariableDeclarationNode&) override;
+		void visit(const WhileNode&) override;
 
 		ASTNode::Dependency   clone(const ASTNode::Reference node);
-		ASTNode::Dependency   clone(const nodes::BinaryNode&);
-		ASTNode::ScopeBlock   clone(const nodes::BlockNode&);
-		ASTNode::Dependency   clone(const nodes::CastNode&);
-		ASTNode::Dependency   clone(const nodes::ErrorNode&);
-		ASTNode::Dependency   clone(const nodes::ForLoopNode&);
-		ASTNode::Dependency   clone(const nodes::ForeachLoopNode&);
-		ASTNode::Dependency   clone(const nodes::FunctionCallNode&);
-		ASTNode::Dependency   clone(const nodes::FunctionDeclarationNode&);
-		ASTNode::Dependency   clone(const nodes::IfNode&);
-		ASTNode::Dependency   clone(const nodes::LiteralNode&);
-		ASTNode::Dependency   clone(const nodes::LoopControlNode&);
-		ASTNode::Dependency   clone(const nodes::ModuleNode&);
-		ASTNode::Dependency   clone(const nodes::ReturnNode&);
-		ASTNode::Dependency   clone(const nodes::StructDeclarationNode&);
-		ASTNode::Dependency   clone(const nodes::UnaryNode&);
-		ASTNode::Dependency   clone(const nodes::VariableDeclarationNode&);
-		ASTNode::Dependency   clone(const nodes::WhileNode&);
+		ASTNode::Dependency   clone(const BinaryNode&);
+		ASTNode::ScopeBlock   clone(const BlockNode&);
+		ASTNode::Dependency   clone(const CastNode&);
+		ASTNode::Dependency   clone(const ErrorNode&);
+		ASTNode::Dependency   clone(const ForLoopNode&);
+		ASTNode::Dependency   clone(const ForeachLoopNode&);
+		ASTNode::Dependency   clone(const FunctionCallNode&);
+		ASTNode::Dependency   clone(const FunctionDeclarationNode&);
+		ASTNode::Dependency   clone(const IfNode&);
+		ASTNode::Dependency   clone(const LiteralNode&);
+		ASTNode::Dependency   clone(const LoopControlNode&);
+		ASTNode::Dependency   clone(const ModuleNode&);
+		ASTNode::Dependency   clone(const ReturnNode&);
+		ASTNode::Dependency   clone(const StructDeclarationNode&);
+		ASTNode::Dependency   clone(const UnaryNode&);
+		ASTNode::Dependency   clone(const VariableDeclarationNode&);
+		ASTNode::Dependency   clone(const WhileNode&);
 		ASTNode::Dependencies clone(const std::ranges::forward_range auto& elements)
 		{
 			ASTNode::Dependencies cloned{};
