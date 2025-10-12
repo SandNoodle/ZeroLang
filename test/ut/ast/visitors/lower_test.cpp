@@ -472,6 +472,53 @@ namespace soul::ast::visitors::ut
 		ASSERT_EQ(expected_string, result_string);
 	}
 
+	// @TODO The Phi/Upsilon logic is incorrect - One phi has unassigned value / Upsilon is missing.
+	TEST_F(LowerVisitorTest, DISABLED_VariableDeclaration_ReadTheValueTwice)
+	{
+		static constexpr auto k_first_variable_name  = "first_variable";
+		static constexpr auto k_second_variable_name = "second_variable";
+
+		auto function_declaration_statements = ASTNode::Dependencies{};
+		function_declaration_statements.reserve(2);
+		function_declaration_statements.emplace_back(VariableDeclarationNode::create(
+			k_first_variable_name, "i32", LiteralNode::create(Value{ 1 }, LiteralNode::Type::Int32), false));
+		function_declaration_statements.emplace_back(VariableDeclarationNode::create(
+			k_second_variable_name,
+			"i32",
+			BinaryNode::create(LiteralNode::create(Value{ k_first_variable_name }, LiteralNode::Type::Identifier),
+		                       LiteralNode::create(Value{ k_first_variable_name }, LiteralNode::Type::Identifier),
+		                       ASTNode::Operator::Mul),
+			false));
+
+		auto function_declaration_parameters = ASTNode::Dependencies{};
+		auto function_declaration
+			= FunctionDeclarationNode::create(k_function_name,
+		                                      "void",
+		                                      std::move(function_declaration_parameters),
+		                                      BlockNode::create(std::move(function_declaration_statements)));
+
+		auto module_statements = ASTNode::Dependencies{};
+		module_statements.push_back(std::move(function_declaration));
+		auto result_ir = build(ModuleNode::create(k_module_name, std::move(module_statements)));
+		ASSERT_TRUE(result_ir);
+
+		IRBuilder expected_ir_builder{};
+		expected_ir_builder.set_module_name(k_module_name);
+		expected_ir_builder.create_function(k_function_name, Type{ PrimitiveType::Kind::Void }, {});
+		auto* value = expected_ir_builder.emit<Const>(Type{ PrimitiveType::Kind::Int32 }, Value{ 1 });
+		expected_ir_builder.emit_upsilon(k_first_variable_name, value);
+		expected_ir_builder.emit_upsilon(k_first_variable_name, value);
+		auto* lhs    = expected_ir_builder.emit_phi(k_first_variable_name, Type{ PrimitiveType::Kind::Int32 });
+		auto* rhs    = expected_ir_builder.emit_phi(k_first_variable_name, Type{ PrimitiveType::Kind::Int32 });
+		auto* result = expected_ir_builder.emit<Mul>(Type{ PrimitiveType::Kind::Int32 }, lhs, rhs);
+		expected_ir_builder.emit_upsilon(k_second_variable_name, result);
+		auto expected_ir = expected_ir_builder.build();
+		ASSERT_TRUE(expected_ir);
+
+		auto [expected_string, result_string] = compare(*expected_ir, *result_ir);
+		ASSERT_EQ(expected_string, result_string);
+	}
+
 	template <typename T>
 	class LowerVisitorBinaryTypedTest : public LowerVisitorTest
 	{
