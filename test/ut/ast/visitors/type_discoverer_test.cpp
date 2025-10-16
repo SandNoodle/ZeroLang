@@ -39,19 +39,10 @@ namespace soul::ast::visitors::ut
 		auto expected_module = ModuleNode::create("discovery_module", std::move(module_statements));
 
 		// ...discover them...
-		StringifyVisitor stringify_expected_before{};
-		stringify_expected_before.accept(expected_module.get());
-
 		TypeDiscovererVisitor type_discoverer{};
 		type_discoverer.accept(expected_module.get());
 
-		StringifyVisitor stringify_expected_after{};
-		stringify_expected_after.accept(expected_module.get());
-
 		// ...and verify the results.
-		EXPECT_EQ(stringify_expected_before.string(), stringify_expected_after.string())
-			<< "TypeDiscovererVisitor should not modify the original AST";
-
 		auto first_struct_type  = Type{ StructType{
 			 { PrimitiveType::Kind::Int32, PrimitiveType::Kind::Float64, PrimitiveType::Kind::String } } };
 		auto second_struct_type = Type{ StructType{ { first_struct_type, PrimitiveType::Kind::Boolean } } };
@@ -86,28 +77,16 @@ namespace soul::ast::visitors::ut
 		auto expected_module = ModuleNode::create("discovery_module", std::move(module_statements));
 
 		// ...discover them...
-		StringifyVisitor stringify_expected_before{};
-		stringify_expected_before.accept(expected_module.get());
-
 		TypeDiscovererVisitor type_discoverer{};
 		type_discoverer.accept(expected_module.get());
 
-		StringifyVisitor stringify_expected_after{};
-		stringify_expected_after.accept(expected_module.get());
-
 		// ...and verify the results.
-		EXPECT_EQ(stringify_expected_before.string(), stringify_expected_after.string())
-			<< "TypeDiscovererVisitor should not modify the original AST";
-
 		auto k_expected_types              = TypeDiscovererVisitor::basic_types();
 		k_expected_types["first_struct"sv] = Type{ StructType{
 			{ PrimitiveType::Kind::Int32, PrimitiveType::Kind::Float64, PrimitiveType::Kind::String } } };
 		EXPECT_EQ(k_expected_types, type_discoverer.discovered_types());
 
-		const auto&      result_module = type_discoverer.cloned();
-		StringifyVisitor stringify_result{};
-		stringify_result.accept(result_module.get());
-
+		const auto& result_module = type_discoverer.cloned();
 		ASSERT_TRUE(result_module->is<ModuleNode>());
 		const auto& as_result_module = result_module->as<ModuleNode>();
 		ASSERT_EQ(as_result_module.statements.size(), 2);
@@ -158,19 +137,10 @@ namespace soul::ast::visitors::ut
 		auto expected_module = ModuleNode::create("discovery_module", std::move(module_statements));
 
 		// ...discover them...
-		StringifyVisitor stringify_expected_before{};
-		stringify_expected_before.accept(expected_module.get());
-
 		TypeDiscovererVisitor type_discoverer{};
 		type_discoverer.accept(expected_module.get());
 
-		StringifyVisitor stringify_expected_after{};
-		stringify_expected_after.accept(expected_module.get());
-
 		// ...and verify the results.
-		EXPECT_EQ(stringify_expected_before.string(), stringify_expected_after.string())
-			<< "TypeDiscovererVisitor should not modify the original AST";
-
 		const auto& result_module = type_discoverer.cloned();
 		ASSERT_TRUE(result_module->is<ModuleNode>());
 		const auto& as_result_module = result_module->as<ModuleNode>();

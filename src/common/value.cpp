@@ -2,11 +2,11 @@
 
 namespace soul
 {
-	Value::Value(Variant value) : value(std::move(value)) {}
+	Value::Value(Variant value) : _value(std::move(value)) {}
 
 	std::partial_ordering Value::operator<=>(const Value& other) const noexcept
 	{
-		return std::tie(value) <=> std::tie(other.value);
+		return std::tie(_value) <=> std::tie(other._value);
 	}
 
 	Value::operator std::string() const
@@ -23,7 +23,7 @@ namespace soul
 					return ss.str();
 				}
 			},
-			value);
+			_value);
 	}
 
 }  // namespace soul

@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "ast/ast.h"
+#include "ast/visitors/compare.h"
 #include "ast/visitors/error_collector.h"
 #include "ast/visitors/stringify.h"
 #include "ast/visitors/type_discoverer.h"
@@ -59,15 +60,21 @@ namespace soul::ast::visitors::ut
 		}
 
 		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-		std::pair<std::string, std::string> compare(const ASTNode::Reference expected, const ASTNode::Reference result)
+		void verify(const ASTNode::Reference expected, const ASTNode::Reference result)
 		{
+			if (CompareVisitor{ expected, result }) [[likely]] {
+				return;
+			}
+
 			StringifyVisitor stringify_expected{ StringifyVisitor::Options::PrintTypes };
 			stringify_expected.accept(expected);
 
 			StringifyVisitor stringify_result{ StringifyVisitor::Options::PrintTypes };
 			stringify_result.accept(result);
 
-			return std::make_pair(std::move(stringify_expected.string()), std::move(stringify_result.string()));
+			GTEST_FAIL() << "Expected:\n"
+						 << stringify_expected.string() << "\n...but got:\n"
+						 << stringify_result.string();
 		}
 	};
 
@@ -112,8 +119,7 @@ namespace soul::ast::visitors::ut
 		auto expected_module = build(ModuleNode::create(k_module_name, std::move(expected_module_statements)));
 		ASSERT_TRUE(expected_module);
 
-		auto [expected_string, result_string] = compare(expected_module.get(), result_module.get());
-		ASSERT_EQ(expected_string, result_string);
+		verify(expected_module.get(), result_module.get());
 	}
 
 	TEST_F(DesugarVisitorTest, ForLoop)
@@ -175,7 +181,6 @@ namespace soul::ast::visitors::ut
 		auto expected_module = build(ModuleNode::create(k_module_name, std::move(expected_module_statements)));
 		ASSERT_TRUE(expected_module);
 
-		auto [expected_string, result_string] = compare(expected_module.get(), result_module.get());
-		ASSERT_EQ(expected_string, result_string);
+		verify(expected_module.get(), result_module.get());
 	}
 }  // namespace soul::ast::visitors::ut

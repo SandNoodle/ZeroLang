@@ -28,7 +28,7 @@ namespace soul::ast::visitors
 
 		using DefaultTraverseVisitor::accept;
 
-		private:
+		protected:
 		using DefaultTraverseVisitor::visit;
 		void visit(const BinaryNode&) override;
 		void visit(const BlockNode&) override;

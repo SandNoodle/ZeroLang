@@ -31,8 +31,8 @@ namespace soul
 		using UnknownValue = std::monostate;
 		using Variant      = std::variant<UnknownValue, bool, i64, f64, std::string, char>;
 
-		public:
-		Variant value = UnknownValue{};
+		private:
+		Variant _value = UnknownValue{};
 
 		public:
 		Value()                      = default;
@@ -54,7 +54,7 @@ namespace soul
 		template <ValueKind T>
 		[[nodiscard]] constexpr bool is() const noexcept
 		{
-			return std::holds_alternative<T>(value);
+			return std::holds_alternative<T>(_value);
 		}
 
 		/**
@@ -65,7 +65,7 @@ namespace soul
 		template <ValueKind T>
 		[[nodiscard]] constexpr const T& get() const noexcept
 		{
-			return std::get<T>(value);
+			return std::get<T>(_value);
 		}
 
 		/**
@@ -76,7 +76,7 @@ namespace soul
 		template <ValueKind T>
 		[[nodiscard]] constexpr T& get() noexcept
 		{
-			return std::get<T>(value);
+			return std::get<T>(_value);
 		}
 	};
 

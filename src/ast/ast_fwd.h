@@ -5,23 +5,29 @@
 
 namespace soul::ast
 {
-	class BinaryNode;
-	class BlockNode;
-	class CastNode;
-	class ErrorNode;
-	class ForLoopNode;
-	class ForeachLoopNode;
-	class FunctionCallNode;
-	class FunctionDeclarationNode;
-	class IfNode;
-	class LiteralNode;
-	class LoopControlNode;
-	class ModuleNode;
-	class ReturnNode;
-	class StructDeclarationNode;
-	class UnaryNode;
-	class VariableDeclarationNode;
-	class WhileNode;
+#define SOUL_AST_NODES                     \
+	SOUL_AST_NODE(BinaryNode)              \
+	SOUL_AST_NODE(BlockNode)               \
+	SOUL_AST_NODE(CastNode)                \
+	SOUL_AST_NODE(ErrorNode)               \
+	SOUL_AST_NODE(ForLoopNode)             \
+	SOUL_AST_NODE(ForeachLoopNode)         \
+	SOUL_AST_NODE(FunctionCallNode)        \
+	SOUL_AST_NODE(FunctionDeclarationNode) \
+	SOUL_AST_NODE(IfNode)                  \
+	SOUL_AST_NODE(LiteralNode)             \
+	SOUL_AST_NODE(LoopControlNode)         \
+	SOUL_AST_NODE(ModuleNode)              \
+	SOUL_AST_NODE(ReturnNode)              \
+	SOUL_AST_NODE(StructDeclarationNode)   \
+	SOUL_AST_NODE(UnaryNode)               \
+	SOUL_AST_NODE(VariableDeclarationNode) \
+	SOUL_AST_NODE(WhileNode)
+
+	// NOLINTNEXTLINE(bugprone-macro-parentheses)
+#define SOUL_AST_NODE(name) class name;
+	SOUL_AST_NODES
+#undef SOUL_AST_NODE
 
 	/**
 	 * @brief NodeKind is a concept that specifies (and is satisfied by) nodes that can be represented in the
