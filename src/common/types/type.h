@@ -1,13 +1,13 @@
 #pragma once
 
-#include "common/types/array_type.h"
-#include "common/types/primitive_type.h"
-#include "common/types/struct_type.h"
+#include "common/types/types_fwd.h"
+#include "core/types.h"
 
 #include <concepts>
-#include <string>
-#include <type_traits>
+#include <memory>
+#include <ostream>
 #include <variant>
+#include <vector>
 
 namespace soul::types
 {
@@ -21,10 +21,88 @@ namespace soul::types
 	                || std::same_as<T, StructType>     //
 		;
 
-	constexpr std::weak_ordering operator<=>(const Type& lhs, const Type& rhs);
+	constexpr std::strong_ordering operator<=>(const Type& lhs, const Type& rhs);
 
 	/**
-	 * @brief Class that represents a specific type in the language's type system.
+	 * @brief Represents the most basic data type present in the language.
+	 * It's a base from which all the other types are constructed.
+	 */
+	class PrimitiveType
+	{
+		public:
+		enum class Kind : u8
+		{
+			Unknown,
+			Boolean,
+			Char,
+			Float32,
+			Float64,
+			Int32,
+			Int64,
+			String,
+			Void,
+		};
+
+		public:
+		Kind type = Kind::Unknown;
+
+		public:
+		constexpr PrimitiveType(Kind type = Kind::Unknown) : type(type) {}
+
+		bool                 operator==(const PrimitiveType&) const noexcept = default;
+		std::strong_ordering operator<=>(const PrimitiveType&) const         = default;
+		explicit             operator std::string() const;
+
+		friend std::ostream& operator<<(std::ostream& os, const PrimitiveType&);
+	};
+
+	/**
+	 * @brief Represents a collection of elements of a given type.
+	 */
+	class ArrayType
+	{
+		private:
+		std::unique_ptr<Type> _type;
+
+		public:
+		ArrayType(const Type& contained_type);
+		ArrayType(const ArrayType&) noexcept;
+		ArrayType(ArrayType&&) noexcept;
+
+		ArrayType&           operator=(const ArrayType&) noexcept;
+		ArrayType&           operator=(ArrayType&&) noexcept;
+		bool                 operator==(const ArrayType&) const noexcept = default;
+		std::strong_ordering operator<=>(const ArrayType&) const;
+		explicit             operator std::string() const;
+
+		const Type& data_type() const noexcept;
+
+		friend std::ostream& operator<<(std::ostream& os, const ArrayType&);
+	};
+
+	/**
+	 * @brief Represents a composite data structure that is a collection of (possibly) different data types.
+	 */
+	class StructType
+	{
+		public:
+		using ContainedTypes = std::vector<Type>;
+
+		public:
+		ContainedTypes types;
+
+		public:
+		StructType(ContainedTypes types);
+
+		bool                 operator==(const StructType&) const noexcept = default;
+		std::strong_ordering operator<=>(const StructType&) const;
+		explicit             operator std::string() const;
+
+		friend std::ostream& operator<<(std::ostream& os, const StructType& type);
+	};
+
+	/**
+	 * @brief Represents specific `type` in the language's type system.
 	 * It is capable of describing all builtin, nested and user defined types.
 	 */
 	class Type
@@ -69,11 +147,11 @@ namespace soul::types
 			return std::get<T>(_type);
 		}
 
-		friend std::ostream&                operator<<(std::ostream& os, const Type& type);
-		friend constexpr std::weak_ordering operator<=>(const Type&, const Type&);
+		friend std::ostream&                  operator<<(std::ostream& os, const Type& type);
+		friend constexpr std::strong_ordering operator<=>(const Type&, const Type&);
 	};
 
-	constexpr std::weak_ordering operator<=>(const Type& lhs, const Type& rhs)
+	constexpr std::strong_ordering operator<=>(const Type& lhs, const Type& rhs)
 	{
 		return std::tie(lhs._type) <=> std::tie(rhs._type);
 	}
